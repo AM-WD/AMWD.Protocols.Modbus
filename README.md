@@ -2,36 +2,45 @@
 
 Here you can find a basic implementation of the Modbus protocol.
 
-## Package Overview
+## Overview
 
 The project is divided into three parts.
 
 To be mentioned at the beginning:    
-Only the clients are build very modular to fit any requirement reached on the first implementation back in 2018 ([see here](https://github.com/andreasAmMueller/Modbus)).    
+Only the clients are build very modular to fit any requirement reached on the first implementation back in 2018 ([see here]).    
 The server implementations will only cover their defaults!
 
 
-
-### Common
+### [Common]
 
 Here you'll find all the common interfaces and base implementations for Modbus.
 
 For example the default protocol versions: `TCP`, `RTU` and `ASCII`.
 
+With this package you'll have anything you need to create your own client implementations.
 
 
-### Serial
+### [Serial]
 
-Here you'll find all the serial protocol implementations.
+This package contains some wrappers and implementations for the serial protocol.
+So you can use it out of the box to communicate via serial line ports / devices.
 
 
+### [TCP]
 
-### TCP
-
-Here you'll find all the TCP protocol implementations.
-
+This package contains the default implementations for network communication via TCP.
+It uses a specific TCP connection implementation and plugs all things from the Common package together.
 
 
 ---
 
-Published under [MIT License](LICENSE.txt) (see [**tl;dr**Legal](https://www.tldrlegal.com/license/mit-license))
+Published under [MIT License] (see [**tl;dr**Legal])
+
+
+
+[see here]: https://github.com/andreasAMmueller/Modbus
+[Common]: AMWD.Protocols.Modbus.Common/README.md
+[Serial]: AMWD.Protocols.Modbus.Serial/README.md
+[TCP]: AMWD.Protocols.Modbus.Tcp/README.md
+[MIT License]: LICENSE.txt
+[**tl;dr**Legal]: https://www.tldrlegal.com/license/mit-license

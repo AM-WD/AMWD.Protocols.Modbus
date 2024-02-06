@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
+    <LangVersion>12.0</LangVersion>
+
+    <AssemblyName>amwd-modbus-common</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.Common</RootNamespace>
+
+    <Product>Modbus Protocol Common</Product>
+    <Description>Common data for Modbus protocol.</Description>
+  </PropertyGroup>
+
+</Project>

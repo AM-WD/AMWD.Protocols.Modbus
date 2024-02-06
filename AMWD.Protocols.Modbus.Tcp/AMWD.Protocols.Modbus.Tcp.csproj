@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
+    <LangVersion>12.0</LangVersion>
+
+    <AssemblyName>amwd-modbus-tcp</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.Tcp</RootNamespace>
+
+    <Product>Modbus TCP Protocol</Product>
+    <Description>Implementation of the Modbus protocol communicating via TCP.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
+  </ItemGroup>
+
+</Project>

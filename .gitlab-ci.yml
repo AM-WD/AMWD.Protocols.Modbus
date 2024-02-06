@@ -1,0 +1,107 @@
+# The image has to use the same version as the .NET UnitTest project
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+variables:
+  TZ: "Europe/Berlin"
+  LANG: "de"
+
+stages:
+  - build
+  - test
+  - deploy
+
+
+
+build-debug:
+  stage: build
+  tags:
+    - docker
+    - lnx
+  rules:
+    - if: $CI_COMMIT_TAG == null
+  script:
+    - dotnet restore --no-cache --force
+    - dotnet build -c Debug --nologo --no-restore --no-incremental
+    - mkdir ./artifacts
+    - mv ./AMWD.Protocols.Modbus.Common/bin/Debug/*.nupkg    ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Common/bin/Debug/*.snupkg   ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Serial/bin/Debug/*.nupkg    ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Serial/bin/Debug/*.snupkg   ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Debug/*.nupkg       ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Debug/*.snupkg      ./artifacts/
+  artifacts:
+    paths:
+      - artifacts/*.nupkg
+      - artifacts/*.snupkg
+    expire_in: 3 days
+
+test-debug:
+  stage: test
+  dependencies:
+    - build-debug
+  tags:
+    - docker
+    - lnx
+  rules:
+    - if: $CI_COMMIT_TAG == null
+  # line-coverage
+  #coverage: '/Total[^|]*\|\s*([0-9.%]+)/'
+  # branch-coverage
+  coverage: '/Total[^|]*\|[^|]*\|\s*([0-9.%]+)/'
+  script:
+    - dotnet restore --no-cache --force
+    - dotnet test -c Debug --nologo --no-restore
+
+
+build-release:
+  stage: build
+  tags:
+    - docker
+    - lnx
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  script:
+    - dotnet restore --no-cache --force
+    - dotnet build -c Release --nologo --no-restore --no-incremental
+    - mkdir ./artifacts
+    - mv ./AMWD.Protocols.Modbus.Common/bin/Release/*.nupkg    ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Common/bin/Release/*.snupkg   ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Serial/bin/Release/*.nupkg    ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Serial/bin/Release/*.snupkg   ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Release/*.nupkg       ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Release/*.snupkg      ./artifacts/
+  artifacts:
+    paths:
+      - artifacts/*.nupkg
+      - artifacts/*.snupkg
+    expire_in: 1 day
+
+test-release:
+  stage: test
+  dependencies:
+    - build-release
+  tags:
+    - docker
+    - lnx
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  # line-coverage
+  #coverage: '/Total[^|]*\|\s*([0-9.%]+)/'
+  # branch-coverage
+  coverage: '/Total[^|]*\|[^|]*\|\s*([0-9.%]+)/'
+  script:
+    - dotnet restore --no-cache --force
+    - dotnet test -c Release --nologo --no-restore
+
+deploy:
+  stage: deploy
+  dependencies:
+    - build-release
+    - test-release
+  tags:
+    - docker
+    - lnx
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  script:
+    - dotnet nuget push -k $NUGET_APIKEY -s https://api.nuget.org/v3/index.json --skip-duplicate artifacts/*.nupkg
