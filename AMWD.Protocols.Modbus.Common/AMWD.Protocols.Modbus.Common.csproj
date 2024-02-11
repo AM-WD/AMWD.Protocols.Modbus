@@ -11,4 +11,8 @@
     <Description>Common data for Modbus protocol.</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
 </Project>
