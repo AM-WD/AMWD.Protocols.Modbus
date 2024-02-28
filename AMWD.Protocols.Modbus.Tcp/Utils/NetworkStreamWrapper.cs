@@ -12,7 +12,7 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 	{
 		private readonly NetworkStream _stream;
 
-		[Obsolete("Constructor only for mocking on UnitTests!")]
+		[Obsolete("Constructor only for mocking on UnitTests!", error: true)]
 		public NetworkStreamWrapper()
 		{ }
 

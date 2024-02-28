@@ -18,9 +18,7 @@ namespace AMWD.Protocols.Modbus.Common
 			get
 			{
 				byte[] blob = [HighByte, LowByte];
-				if (BitConverter.IsLittleEndian)
-					Array.Reverse(blob);
-
+				blob.SwapNetworkOrder();
 				return BitConverter.ToUInt16(blob, 0);
 			}
 		}

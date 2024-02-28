@@ -7,7 +7,7 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	internal class SocketWrapper : IDisposable
 	{
-		[Obsolete("Constructor only for mocking on UnitTests!")]
+		[Obsolete("Constructor only for mocking on UnitTests!", error: true)]
 		public SocketWrapper()
 		{ }
 

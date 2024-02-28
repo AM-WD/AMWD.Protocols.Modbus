@@ -115,7 +115,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 #endif
 
 			if (_disconnectCts != null)
+			{
+				await _reconnectTask;
 				return;
+			}
 
 			_disconnectCts = new CancellationTokenSource();
 			using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_disconnectCts.Token, cancellationToken);
@@ -166,6 +169,16 @@ namespace AMWD.Protocols.Modbus.Tcp
 			if (!IsConnected)
 				throw new ApplicationException($"Connection is not open");
 
+			if (request?.Count < 1)
+				throw new ArgumentNullException(nameof(request));
+
+#if NET8_0_OR_GREATER
+			ArgumentNullException.ThrowIfNull(validateResponseComplete);
+#else
+			if (validateResponseComplete == null)
+				throw new ArgumentNullException(nameof(validateResponseComplete));
+#endif
+
 			var item = new RequestQueueItem
 			{
 				Request = [.. request],
@@ -178,7 +191,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			{
 				_requestQueue.Remove(item);
 				item.CancellationTokenSource.Dispose();
-				item.TaskCompletionSource.TrySetCanceled();
+				item.TaskCompletionSource.TrySetCanceled(cancellationToken);
 				item.CancellationTokenRegistration.Dispose();
 			});
 
@@ -375,7 +388,6 @@ namespace AMWD.Protocols.Modbus.Tcp
 				catch (Exception ex)
 				{
 					item.TaskCompletionSource.TrySetException(ex);
-					continue;
 				}
 			}
 		}
