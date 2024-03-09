@@ -13,7 +13,7 @@ If you want to speak a custom type of protocol with the clients, you can impleme
 
 **ModbusBaseClient**    
 This abstract base client contains all the basic methods and handlings required to communicate via Modbus Protocol.
-The packages `AMWD.Protocols.Modbus.Serial`  _(in progress)_ and `AMWD.Protocols.Modbus.Tcp` have specific derived implementations to match the communication types.
+The packages `AMWD.Protocols.Modbus.Serial` _(in progress)_ and `AMWD.Protocols.Modbus.Tcp` _(in progress)_ have specific derived implementations to match the communication types.
 
 
 ### Enums
@@ -39,6 +39,11 @@ The different types handled by the Modbus Protocol.
 - Discrete Input
 - Holding Register
 - Input Register
+
+In addition, you'll find the `DeviceIdentification` there.    
+It is used for a "special" function called "Read Device Identification" (0x2B / 43) not supported by all devices.
+
+The `ModbusDevice` is used for the server implementations in the derived packages.
 
 
 ### Protocols

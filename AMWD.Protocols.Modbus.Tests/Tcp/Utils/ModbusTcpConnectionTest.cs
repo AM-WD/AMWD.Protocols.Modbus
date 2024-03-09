@@ -161,7 +161,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp.Utils
 		public async Task ShouldThrowApplicationExceptionHostnameNotResolvable()
 		{
 			// Arrange
-			_hostname = "device.internal";
+			_hostname = "123.321.123.321";
 			var connection = GetConnection();
 
 			// Act
