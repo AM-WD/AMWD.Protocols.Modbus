@@ -435,6 +435,115 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 		#endregion Read Input Registers
 
+		#region Read Device Identification
+
+		[DataTestMethod]
+		[DataRow(ModbusDeviceIdentificationCategory.Basic)]
+		[DataRow(ModbusDeviceIdentificationCategory.Regular)]
+		[DataRow(ModbusDeviceIdentificationCategory.Extended)]
+		[DataRow(ModbusDeviceIdentificationCategory.Individual)]
+		public void ShouldSerializeReadDeviceIdentification(ModbusDeviceIdentificationCategory category)
+		{
+			// Arrange
+			var protocol = new TcpProtocol();
+
+			// Act
+			var bytes = protocol.SerializeReadDeviceIdentification(UNIT_ID, category, ModbusDeviceIdentificationObject.ProductCode);
+
+			// Assert
+			Assert.IsNotNull(bytes);
+			Assert.AreEqual(11, bytes.Count);
+
+			//    Transaction id
+			Assert.AreEqual(0x00, bytes[0]);
+			Assert.AreEqual(0x01, bytes[1]);
+
+			//    Protocol identifier
+			Assert.AreEqual(0x00, bytes[2]);
+			Assert.AreEqual(0x00, bytes[3]);
+
+			//    Following bytes
+			Assert.AreEqual(0x00, bytes[4]);
+			Assert.AreEqual(0x05, bytes[5]);
+
+			//    Unit id
+			Assert.AreEqual(UNIT_ID, bytes[6]);
+
+			//    Function code
+			Assert.AreEqual(0x2B, bytes[7]);
+
+			//    MEI Type
+			Assert.AreEqual(0x0E, bytes[8]);
+
+			//    Category
+			Assert.AreEqual((byte)category, bytes[9]);
+
+			//    Object Id
+			Assert.AreEqual((byte)ModbusDeviceIdentificationObject.ProductCode, bytes[10]);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void ShouldTrhowOutOfRangeExceptionOnSerializeReadDeviceIdentification()
+		{
+			// Arrange
+			var protocol = new TcpProtocol();
+
+			// Act
+			protocol.SerializeReadDeviceIdentification(UNIT_ID, (ModbusDeviceIdentificationCategory)10, ModbusDeviceIdentificationObject.ProductCode);
+
+			// Assert - ArgumentOutOfRangeException
+		}
+
+		[DataTestMethod]
+		[DataRow(false)]
+		[DataRow(true)]
+		public void ShouldDeserializeReadDeviceIdentification(bool moreAndIndividual)
+		{
+			// Arrange
+			byte[] response = [0x00, 0x01, 0x00, 0x00, 0x00, 0x0D, 0x2A, 0x2B, 0x0E, 0x02, (byte)(moreAndIndividual ? 0x82 : 0x02), (byte)(moreAndIndividual ? 0xFF : 0x00), (byte)(moreAndIndividual ? 0x05 : 0x00), 0x01, 0x04, 0x02, 0x41, 0x4D];
+			var protocol = new TcpProtocol();
+
+			// Act
+			var result = protocol.DeserializeReadDeviceIdentification(response);
+
+			// Assert
+			Assert.IsNotNull(result);
+			Assert.AreEqual(moreAndIndividual, result.AllowsIndividualAccess);
+			Assert.AreEqual(moreAndIndividual, result.MoreRequestsNeeded);
+			Assert.AreEqual(moreAndIndividual ? 0x05 : 0x00, result.NextObjectIdToRequest);
+
+			Assert.AreEqual(1, result.Objects.Count);
+			Assert.AreEqual(4, result.Objects.First().Key);
+			CollectionAssert.AreEqual("AM"u8.ToArray(), result.Objects.First().Value);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ModbusException))]
+		public void ShouldThrowExceptionOnDeserializeReadDeviceIdentificationForMeiType()
+		{
+			// Arrange
+			byte[] response = [0x00, 0x01, 0x00, 0x00, 0x00, 0x0D, 0x2A, 0x2B, 0x0D];
+			var protocol = new TcpProtocol();
+
+			// Act
+			protocol.DeserializeReadDeviceIdentification(response);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ModbusException))]
+		public void ShouldThrowExceptionOnDeserializeReadDeviceIdentificationForCategory()
+		{
+			// Arrange
+			byte[] response = [0x00, 0x01, 0x00, 0x00, 0x00, 0x0D, 0x2A, 0x2B, 0x0E, 0x08];
+			var protocol = new TcpProtocol();
+
+			// Act
+			protocol.DeserializeReadDeviceIdentification(response);
+		}
+
+		#endregion Read Device Identification
+
 		#region Write Single Coil
 
 		[TestMethod]
@@ -1091,7 +1200,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			var protocol = new TcpProtocol();
 
 			// Act
-			var result = protocol.Name;
+			string result = protocol.Name;
 
 			// Assert
 			Assert.AreEqual("TCP", result);

@@ -74,10 +74,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeReadCoils(byte unitId, ushort startAddress, ushort count)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 			if (count < MIN_READ_COUNT || MAX_DISCRETE_READ_COUNT < count)
 				throw new ArgumentOutOfRangeException(nameof(count));
 
@@ -133,10 +129,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeReadDiscreteInputs(byte unitId, ushort startAddress, ushort count)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 			if (count < MIN_READ_COUNT || MAX_DISCRETE_READ_COUNT < count)
 				throw new ArgumentOutOfRangeException(nameof(count));
 
@@ -192,10 +184,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeReadHoldingRegisters(byte unitId, ushort startAddress, ushort count)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 			if (count < MIN_READ_COUNT || MAX_REGISTER_READ_COUNT < count)
 				throw new ArgumentOutOfRangeException(nameof(count));
 
@@ -248,10 +236,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeReadInputRegisters(byte unitId, ushort startAddress, ushort count)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 			if (count < MIN_READ_COUNT || MAX_REGISTER_READ_COUNT < count)
 				throw new ArgumentOutOfRangeException(nameof(count));
 
@@ -301,6 +285,61 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			return inputRegisters;
 		}
 
+		/// <inheritdoc/>
+		public IReadOnlyList<byte> SerializeReadDeviceIdentification(byte unitId, ModbusDeviceIdentificationCategory category, ModbusDeviceIdentificationObject objectId)
+		{
+			if (!Enum.IsDefined(typeof(ModbusDeviceIdentificationCategory), category))
+				throw new ArgumentOutOfRangeException(nameof(category));
+
+			byte[] request = new byte[11];
+
+			byte[] header = GetHeader(unitId, 5);
+			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Function code
+			request[7] = (byte)ModbusFunctionCode.EncapsulatedInterface;
+
+			// Modbus Encapsulated Interface: Read Device Identification (MEI Type)
+			request[8] = 0x0E;
+
+			// The category type (basic, regular, extended, individual)
+			request[9] = (byte)category;
+			request[10] = (byte)objectId;
+
+			return request;
+		}
+
+		/// <inheritdoc/>
+		public DeviceIdentificationRaw DeserializeReadDeviceIdentification(IReadOnlyList<byte> response)
+		{
+			if (response[8] != 0x0E)
+				throw new ModbusException("The MEI type does not match");
+
+			if (!Enum.IsDefined(typeof(ModbusDeviceIdentificationCategory), response[9]))
+				throw new ModbusException("The category type does not match");
+
+			var deviceIdentification = new DeviceIdentificationRaw
+			{
+				AllowsIndividualAccess = (response[10] & 0x80) == 0x80,
+				MoreRequestsNeeded = response[11] == 0xFF,
+				NextObjectIdToRequest = response[12],
+			};
+
+			int baseOffset = 14;
+			while (baseOffset < response.Count)
+			{
+				byte objectId = response[baseOffset];
+				byte length = response[baseOffset + 1];
+
+				byte[] data = response.Skip(baseOffset + 2).Take(length).ToArray();
+
+				deviceIdentification.Objects.Add(objectId, data);
+				baseOffset += 2 + length;
+			}
+
+			return deviceIdentification;
+		}
+
 		#endregion Read
 
 		#region Write
@@ -308,10 +347,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeWriteSingleCoil(byte unitId, Coil coil)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 #if NET8_0_OR_GREATER
 			ArgumentNullException.ThrowIfNull(coil);
 #else
@@ -351,10 +386,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeWriteSingleHoldingRegister(byte unitId, HoldingRegister register)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 #if NET8_0_OR_GREATER
 			ArgumentNullException.ThrowIfNull(register);
 #else
@@ -394,10 +425,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeWriteMultipleCoils(byte unitId, IReadOnlyList<Coil> coils)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 #if NET8_0_OR_GREATER
 			ArgumentNullException.ThrowIfNull(coils);
 #else
@@ -465,10 +492,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public IReadOnlyList<byte> SerializeWriteMultipleHoldingRegisters(byte unitId, IReadOnlyList<HoldingRegister> registers)
 		{
-			// Technically not possible to reach. Left here for completeness.
-			if (unitId < MIN_UNIT_ID || MAX_UNIT_ID < unitId)
-				throw new ArgumentOutOfRangeException(nameof(unitId));
-
 #if NET8_0_OR_GREATER
 			ArgumentNullException.ThrowIfNull(registers);
 #else
@@ -598,6 +621,15 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			}
 		}
 
+		/// <summary>
+		/// Generates the header for a Modbus request.
+		/// </summary>
+		/// <param name="unitId">The unit identifier.</param>
+		/// <param name="followingBytes">The number of following bytes.</param>
+		/// <returns>The header ready to copy to the request bytes.</returns>
+		/// <remarks>
+		/// <strong>ATTENTION:</strong> Do not forget the <paramref name="unitId"/>. It is placed after the count information.
+		/// </remarks>
 		private byte[] GetHeader(byte unitId, int followingBytes)
 		{
 			byte[] header = new byte[7];

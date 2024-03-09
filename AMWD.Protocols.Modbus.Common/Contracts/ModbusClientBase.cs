@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Linq;
+using System.Text;
 
 namespace AMWD.Protocols.Modbus.Common.Contracts
 {
@@ -174,6 +175,91 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 				inputRegister.Address += startAddress;
 
 			return inputRegisters;
+		}
+
+		/// <summary>
+		/// Read the device identification.
+		/// </summary>
+		/// <returns></returns>
+		/// <remarks>
+		/// The interface consists of three (3) categories of objects:
+		/// <list type="bullet">
+		/// <item>
+		///   <em>Basic Device Identification</em><br/>
+		///   All objects of this category are mandatory: VendorName, ProductCode and RevisionNumber.
+		/// </item>
+		/// <item>
+		///   <em>Regular Device Identification</em><br/>
+		///   In addition to basic data objects, the device provides additional and optional identification and description data objects.
+		///   All of the objects of this category are defined in the standard but their implementation is optional.
+		/// </item>
+		/// <item>
+		///   <em>Extended Device Identification</em><br/>
+		///   In addition to regular data objects, the device provides additional and optional identification and description private data about the physical device itself.
+		///   All of these data are device dependent.
+		/// </item>
+		/// </list>
+		/// </remarks>
+		public virtual async Task<DeviceIdentification> ReadDeviceIdentificationAsync(byte unitId, ModbusDeviceIdentificationCategory category, ModbusDeviceIdentificationObject objectId = 0x00, CancellationToken cancellationToken = default)
+		{
+			Assertions();
+
+			ModbusDeviceIdentificationObject requestObjectId = objectId;
+			var devIdent = new DeviceIdentification();
+
+			DeviceIdentificationRaw result;
+			do
+			{
+				var request = Protocol.SerializeReadDeviceIdentification(unitId, category, requestObjectId);
+				var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+				Protocol.ValidateResponse(request, response);
+
+				result = Protocol.DeserializeReadDeviceIdentification(response);
+				devIdent.IsIndividualAccessAllowed = result.AllowsIndividualAccess;
+
+				foreach (var item in result.Objects)
+				{
+					switch ((ModbusDeviceIdentificationObject)item.Key)
+					{
+						case ModbusDeviceIdentificationObject.VendorName:
+							devIdent.VendorName = Encoding.ASCII.GetString(item.Value);
+							break;
+
+						case ModbusDeviceIdentificationObject.ProductCode:
+							devIdent.ProductCode = Encoding.ASCII.GetString(item.Value);
+							break;
+
+						case ModbusDeviceIdentificationObject.MajorMinorRevision:
+							devIdent.MajorMinorRevision = Encoding.ASCII.GetString(item.Value);
+							break;
+
+						case ModbusDeviceIdentificationObject.VendorUrl:
+							devIdent.VendorUrl = Encoding.ASCII.GetString(item.Value);
+							break;
+
+						case ModbusDeviceIdentificationObject.ProductName:
+							devIdent.ProductName = Encoding.ASCII.GetString(item.Value);
+							break;
+
+						case ModbusDeviceIdentificationObject.ModelName:
+							devIdent.ModelName = Encoding.ASCII.GetString(item.Value);
+							break;
+
+						case ModbusDeviceIdentificationObject.UserApplicationName:
+							devIdent.UserApplicationName = Encoding.ASCII.GetString(item.Value);
+							break;
+
+						default:
+							devIdent.ExtendedObjects.Add(item.Key, item.Value);
+							break;
+					}
+				}
+
+				requestObjectId = (ModbusDeviceIdentificationObject)result.NextObjectIdToRequest;
+			}
+			while (result.MoreRequestsNeeded);
+
+			return devIdent;
 		}
 
 		/// <summary>

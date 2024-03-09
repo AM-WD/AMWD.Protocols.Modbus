@@ -78,6 +78,22 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		/// <returns>A list of <see cref="InputRegister"/>s.</returns>
 		IReadOnlyList<InputRegister> DeserializeReadInputRegisters(IReadOnlyList<byte> response);
 
+		/// <summary>
+		/// Serializes a read request for device identification.
+		/// </summary>
+		/// <param name="unitId">The unit id.</param>
+		/// <param name="category">The identification category to read.</param>
+		/// <param name="objectId">The first object id to read.</param>
+		/// <returns>The <see langword="byte"/>s to send.</returns>
+		IReadOnlyList<byte> SerializeReadDeviceIdentification(byte unitId, ModbusDeviceIdentificationCategory category, ModbusDeviceIdentificationObject objectId);
+
+		/// <summary>
+		/// Deserializes a read response for device identification.
+		/// </summary>
+		/// <param name="response">The <see langword="byte"/>s received.</param>
+		/// <returns>The raw device identification information data.</returns>
+		DeviceIdentificationRaw DeserializeReadDeviceIdentification(IReadOnlyList<byte> response);
+
 		#endregion Read
 
 		#region Write

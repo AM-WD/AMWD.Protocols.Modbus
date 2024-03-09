@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AMWD.Protocols.Modbus.Common.Contracts;
@@ -24,6 +25,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 		private List<DiscreteInput> _readDiscreteInputsResponse;
 		private List<HoldingRegister> _readHoldingRegistersResponse;
 		private List<InputRegister> _readInputRegistersResponse;
+		private DeviceIdentificationRaw _firstDeviceIdentificationResponse;
+		private Queue<DeviceIdentificationRaw> _deviceIdentificationResponseQueue;
 		private Coil _writeSingleCoilResponse;
 		private HoldingRegister _writeSingleHoldingRegisterResponse;
 		private (ushort startAddress, ushort count) _writeMultipleCoilsResponse;
@@ -34,10 +37,10 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 		{
 			_connectionIsConnectecd = true;
 
-			_readCoilsResponse = new List<Coil>();
-			_readDiscreteInputsResponse = new List<DiscreteInput>();
-			_readHoldingRegistersResponse = new List<HoldingRegister>();
-			_readInputRegistersResponse = new List<InputRegister>();
+			_readCoilsResponse = [];
+			_readDiscreteInputsResponse = [];
+			_readHoldingRegistersResponse = [];
+			_readInputRegistersResponse = [];
 
 			for (int i = 0; i < READ_COUNT; i++)
 			{
@@ -66,12 +69,31 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 				});
 			}
 
+			_firstDeviceIdentificationResponse = new DeviceIdentificationRaw
+			{
+				AllowsIndividualAccess = true,
+				MoreRequestsNeeded = false,
+				NextObjectIdToRequest = 0x00,
+			};
+			_firstDeviceIdentificationResponse.Objects.Add(0x00, Encoding.ASCII.GetBytes("AM.WD"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x01, Encoding.ASCII.GetBytes("AMWD-MB"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x02, Encoding.ASCII.GetBytes("1.2.3"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x03, Encoding.ASCII.GetBytes("https://github.com/AM-WD/AMWD.Protocols.Modbus"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x04, Encoding.ASCII.GetBytes("AM.WD Modbus Library"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x05, Encoding.ASCII.GetBytes("UnitTests"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x06, Encoding.ASCII.GetBytes("Modbus Client Base Unit Test"));
+
+			_deviceIdentificationResponseQueue = new Queue<DeviceIdentificationRaw>();
+			_deviceIdentificationResponseQueue.Enqueue(_firstDeviceIdentificationResponse);
+
 			_writeSingleCoilResponse = new Coil { Address = START_ADDRESS };
 			_writeSingleHoldingRegisterResponse = new HoldingRegister { Address = START_ADDRESS, Value = 0x1234 };
 
 			_writeMultipleCoilsResponse = (START_ADDRESS, READ_COUNT);
 			_writeMultipleHoldingRegistersResponse = (START_ADDRESS, READ_COUNT);
 		}
+
+		#region Common/Connection/Assertions
 
 		[TestMethod]
 		public void ShouldPrettyPrint()
@@ -210,6 +232,10 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert - ApplicationException
 		}
 
+		#endregion Common/Connection/Assertions
+
+		#region Read
+
 		[TestMethod]
 		public async Task ShouldReadCoils()
 		{
@@ -327,6 +353,89 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			_protocol.Verify(p => p.DeserializeReadInputRegisters(It.IsAny<IReadOnlyList<byte>>()), Times.Once);
 			_protocol.VerifyNoOtherCalls();
 		}
+
+		[TestMethod]
+		public async Task ShouldReadDeviceIdentification()
+		{
+			// Arrange
+			var client = GetClient();
+
+			// Act
+			var result = await client.ReadDeviceIdentificationAsync(UNIT_ID, ModbusDeviceIdentificationCategory.Basic, ModbusDeviceIdentificationObject.VendorName);
+
+			// Assert
+			Assert.IsNotNull(result);
+			Assert.IsTrue(result.IsIndividualAccessAllowed);
+			Assert.AreEqual("AM.WD", result.VendorName);
+			Assert.AreEqual("AMWD-MB", result.ProductCode);
+			Assert.AreEqual("1.2.3", result.MajorMinorRevision);
+			Assert.AreEqual("https://github.com/AM-WD/AMWD.Protocols.Modbus", result.VendorUrl);
+			Assert.AreEqual("AM.WD Modbus Library", result.ProductName);
+			Assert.AreEqual("UnitTests", result.ModelName);
+			Assert.AreEqual("Modbus Client Base Unit Test", result.UserApplicationName);
+
+			Assert.AreEqual(0, result.ExtendedObjects.Count);
+
+			_connection.VerifyGet(c => c.IsConnected, Times.Once);
+			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
+			_connection.VerifyNoOtherCalls();
+
+			_protocol.Verify(p => p.SerializeReadDeviceIdentification(UNIT_ID, ModbusDeviceIdentificationCategory.Basic, ModbusDeviceIdentificationObject.VendorName), Times.Once);
+			_protocol.Verify(p => p.ValidateResponse(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<IReadOnlyList<byte>>()), Times.Once);
+			_protocol.Verify(p => p.DeserializeReadDeviceIdentification(It.IsAny<IReadOnlyList<byte>>()), Times.Once);
+			_protocol.VerifyNoOtherCalls();
+		}
+
+		[TestMethod]
+		public async Task ShouldReadDeviceIdentificationMultipleCycles()
+		{
+			// Arrange
+			_firstDeviceIdentificationResponse.MoreRequestsNeeded = true;
+			_firstDeviceIdentificationResponse.NextObjectIdToRequest = 0x07;
+			_deviceIdentificationResponseQueue.Enqueue(new DeviceIdentificationRaw
+			{
+				AllowsIndividualAccess = true,
+				MoreRequestsNeeded = false,
+				NextObjectIdToRequest = 0x00,
+				Objects = new Dictionary<byte, byte[]>
+				{
+					{ 0x07, new byte[] { 0x01, 0x02, 0x03 } },
+				}
+			});
+			var client = GetClient();
+
+			// Act
+			var result = await client.ReadDeviceIdentificationAsync(UNIT_ID, ModbusDeviceIdentificationCategory.Extended, ModbusDeviceIdentificationObject.VendorName);
+
+			// Assert
+			Assert.IsNotNull(result);
+			Assert.IsTrue(result.IsIndividualAccessAllowed);
+			Assert.AreEqual("AM.WD", result.VendorName);
+			Assert.AreEqual("AMWD-MB", result.ProductCode);
+			Assert.AreEqual("1.2.3", result.MajorMinorRevision);
+			Assert.AreEqual("https://github.com/AM-WD/AMWD.Protocols.Modbus", result.VendorUrl);
+			Assert.AreEqual("AM.WD Modbus Library", result.ProductName);
+			Assert.AreEqual("UnitTests", result.ModelName);
+			Assert.AreEqual("Modbus Client Base Unit Test", result.UserApplicationName);
+
+			Assert.AreEqual(1, result.ExtendedObjects.Count);
+			Assert.AreEqual(0x07, result.ExtendedObjects.First().Key);
+			CollectionAssert.AreEqual(new byte[] { 0x01, 0x02, 0x03 }, result.ExtendedObjects.First().Value);
+
+			_connection.VerifyGet(c => c.IsConnected, Times.Once);
+			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+			_connection.VerifyNoOtherCalls();
+
+			_protocol.Verify(p => p.SerializeReadDeviceIdentification(UNIT_ID, ModbusDeviceIdentificationCategory.Extended, ModbusDeviceIdentificationObject.VendorName), Times.Once);
+			_protocol.Verify(p => p.SerializeReadDeviceIdentification(UNIT_ID, ModbusDeviceIdentificationCategory.Extended, (ModbusDeviceIdentificationObject)0x07), Times.Once);
+			_protocol.Verify(p => p.ValidateResponse(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<IReadOnlyList<byte>>()), Times.Exactly(2));
+			_protocol.Verify(p => p.DeserializeReadDeviceIdentification(It.IsAny<IReadOnlyList<byte>>()), Times.Exactly(2));
+			_protocol.VerifyNoOtherCalls();
+		}
+
+		#endregion Read
+
+		#region Write
 
 		[TestMethod]
 		public async Task ShouldWriteSingleCoil()
@@ -680,6 +789,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			_protocol.VerifyNoOtherCalls();
 		}
 
+		#endregion Write
+
 		private ModbusClientBase GetClient(bool disposeConnection = true)
 		{
 			_connection = new Mock<IModbusConnection>();
@@ -706,6 +817,9 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			_protocol
 				.Setup(p => p.DeserializeReadInputRegisters(It.IsAny<IReadOnlyList<byte>>()))
 				.Returns(() => _readInputRegistersResponse);
+			_protocol
+				.Setup(p => p.DeserializeReadDeviceIdentification(It.IsAny<IReadOnlyList<byte>>()))
+				.Returns(() => _deviceIdentificationResponseQueue.Dequeue());
 
 			_protocol
 				.Setup(p => p.DeserializeWriteSingleCoil(It.IsAny<IReadOnlyList<byte>>()))
