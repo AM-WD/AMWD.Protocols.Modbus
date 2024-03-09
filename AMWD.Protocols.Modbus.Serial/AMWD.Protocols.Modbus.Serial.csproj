@@ -4,11 +4,13 @@
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
 
+    <PackageId>AMWD.Protocols.Modbus.Serial</PackageId>
     <AssemblyName>amwd-modbus-serial</AssemblyName>
     <RootNamespace>AMWD.Protocols.Modbus.Serial</RootNamespace>
 
     <Product>Modbus RTU/ASCII Protocol</Product>
     <Description>Implementation of the Modbus protocol communicating via serial line using RTU or ASCII encoding.</Description>
+    <PackageTags>Modbus Protocol Serial Line RTU ASCII COM TTY</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

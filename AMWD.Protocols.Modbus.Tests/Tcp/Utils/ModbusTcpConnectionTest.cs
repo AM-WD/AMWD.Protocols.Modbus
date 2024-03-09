@@ -56,6 +56,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp.Utils
 			connection.WriteTimeout = TimeSpan.FromSeconds(456);
 
 			// Assert - part 1
+			Assert.AreEqual("TCP", connection.Name);
 			Assert.AreEqual(1, connection.ReadTimeout.TotalSeconds);
 			Assert.AreEqual(1, connection.WriteTimeout.TotalSeconds);
 			Assert.IsTrue(connection.IsConnected);

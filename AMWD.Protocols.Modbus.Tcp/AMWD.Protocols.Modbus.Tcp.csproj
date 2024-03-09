@@ -4,11 +4,13 @@
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
 
+    <PackageId>AMWD.Protocols.Modbus.Tcp</PackageId>
     <AssemblyName>amwd-modbus-tcp</AssemblyName>
     <RootNamespace>AMWD.Protocols.Modbus.Tcp</RootNamespace>
 
     <Product>Modbus TCP Protocol</Product>
     <Description>Implementation of the Modbus protocol communicating via TCP.</Description>
+    <PackageTags>Modbus Protocol Network TCP LAN</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
