@@ -8,7 +8,7 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/AndreasAmMueller/AMWD.Protocols.Modbus.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/AM-WD/AMWD.Protocols.Modbus.git</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

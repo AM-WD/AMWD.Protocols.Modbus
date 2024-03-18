@@ -5,7 +5,7 @@ using System.Linq;
 namespace System
 {
 	// ================================================================================================================================== //
-	// Source: https://git.am-wd.de/am.wd/common/-/blob/d4b390ad911ce302cc371bb2121fa9c31db1674a/AMWD.Common/Extensions/EnumExtensions.cs //
+	// Source: https://git.am-wd.de/am-wd/common/-/blob/d4b390ad911ce302cc371bb2121fa9c31db1674a/AMWD.Common/Extensions/EnumExtensions.cs //
 	// ================================================================================================================================== //
 	[Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	internal static class EnumExtensions
