@@ -59,6 +59,15 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// </summary>
 		public const ushort MAX_REGISTER_WRITE_COUNT = 0x007B; // 123
 
+		/// <summary>
+		/// The maximum allowed ADU length in bytes.
+		/// </summary>
+		/// <remarks>
+		/// A Modbus frame consists of a PDU (protcol data unit) and additional protocol addressing / error checks.
+		/// The whole data frame is called ADU (application data unit).
+		/// </remarks>
+		public const int MAX_ADU_LENGTH = 260; // bytes
+
 		#endregion Constants
 
 		/// <inheritdoc/>

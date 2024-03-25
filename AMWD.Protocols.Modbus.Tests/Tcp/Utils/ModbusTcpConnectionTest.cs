@@ -161,8 +161,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp.Utils
 		public async Task ShouldThrowApplicationExceptionHostnameNotResolvable()
 		{
 			// Arrange
-			_hostname = "123.321.123.321";
 			var connection = GetConnection();
+			connection.GetType().GetField("_hostname", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(connection, "");
 
 			// Act
 			await connection.ConnectAsync();
