@@ -130,7 +130,7 @@ namespace AMWD.Protocols.Modbus.Common.Models
 					value = 0x0000;
 
 				byte[] blob = BitConverter.GetBytes(value);
-				blob.SwapNetworkOrder();
+				blob.SwapBigEndian();
 
 				return new HoldingRegister
 				{
@@ -157,7 +157,7 @@ namespace AMWD.Protocols.Modbus.Common.Models
 				}
 
 				byte[] blob = [register.HighByte, register.LowByte];
-				blob.SwapNetworkOrder();
+				blob.SwapBigEndian();
 				_holdingRegisters[register.Address] = BitConverter.ToUInt16(blob, 0);
 			}
 		}
@@ -175,7 +175,7 @@ namespace AMWD.Protocols.Modbus.Common.Models
 					value = 0x0000;
 
 				byte[] blob = BitConverter.GetBytes(value);
-				blob.SwapNetworkOrder();
+				blob.SwapBigEndian();
 
 				return new InputRegister
 				{
@@ -202,7 +202,7 @@ namespace AMWD.Protocols.Modbus.Common.Models
 				}
 
 				byte[] blob = [register.HighByte, register.LowByte];
-				blob.SwapNetworkOrder();
+				blob.SwapBigEndian();
 				_inputRegisters[register.Address] = BitConverter.ToUInt16(blob, 0);
 			}
 		}

@@ -256,7 +256,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 						requestBytes.AddRange(headerBytes);
 
 						byte[] followingCountBytes = headerBytes.Skip(4).Take(2).ToArray();
-						followingCountBytes.SwapNetworkOrder();
+						followingCountBytes.SwapBigEndian();
 						int followingCount = BitConverter.ToUInt16(followingCountBytes, 0);
 
 						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(followingCount, cts.Token).ConfigureAwait(false);
@@ -351,8 +351,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort firstAddress = requestBytes.NetworkUInt16(8);
-			ushort count = requestBytes.NetworkUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
+			ushort count = requestBytes.GetBigEndianUInt16(10);
 
 			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_DISCRETE_READ_COUNT)
 			{
@@ -403,8 +403,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort firstAddress = requestBytes.NetworkUInt16(8);
-			ushort count = requestBytes.NetworkUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
+			ushort count = requestBytes.GetBigEndianUInt16(10);
 
 			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_DISCRETE_READ_COUNT)
 			{
@@ -455,8 +455,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort firstAddress = requestBytes.NetworkUInt16(8);
-			ushort count = requestBytes.NetworkUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
+			ushort count = requestBytes.GetBigEndianUInt16(10);
 
 			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_REGISTER_READ_COUNT)
 			{
@@ -504,8 +504,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort firstAddress = requestBytes.NetworkUInt16(8);
-			ushort count = requestBytes.NetworkUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
+			ushort count = requestBytes.GetBigEndianUInt16(10);
 
 			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_REGISTER_READ_COUNT)
 			{
@@ -553,7 +553,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort address = requestBytes.NetworkUInt16(8);
+			ushort address = requestBytes.GetBigEndianUInt16(8);
 
 			if (requestBytes[10] != 0x00 && requestBytes[10] != 0xFF)
 			{
@@ -608,8 +608,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort address = requestBytes.NetworkUInt16(8);
-			ushort value = requestBytes.NetworkUInt16(10);
+			ushort address = requestBytes.GetBigEndianUInt16(8);
+			ushort value = requestBytes.GetBigEndianUInt16(10);
 
 			try
 			{
@@ -660,8 +660,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort firstAddress = requestBytes.NetworkUInt16(8);
-			ushort count = requestBytes.NetworkUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
+			ushort count = requestBytes.GetBigEndianUInt16(10);
 
 			int byteCount = (int)Math.Ceiling(count / 8.0);
 			if (requestBytes.Length < 13 + byteCount)
@@ -726,8 +726,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort firstAddress = requestBytes.NetworkUInt16(8);
-			ushort count = requestBytes.NetworkUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
+			ushort count = requestBytes.GetBigEndianUInt16(10);
 
 			int byteCount = count * 2;
 			if (requestBytes.Length < 13 + byteCount)
@@ -760,7 +760,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 							{
 								UnitId = device.Id,
 								Address = address,
-								Value = requestBytes.NetworkUInt16(baseOffset + i * 2),
+								Value = requestBytes.GetBigEndianUInt16(baseOffset + i * 2),
 								HighByte = requestBytes[baseOffset + i * 2],
 								LowByte = requestBytes[baseOffset + i * 2 + 1]
 							});

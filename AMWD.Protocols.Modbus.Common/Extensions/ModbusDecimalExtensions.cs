@@ -49,7 +49,7 @@ namespace AMWD.Protocols.Modbus.Common
 				blob[i * 2 + 1] = registers[i].LowByte;
 			}
 
-			blob.SwapNetworkOrder();
+			blob.SwapBigEndian();
 			return BitConverter.ToSingle(blob, 0);
 		}
 
@@ -93,7 +93,7 @@ namespace AMWD.Protocols.Modbus.Common
 				blob[i * 2 + 1] = registers[i].LowByte;
 			}
 
-			blob.SwapNetworkOrder();
+			blob.SwapBigEndian();
 			return BitConverter.ToDouble(blob, 0);
 		}
 
@@ -107,7 +107,7 @@ namespace AMWD.Protocols.Modbus.Common
 		public static IEnumerable<HoldingRegister> ToRegister(this float value, ushort address, bool reverseRegisterOrder = false)
 		{
 			byte[] blob = BitConverter.GetBytes(value);
-			blob.SwapNetworkOrder();
+			blob.SwapBigEndian();
 
 			int numRegisters = blob.Length / 2;
 			for (int i = 0; i < numRegisters; i++)
@@ -135,7 +135,7 @@ namespace AMWD.Protocols.Modbus.Common
 		public static IEnumerable<HoldingRegister> ToRegister(this double value, ushort address, bool reverseRegisterOrder = false)
 		{
 			byte[] blob = BitConverter.GetBytes(value);
-			blob.SwapNetworkOrder();
+			blob.SwapBigEndian();
 
 			int numRegisters = blob.Length / 2;
 			for (int i = 0; i < numRegisters; i++)

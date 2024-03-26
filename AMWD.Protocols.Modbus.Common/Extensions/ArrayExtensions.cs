@@ -6,23 +6,23 @@ namespace AMWD.Protocols.Modbus.Common
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	internal static class ArrayExtensions
 	{
-		public static void SwapNetworkOrder(this byte[] bytes)
+		public static void SwapBigEndian(this byte[] bytes)
 		{
 			if (BitConverter.IsLittleEndian)
 				Array.Reverse(bytes);
 		}
 
-		public static ushort NetworkUInt16(this byte[] bytes, int offset = 0)
+		public static ushort GetBigEndianUInt16(this byte[] bytes, int offset = 0)
 		{
 			byte[] b = bytes.Skip(offset).Take(2).ToArray();
-			b.SwapNetworkOrder();
+			b.SwapBigEndian();
 			return BitConverter.ToUInt16(b, 0);
 		}
 
-		public static byte[] ToNetworkBytes(this ushort value)
+		public static byte[] ToBigEndianBytes(this ushort value)
 		{
 			byte[] b = BitConverter.GetBytes(value);
-			b.SwapNetworkOrder();
+			b.SwapBigEndian();
 			return b;
 		}
 	}

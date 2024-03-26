@@ -18,13 +18,13 @@ namespace AMWD.Protocols.Modbus.Common
 			get
 			{
 				byte[] blob = [HighByte, LowByte];
-				blob.SwapNetworkOrder();
+				blob.SwapBigEndian();
 				return BitConverter.ToUInt16(blob, 0);
 			}
 			set
 			{
 				byte[] blob = BitConverter.GetBytes(value);
-				blob.SwapNetworkOrder();
+				blob.SwapBigEndian();
 
 				HighByte = blob[0];
 				LowByte = blob[1];
