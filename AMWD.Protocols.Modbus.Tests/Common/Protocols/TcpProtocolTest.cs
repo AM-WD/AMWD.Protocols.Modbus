@@ -484,7 +484,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void ShouldTrhowOutOfRangeExceptionOnSerializeReadDeviceIdentification()
+		public void ShouldThrowOutOfRangeExceptionOnSerializeReadDeviceIdentification()
 		{
 			// Arrange
 			var protocol = new TcpProtocol();
@@ -750,7 +750,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void ShouldTrhowArgumentNullOnSerializeWriteMultipleCoils()
+		public void ShouldThrowArgumentNullOnSerializeWriteMultipleCoils()
 		{
 			// Arrange
 			var protocol = new TcpProtocol();
@@ -891,7 +891,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void ShouldTrhowArgumentNullOnSerializeWriteMultipleHoldingRegisters()
+		public void ShouldThrowArgumentNullOnSerializeWriteMultipleHoldingRegisters()
 		{
 			// Arrange
 			var protocol = new TcpProtocol();
