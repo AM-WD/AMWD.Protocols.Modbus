@@ -13,12 +13,18 @@ If you want to speak a custom type of protocol with the clients, you can impleme
 
 **ModbusBaseClient**    
 This abstract base client contains all the basic methods and handlings required to communicate via Modbus Protocol.
-The packages `AMWD.Protocols.Modbus.Serial` _(in progress)_ and `AMWD.Protocols.Modbus.Tcp` _(in progress)_ have specific derived implementations to match the communication types.
+The packages `AMWD.Protocols.Modbus.Serial` _(in progress)_ and `AMWD.Protocols.Modbus.Tcp` have specific derived implementations to match the communication types.
 
 
 ### Enums
 
 Here you have all typed enumerables defined by the Modbus Protocol.
+
+- Error code
+- Function code
+- Device Identification Category (Basic, Regular, Extended, Individual)
+- Device Identification Object
+- ModbusObjectType (only needed when using the abstract base type `ModbusObject` instead of `Coil`, etc.)
 
 
 ### Extensions
@@ -41,7 +47,7 @@ The different types handled by the Modbus Protocol.
 - Input Register
 
 In addition, you'll find the `DeviceIdentification` there.    
-It is used for a "special" function called "Read Device Identification" (0x2B / 43) not supported by all devices.
+It is used for a "special" function called _Read Device Identification_ (0x2B / 43), not supported on all devices.
 
 The `ModbusDevice` is used for the server implementations in the derived packages.
 
@@ -50,10 +56,14 @@ The `ModbusDevice` is used for the server implementations in the derived package
 
 Here you have the specific default implementations for the Modbus Protocol.
 
-- ASCII _(in progress)_
-- RTU _(in progress)_
+- ASCII
+- RTU
+- RTU over TCP _(in progress)_
 - TCP
 
+**NOTE:**    
+The implementations over serial line (RTU and ASCII) have a minimum unit ID of one (1) referring to the specification.
+This validation is _not_ implemented here due to real world experience, that some manufactures do not care about it.
 
 ---
 

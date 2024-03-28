@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AMWD.Protocols.Modbus.Common.Contracts;
 
 namespace AMWD.Protocols.Modbus.Common.Protocols
 {
 	/// <summary>
-	/// Default implementation of the Modbus RTU protocol.
+	/// Default implementation of the Modbus ASCII protocol.
 	/// </summary>
-	public class RtuProtocol : IModbusProtocol
+	public class AsciiProtocol : IModbusProtocol
 	{
 		#region Constants
 
@@ -63,18 +64,18 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		public const ushort MAX_REGISTER_WRITE_COUNT = 0x007B; // 123
 
 		/// <summary>
-		/// The maximum allowed ADU length in bytes.
+		/// The maximum allowed ADU length in chars.
 		/// </summary>
 		/// <remarks>
 		/// A Modbus frame consists of a PDU (protcol data unit) and additional protocol addressing / error checks.
 		/// The whole data frame is called ADU (application data unit).
 		/// </remarks>
-		public const int MAX_ADU_LENGTH = 256; // bytes
+		public const int MAX_ADU_LENGTH = 513; // chars in ASCII (so bytes in the end)
 
 		#endregion Constants
 
 		/// <inheritdoc/>
-		public string Name => "RTU";
+		public string Name => "ASCII";
 
 		#region Read
 
@@ -87,47 +88,46 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			if (ushort.MaxValue < (startAddress + count - 1))
 				throw new ArgumentOutOfRangeException(nameof(count), $"Combination of {nameof(startAddress)} and {nameof(count)} exceeds the addressation limit of {ushort.MaxValue}");
 
-			byte[] request = new byte[8];
-
-			// Unit Id
-			request[0] = unitId;
-
-			// Function code
-			request[1] = (byte)ModbusFunctionCode.ReadCoils;
+			// Unit Id and Function code
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadCoils:X2}";
 
 			// Starting address
 			byte[] addrBytes = startAddress.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
 			byte[] countBytes = count.ToBigEndianBytes();
-			request[4] = countBytes[0];
-			request[5] = countBytes[1];
+			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
-			// CRC
-			byte[] crc = CRC16(request, 0, 6);
-			request[6] = crc[0];
-			request[7] = crc[1];
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
 
-			return request;
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public IReadOnlyList<Coil> DeserializeReadCoils(IReadOnlyList<byte> response)
 		{
-			int baseOffset = 3;
-			if (response[2] != response.Count - baseOffset - 2) // -2 for CRC
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			byte numBytes = HexToByte(responseMessage.Substring(5, 2));
+			byte[] responsePayloadBytes = HexStringToByteArray(responseMessage.Substring(7, responseMessage.Length - 11));
+
+			if (numBytes != responsePayloadBytes.Length)
 				throw new ModbusException("Coil byte count does not match.");
 
-			int count = response[2] * 8;
+			int count = numBytes * 8;
 			var coils = new List<Coil>();
 			for (int i = 0; i < count; i++)
 			{
 				int bytePosition = i / 8;
 				int bitPosition = i % 8;
 
-				int value = response[baseOffset + bytePosition] & (1 << bitPosition);
+				int value = responsePayloadBytes[bytePosition] & (1 << bitPosition);
 				coils.Add(new Coil
 				{
 					Address = (ushort)i,
@@ -147,47 +147,46 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			if (ushort.MaxValue < (startAddress + count - 1))
 				throw new ArgumentOutOfRangeException(nameof(count), $"Combination of {nameof(startAddress)} and {nameof(count)} exceeds the addressation limit of {ushort.MaxValue}");
 
-			byte[] request = new byte[8];
-
-			// Unit Id
-			request[0] = unitId;
-
-			// Function code
-			request[1] = (byte)ModbusFunctionCode.ReadDiscreteInputs;
+			// Unit Id and Function code
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadDiscreteInputs:X2}";
 
 			// Starting address
 			byte[] addrBytes = startAddress.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
 			byte[] countBytes = count.ToBigEndianBytes();
-			request[4] = countBytes[0];
-			request[5] = countBytes[1];
+			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
-			// CRC
-			byte[] crc = CRC16(request, 0, 6);
-			request[6] = crc[0];
-			request[7] = crc[1];
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
 
-			return request;
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public IReadOnlyList<DiscreteInput> DeserializeReadDiscreteInputs(IReadOnlyList<byte> response)
 		{
-			int baseOffset = 3;
-			if (response[2] != response.Count - baseOffset - 2) // -2 for CRC
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			byte numBytes = HexToByte(responseMessage.Substring(5, 2));
+			byte[] responsePayloadBytes = HexStringToByteArray(responseMessage.Substring(7, responseMessage.Length - 11));
+
+			if (numBytes != responsePayloadBytes.Length)
 				throw new ModbusException("Discrete input byte count does not match.");
 
-			int count = response[2] * 8;
+			int count = numBytes * 8;
 			var discreteInputs = new List<DiscreteInput>();
 			for (int i = 0; i < count; i++)
 			{
 				int bytePosition = i / 8;
 				int bitPosition = i % 8;
 
-				int value = response[baseOffset + bytePosition] & (1 << bitPosition);
+				int value = responsePayloadBytes[bytePosition] & (1 << bitPosition);
 				discreteInputs.Add(new DiscreteInput
 				{
 					Address = (ushort)i,
@@ -207,48 +206,46 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			if (ushort.MaxValue < (startAddress + count - 1))
 				throw new ArgumentOutOfRangeException(nameof(count), $"Combination of {nameof(startAddress)} and {nameof(count)} exceeds the addressation limit of {ushort.MaxValue}");
 
-			byte[] request = new byte[8];
-
-			// Unit Id
-			request[0] = unitId;
-
-			// Function code
-			request[1] = (byte)ModbusFunctionCode.ReadHoldingRegisters;
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadHoldingRegisters:X2}";
 
 			// Starting address
 			byte[] addrBytes = startAddress.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
 			byte[] countBytes = count.ToBigEndianBytes();
-			request[4] = countBytes[0];
-			request[5] = countBytes[1];
+			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
-			// CRC
-			byte[] crc = CRC16(request, 0, 6);
-			request[6] = crc[0];
-			request[7] = crc[1];
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
 
-			return request;
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public IReadOnlyList<HoldingRegister> DeserializeReadHoldingRegisters(IReadOnlyList<byte> response)
 		{
-			int baseOffset = 3;
-			if (response[2] != response.Count - baseOffset - 2)
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			byte numBytes = HexToByte(responseMessage.Substring(5, 2));
+			byte[] responsePayloadBytes = HexStringToByteArray(responseMessage.Substring(7, responseMessage.Length - 11));
+
+			if (numBytes != responsePayloadBytes.Length)
 				throw new ModbusException("Holding register byte count does not match.");
 
-			int count = response[2] / 2;
+			int count = numBytes / 2;
 			var holdingRegisters = new List<HoldingRegister>();
 			for (int i = 0; i < count; i++)
 			{
 				holdingRegisters.Add(new HoldingRegister
 				{
 					Address = (ushort)i,
-					HighByte = response[baseOffset + i * 2],
-					LowByte = response[baseOffset + i * 2 + 1]
+					HighByte = responsePayloadBytes[i * 2],
+					LowByte = responsePayloadBytes[i * 2 + 1]
 				});
 			}
 
@@ -264,48 +261,46 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			if (ushort.MaxValue < (startAddress + count - 1))
 				throw new ArgumentOutOfRangeException(nameof(count), $"Combination of {nameof(startAddress)} and {nameof(count)} exceeds the addressation limit of {ushort.MaxValue}");
 
-			byte[] request = new byte[8];
-
-			// Unit Id
-			request[0] = unitId;
-
-			// Function code
-			request[1] = (byte)ModbusFunctionCode.ReadInputRegisters;
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadInputRegisters:X2}";
 
 			// Starting address
 			byte[] addrBytes = startAddress.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
 			byte[] countBytes = count.ToBigEndianBytes();
-			request[4] = countBytes[0];
-			request[5] = countBytes[1];
+			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
-			// CRC
-			byte[] crc = CRC16(request, 0, 6);
-			request[6] = crc[0];
-			request[7] = crc[1];
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
 
-			return request;
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public IReadOnlyList<InputRegister> DeserializeReadInputRegisters(IReadOnlyList<byte> response)
 		{
-			int baseOffset = 3;
-			if (response[2] != response.Count - baseOffset - 2)
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			byte numBytes = HexToByte(responseMessage.Substring(5, 2));
+			byte[] responsePayloadBytes = HexStringToByteArray(responseMessage.Substring(7, responseMessage.Length - 11));
+
+			if (numBytes != responsePayloadBytes.Length)
 				throw new ModbusException("Input register byte count does not match.");
 
-			int count = response[2] / 2;
+			int count = numBytes / 2;
 			var inputRegisters = new List<InputRegister>();
 			for (int i = 0; i < count; i++)
 			{
 				inputRegisters.Add(new InputRegister
 				{
 					Address = (ushort)i,
-					HighByte = response[baseOffset + i * 2],
-					LowByte = response[baseOffset + i * 2 + 1]
+					HighByte = responsePayloadBytes[i * 2],
+					LowByte = responsePayloadBytes[i * 2 + 1]
 				});
 			}
 
@@ -318,52 +313,50 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			if (!Enum.IsDefined(typeof(ModbusDeviceIdentificationCategory), category))
 				throw new ArgumentOutOfRangeException(nameof(category));
 
-			byte[] request = new byte[7];
-
-			// Unit Id
-			request[0] = unitId;
-
-			// Function code
-			request[1] = (byte)ModbusFunctionCode.EncapsulatedInterface;
-
-			// Modbus Encapsulated Interface: Read Device Identification (MEI Type)
-			request[2] = 0x0E;
+			// Unit Id, Function code and Modbus Encapsulated Interface: Read Device Identification (MEI Type)
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.EncapsulatedInterface:X2}0E";
 
 			// The category type (basic, regular, extended, individual)
-			request[3] = (byte)category;
-			request[4] = (byte)objectId;
+			request += $"{(byte)category:X2}{(byte)objectId:X2}";
 
-			// CRC
-			byte[] crc = CRC16(request, 0, 5);
-			request[5] = crc[0];
-			request[6] = crc[1];
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
 
-			return request;
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public DeviceIdentificationRaw DeserializeReadDeviceIdentification(IReadOnlyList<byte> response)
 		{
-			if (response[2] != 0x0E)
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			if (responseMessage.Substring(5, 2) != "0E")
 				throw new ModbusException("The MEI type does not match");
 
-			if (!Enum.IsDefined(typeof(ModbusDeviceIdentificationCategory), response[3]))
+			byte category = HexToByte(responseMessage.Substring(7, 2));
+			if (!Enum.IsDefined(typeof(ModbusDeviceIdentificationCategory), category))
 				throw new ModbusException("The category type does not match");
 
 			var deviceIdentification = new DeviceIdentificationRaw
 			{
-				AllowsIndividualAccess = (response[4] & 0x80) == 0x80,
-				MoreRequestsNeeded = response[5] == 0xFF,
-				NextObjectIdToRequest = response[6],
+				AllowsIndividualAccess = (HexToByte(responseMessage.Substring(9, 2)) & 0x80) == 0x80,
+				MoreRequestsNeeded = responseMessage.Substring(11, 2) == "FF",
+				NextObjectIdToRequest = HexToByte(responseMessage.Substring(13, 2)),
 			};
 
-			int baseOffset = 8;
-			while (baseOffset < response.Count - 2) // -2 for CRC
-			{
-				byte objectId = response[baseOffset];
-				byte length = response[baseOffset + 1];
+			byte[] responsePayloadBytes = HexStringToByteArray(responseMessage.Substring(15, responseMessage.Length - 19));
 
-				byte[] data = response.Skip(baseOffset + 2).Take(length).ToArray();
+			int baseOffset = 1; // Skip number of objects
+			while (baseOffset < responsePayloadBytes.Length)
+			{
+				byte objectId = responsePayloadBytes[baseOffset];
+				byte length = responsePayloadBytes[baseOffset + 1];
+
+				byte[] data = responsePayloadBytes.Skip(baseOffset + 2).Take(length).ToArray();
 
 				deviceIdentification.Objects.Add(objectId, data);
 				baseOffset += 2 + length;
@@ -386,37 +379,36 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 				throw new ArgumentNullException(nameof(coil));
 #endif
 
-			byte[] request = new byte[8];
+			// Unit Id and Function code
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteSingleCoil:X2}";
 
-			// Unit ID
-			request[0] = unitId;
-
-			// Function code
-			request[1] = (byte)ModbusFunctionCode.WriteSingleCoil;
-
+			// Starting address
 			byte[] addrBytes = coil.Address.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
-			request[4] = coil.HighByte;
-			request[5] = coil.LowByte;
+			// Value
+			request += $"{coil.HighByte:X2}{coil.LowByte:X2}";
 
-			// CRC
-			byte[] crc = CRC16(request, 0, 6);
-			request[6] = crc[0];
-			request[7] = crc[1];
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
 
-			return request;
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public Coil DeserializeWriteSingleCoil(IReadOnlyList<byte> response)
 		{
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
 			return new Coil
 			{
-				Address = response.ToArray().GetBigEndianUInt16(2),
-				HighByte = response[4],
-				LowByte = response[5]
+				Address = HexStringToByteArray(responseMessage.Substring(5, 4)).GetBigEndianUInt16(),
+				HighByte = HexToByte(responseMessage.Substring(9, 2)),
+				LowByte = HexToByte(responseMessage.Substring(11, 2))
 			};
 		}
 
@@ -430,37 +422,36 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 				throw new ArgumentNullException(nameof(register));
 #endif
 
-			byte[] request = new byte[8];
+			// Unit Id and Function code
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteSingleRegister:X2}";
 
-			// Unit Id
-			request[0] = unitId;
-
-			// Function code
-			request[1] = (byte)ModbusFunctionCode.WriteSingleRegister;
-
+			// Starting address
 			byte[] addrBytes = register.Address.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
-			request[4] = register.HighByte;
-			request[5] = register.LowByte;
+			// Value
+			request += $"{register.HighByte:X2}{register.LowByte:X2}";
 
-			// CRC
-			byte[] crc = CRC16(request, 0, 6);
-			request[6] = crc[0];
-			request[7] = crc[1];
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
 
-			return request;
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public HoldingRegister DeserializeWriteSingleHoldingRegister(IReadOnlyList<byte> response)
 		{
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
 			return new HoldingRegister
 			{
-				Address = response.ToArray().GetBigEndianUInt16(2),
-				HighByte = response[4],
-				LowByte = response[5]
+				Address = HexStringToByteArray(responseMessage.Substring(5, 4)).GetBigEndianUInt16(),
+				HighByte = HexToByte(responseMessage.Substring(9, 2)),
+				LowByte = HexToByte(responseMessage.Substring(11, 2))
 			};
 		}
 
@@ -489,23 +480,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 				throw new ArgumentException("Gap in coil list found.", nameof(coils));
 
 			byte byteCount = (byte)Math.Ceiling(orderedList.Count / 8.0);
-			byte[] request = new byte[9 + byteCount];
-
-			request[0] = unitId;
-
-			request[1] = (byte)ModbusFunctionCode.WriteMultipleCoils;
-
-			byte[] addrBytes = firstAddress.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
-
-			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
-			request[4] = countBytes[0];
-			request[5] = countBytes[1];
-
-			request[6] = byteCount;
-
-			int baseOffset = 7;
+			byte[] data = new byte[byteCount];
 			for (int i = 0; i < orderedList.Count; i++)
 			{
 				int bytePosition = i / 8;
@@ -514,23 +489,44 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 				if (orderedList[i].Value)
 				{
 					byte bitMask = (byte)(1 << bitPosition);
-					request[baseOffset + bytePosition] |= bitMask;
+					data[bytePosition] |= bitMask;
 				}
 			}
 
-			// CRC
-			byte[] crc = CRC16(request, 0, request.Length - 2);
-			request[request.Length - 2] = crc[0];
-			request[request.Length - 1] = crc[1];
+			// Unit Id and Function code
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteMultipleCoils:X2}";
 
-			return request;
+			// Starting address
+			byte[] addrBytes = firstAddress.ToBigEndianBytes();
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
+
+			// Quantity
+			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
+			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
+
+			// Byte count
+			request += $"{byteCount:X2}";
+
+			// Data
+			request += string.Join("", data.Select(b => $"{b:X2}"));
+
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
+
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public (ushort FirstAddress, ushort NumberOfCoils) DeserializeWriteMultipleCoils(IReadOnlyList<byte> response)
 		{
-			ushort firstAddress = response.ToArray().GetBigEndianUInt16(2);
-			ushort numberOfCoils = response.ToArray().GetBigEndianUInt16(4);
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			ushort firstAddress = HexStringToByteArray(responseMessage.Substring(5, 4)).GetBigEndianUInt16();
+			ushort numberOfCoils = HexStringToByteArray(responseMessage.Substring(9, 4)).GetBigEndianUInt16();
 
 			return (firstAddress, numberOfCoils);
 		}
@@ -560,41 +556,47 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 				throw new ArgumentException("Gap in holding register list found.", nameof(registers));
 
 			byte byteCount = (byte)(orderedList.Count * 2);
-			byte[] request = new byte[9 + byteCount];
-
-			request[0] = unitId;
-			request[1] = (byte)ModbusFunctionCode.WriteMultipleRegisters;
-
-			byte[] addrBytes = firstAddress.ToBigEndianBytes();
-			request[2] = addrBytes[0];
-			request[3] = addrBytes[1];
-
-			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
-			request[4] = countBytes[0];
-			request[5] = countBytes[1];
-
-			request[6] = byteCount;
-
-			int baseOffset = 7;
+			byte[] data = new byte[byteCount];
 			for (int i = 0; i < orderedList.Count; i++)
 			{
-				request[baseOffset + 2 * i] = orderedList[i].HighByte;
-				request[baseOffset + 2 * i + 1] = orderedList[i].LowByte;
+				data[2 * i] = orderedList[i].HighByte;
+				data[2 * i + 1] = orderedList[i].LowByte;
 			}
 
-			// CRC
-			byte[] crc = CRC16(request, 0, request.Length - 2);
-			request[request.Length - 2] = crc[0];
-			request[request.Length - 1] = crc[1];
+			// Unit Id and Function code
+			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteMultipleRegisters:X2}";
 
-			return request;
+			// Starting address
+			byte[] addrBytes = firstAddress.ToBigEndianBytes();
+			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
+
+			// Quantity
+			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
+			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
+
+			// Byte count
+			request += $"{byteCount:X2}";
+
+			// Data
+			request += string.Join("", data.Select(b => $"{b:X2}"));
+
+			// LRC
+			string lrc = LRC(request);
+			request += lrc;
+
+			// CRLF
+			request += "\r\n";
+
+			return Encoding.ASCII.GetBytes(request);
 		}
 
 		/// <inheritdoc/>
 		public (ushort FirstAddress, ushort NumberOfRegisters) DeserializeWriteMultipleHoldingRegisters(IReadOnlyList<byte> response)
 		{
-			ushort firstAddress = response.ToArray().GetBigEndianUInt16(2);
-			ushort numberOfRegisters = response.ToArray().GetBigEndianUInt16(4);
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			ushort firstAddress = HexStringToByteArray(responseMessage.Substring(5, 4)).GetBigEndianUInt16();
+			ushort numberOfRegisters = HexStringToByteArray(responseMessage.Substring(9, 4)).GetBigEndianUInt16();
 
 			return (firstAddress, numberOfRegisters);
 		}
@@ -606,124 +608,64 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <inheritdoc/>
 		public bool CheckResponseComplete(IReadOnlyList<byte> responseBytes)
 		{
-			// Minimum requirement => Unit ID, Function code and at least 2x CRC
-			if (responseBytes.Count < 4)
+			if (responseBytes.Count < 3)
 				return false;
 
-			// Response is error response
-			if ((responseBytes[1] & 0x80) == 0x80)
+			for (int i = responseBytes.Count - 2; i >= 0; i--)
 			{
-				// Unit ID, Function Code, ErrorCode, 2x CRC
-				if (responseBytes.Count < 5)
-					return false;
-
-				// On error, skip any other evaluation
-				return true;
-			}
-
-			// Read responses
-			// - 0x01 Read Coils
-			// - 0x02 Read Discrete Inputs
-			// - 0x03 Read Holding Registers
-			// - 0x04 Read Input Registers
-			// do have a "following bytes" at position 3
-			if (new[] { 0x01, 0x02, 0x03, 0x04 }.Contains(responseBytes[1]))
-			{
-				// Unit ID, Function Code, ByteCount, 2x CRC and length of ByteCount
-				if (responseBytes.Count < 5 + responseBytes[2])
-					return false;
-			}
-
-			// - 0x05 Write Single Coil
-			// - 0x06 Write Single Register
-			// - 0x0F Write Multiple Coils
-			// - 0x10 Write Multiple Registers
-			if (new[] { 0x05, 0x06, 0x0F, 0x10 }.Contains(responseBytes[1]))
-			{
-				// Write Single => Unit ID, Function code, 2x Address, 2x Value, 2x CRC
-				// Write Multi  => Unit ID, Function code, 2x Address, 2x QuantityWritten, 2x CRC
-				if (responseBytes.Count < 8)
-					return false;
-			}
-
-			// 0x2B Read Device Identification
-			if (responseBytes[1] == 0x2B)
-			{
-				// [0] 1x Unit ID
-				// [1] 1x Function code
-				// [2] 1x MEI Type
-				// [3] 1x Category
-				// [4] 1x Conformity Level
-				// [5] 1x More Follows
-				// [6] 1x Next Object ID
-				// [7] 1x NumberOfObjects
-				// ----- repeat NumberOfObjects times
-				// 1x Object ID
-				// 1x length N
-				// Nx data
-				// -----
-				// 2x CRC
-
-				if (responseBytes.Count < 8)
-					return false;
-
-				byte numberOfObjects = responseBytes[7];
-				if (numberOfObjects == 0)
-				{
-					if (responseBytes.Count < 10)
-						return false;
-
+				// ASCII terminates with CR LF (\r\n)
+				if (responseBytes[i] == 0x0D && responseBytes[i + 1] == 0x0A)
 					return true;
-				}
-
-				int offset = 8;
-				for (int i = 0; i < numberOfObjects; i++)
-				{
-					offset++; // object id
-					byte length = responseBytes[offset++];
-					offset += length; // data
-
-					// 2x CRC or next object ID and length
-					if (responseBytes.Count < offset + 2)
-						return false;
-				}
 			}
 
-			return true;
+			return false;
 		}
 
 		/// <inheritdoc/>
 		public void ValidateResponse(IReadOnlyList<byte> request, IReadOnlyList<byte> response)
 		{
-			if (request[0] != response[0])
+			string requestMessage = Encoding.ASCII.GetString([.. request]).ToUpper();
+			string responseMessage = Encoding.ASCII.GetString([.. response]).ToUpper();
+
+			// Check header
+			if (!responseMessage.StartsWith(":"))
+				throw new ModbusException("The protocol header is missing.");
+
+			// Check trailer
+			if (!responseMessage.EndsWith("\r\n"))
+				throw new ModbusException("The protocol tail is missing.");
+
+			string calculatedLrc = LRC(responseMessage, 1, responseMessage.Length - 5);
+			string receivedLrc = responseMessage.Substring(responseMessage.Length - 4, 2);
+			if (calculatedLrc != receivedLrc)
+				throw new ModbusException("LRC check failed.");
+
+			if (requestMessage.Substring(1, 2) != responseMessage.Substring(1, 2))
 				throw new ModbusException("Unit Identifier does not match.");
 
-			byte[] calculatedCrc16 = CRC16(response, 0, response.Count - 2);
-			byte[] receivedCrc16 = [response[response.Count - 2], response[response.Count - 1]];
-
-			if (calculatedCrc16[0] != receivedCrc16[0] || calculatedCrc16[1] != receivedCrc16[1])
-				throw new ModbusException("CRC16 check failed.");
-
-			byte fnCode = response[1];
+			byte fnCode = HexToByte(responseMessage.Substring(3, 2));
 			bool isError = (fnCode & 0x80) == 0x80;
 			if (isError)
 				fnCode = (byte)(fnCode ^ 0x80); // === fnCode & 0x7F
 
-			if (request[1] != fnCode)
+			if (requestMessage.Substring(3, 2) != fnCode.ToString("X2"))
 				throw new ModbusException("Function code does not match.");
 
 			if (isError)
-				throw new ModbusException("Remote Error") { ErrorCode = (ModbusErrorCode)response[2] };
+				throw new ModbusException("Remote Error") { ErrorCode = (ModbusErrorCode)HexToByte(responseMessage.Substring(5, 2)) };
 
 			if (new[] { 0x01, 0x02, 0x03, 0x04 }.Contains(fnCode))
 			{
-				if (response.Count != 5 + response[2])
+				// : ID FN NU DA XX \r\n
+				byte charByteCount = HexToByte(responseMessage.Substring(5, 2));
+				if (responseMessage.Length != charByteCount * 2 + 11)
 					throw new ModbusException("Number of following bytes does not match.");
 			}
 
 			if (new[] { 0x05, 0x06, 0x0F, 0x10 }.Contains(fnCode))
 			{
-				if (response.Count != 8)
+				// : ID FN 00 10 00 30 XX \r\n
+				if (responseMessage.Length != 17)
 					throw new ModbusException("Number of bytes does not match.");
 			}
 
@@ -731,42 +673,61 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		}
 
 		/// <summary>
-		/// Calculate CRC16 for Modbus RTU.
+		/// Calculate LRC for Modbus ASCII.
 		/// </summary>
-		/// <param name="bytes">The message bytes.</param>
+		/// <param name="message">The message chars.</param>
 		/// <param name="start">The start index.</param>
 		/// <param name="length">The number of bytes to calculate.</param>
-		public static byte[] CRC16(IReadOnlyList<byte> bytes, int start = 0, int? length = null)
+		public static string LRC(string message, int start = 1, int? length = null)
 		{
-			if (bytes == null || bytes.Count == 0)
-				throw new ArgumentNullException(nameof(bytes));
+			if (string.IsNullOrWhiteSpace(message))
+				throw new ArgumentNullException(nameof(message));
 
-			if (start < 0 || start >= bytes.Count)
+			if (start < 0 || start >= message.Length)
 				throw new ArgumentOutOfRangeException(nameof(start));
 
-			length ??= bytes.Count - start;
+			length ??= message.Length - start;
 
-			if (length <= 0 || start + length > bytes.Count)
+			if (length <= 0 || start + length > message.Length)
 				throw new ArgumentOutOfRangeException(nameof(length));
 
-			byte lsb;
-			ushort crc16 = 0xFFFF;
-			for (int i = start; i < start + length; i++)
-			{
-				crc16 = (ushort)(crc16 ^ bytes[i]);
-				for (int j = 0; j < 8; j++)
-				{
-					lsb = (byte)(crc16 & 0x0001);
-					crc16 = (ushort)(crc16 >> 1);
+			if (length % 2 != 0)
+				throw new ArgumentException("The number of chars to calculate the LRC must be even.", nameof(length));
 
-					if (lsb == 0x01)
-						crc16 = (ushort)(crc16 ^ 0xA001);
-				}
-			}
+			string subStr = message.Substring(start, length.Value);
 
-			return [(byte)crc16, (byte)(crc16 >> 8)];
+			// Step 1:
+			// Add all bytes in the message, excluding the starting 'colon' and ending CRLF.
+			// Add them into an 8–bit field, so that carries will be discarded.
+			byte lrc = 0x00;
+			foreach (byte b in HexStringToByteArray(subStr))
+				lrc += b;
+
+			// Step 2:
+			// Subtract the final field value from FF hex (all 1's), to produce the ones-complement.
+			byte oneComplement = (byte)(lrc ^ 0xFF);
+
+			// Step 3:
+			// Add 1 to produce the twos-complement.
+			return ((byte)(oneComplement + 0x01)).ToString("X2");
 		}
 
 		#endregion Validation
+
+		#region Private Helper
+
+		private static byte[] HexStringToByteArray(string hexString)
+		{
+			return Enumerable
+				.Range(0, hexString.Length)
+				.Where(x => x % 2 == 0)
+				.Select(x => HexToByte(hexString.Substring(x, 2)))
+				.ToArray();
+		}
+
+		private static byte HexToByte(string hex)
+			=> Convert.ToByte(hex, 16);
+
+		#endregion Private Helper
 	}
 }

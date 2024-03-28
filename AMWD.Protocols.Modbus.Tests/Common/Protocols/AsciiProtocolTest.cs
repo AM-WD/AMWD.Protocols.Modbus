@@ -5,7 +5,7 @@ using AMWD.Protocols.Modbus.Common.Protocols;
 namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 {
 	[TestClass]
-	public class RtuProtocolTest
+	public class AsciiProtocolTest
 	{
 		private const byte UNIT_ID = 0x2A; // 42
 
@@ -15,29 +15,18 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeReadCoils()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string expectedResponse = $":{UNIT_ID:X2}0100130013";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var bytes = protocol.SerializeReadCoils(UNIT_ID, 19, 19);
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(8, bytes.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, bytes[0]);
-
-			//    Function code
-			Assert.AreEqual(0x01, bytes[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, bytes[2]);
-			Assert.AreEqual(0x13, bytes[3]);
-			//    Quantity
-			Assert.AreEqual(0x00, bytes[4]);
-			Assert.AreEqual(0x13, bytes[5]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, bytes.ToArray());
 		}
 
 		[DataTestMethod]
@@ -47,7 +36,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadCoils(int count)
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadCoils(UNIT_ID, 19, (ushort)count);
@@ -60,7 +49,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadCoils()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadCoils(UNIT_ID, ushort.MaxValue, 2);
@@ -73,10 +62,15 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		{
 			// Arrange
 			int[] setValues = [0, 2, 3, 6, 7, 8, 9, 11, 13, 14, 16, 18];
-			var protocol = new RtuProtocol();
+
+			string response = $":{UNIT_ID:X2}0103CD6B05";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			var coils = protocol.DeserializeReadCoils([UNIT_ID, 0x01, 0x03, 0xCD, 0x6B, 0x05, 0x00, 0x00]);
+			var coils = protocol.DeserializeReadCoils(responseBytes);
 
 			// Assert
 			Assert.IsNotNull(coils);
@@ -98,10 +92,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowExceptionOnDeserializeReadCoils()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0102CD6B05";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			_ = protocol.DeserializeReadCoils([UNIT_ID, 0x01, 0x02, 0xCD, 0x6B, 0x05, 0x00, 0x00]);
+			_ = protocol.DeserializeReadCoils(responseBytes);
 
 			// Assert - ModbusException
 		}
@@ -114,29 +112,18 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeReadDiscreteInputs()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string expectedResponse = $":{UNIT_ID:X2}0200130013";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var bytes = protocol.SerializeReadDiscreteInputs(UNIT_ID, 19, 19);
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(8, bytes.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, bytes[0]);
-
-			//    Function code
-			Assert.AreEqual(0x02, bytes[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, bytes[2]);
-			Assert.AreEqual(0x13, bytes[3]);
-			//    Quantity
-			Assert.AreEqual(0x00, bytes[4]);
-			Assert.AreEqual(0x13, bytes[5]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, bytes.ToArray());
 		}
 
 		[DataTestMethod]
@@ -146,7 +133,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadDiscreteInputs(int count)
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadDiscreteInputs(UNIT_ID, 19, (ushort)count);
@@ -159,7 +146,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadDiscreteInputs()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadDiscreteInputs(UNIT_ID, ushort.MaxValue, 2);
@@ -172,23 +159,28 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		{
 			// Arrange
 			int[] setValues = [0, 2, 3, 6, 7, 8, 9, 11, 13, 14, 16, 18];
-			var protocol = new RtuProtocol();
+
+			string response = $":{UNIT_ID:X2}0203CD6B05";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			var coils = protocol.DeserializeReadDiscreteInputs([UNIT_ID, 0x02, 0x03, 0xCD, 0x6B, 0x05, 0x00, 0x00]);
+			var discreteInputs = protocol.DeserializeReadDiscreteInputs(responseBytes);
 
 			// Assert
-			Assert.IsNotNull(coils);
-			Assert.AreEqual(24, coils.Count);
+			Assert.IsNotNull(discreteInputs);
+			Assert.AreEqual(24, discreteInputs.Count);
 
 			for (int i = 0; i < 24; i++)
 			{
-				Assert.AreEqual(i, coils[i].Address);
+				Assert.AreEqual(i, discreteInputs[i].Address);
 
 				if (setValues.Contains(i))
-					Assert.IsTrue(coils[i].Value);
+					Assert.IsTrue(discreteInputs[i].Value);
 				else
-					Assert.IsFalse(coils[i].Value);
+					Assert.IsFalse(discreteInputs[i].Value);
 			}
 		}
 
@@ -197,10 +189,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowExceptionOnDeserializeReadDiscreteInputs()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0202CD6B05";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			_ = protocol.DeserializeReadDiscreteInputs([UNIT_ID, 0x02, 0x02, 0xCD, 0x6B, 0x05, 0x00, 0x00]);
+			protocol.DeserializeReadDiscreteInputs(responseBytes);
 
 			// Assert - ModbusException
 		}
@@ -213,39 +209,28 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeReadHoldingRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string expectedResponse = $":{UNIT_ID:X2}0300130013";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			var bytes = protocol.SerializeReadHoldingRegisters(UNIT_ID, 107, 2);
+			var bytes = protocol.SerializeReadHoldingRegisters(UNIT_ID, 19, 19);
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(8, bytes.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, bytes[0]);
-
-			//    Function code
-			Assert.AreEqual(0x03, bytes[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, bytes[2]);
-			Assert.AreEqual(0x6B, bytes[3]);
-			//    Quantity
-			Assert.AreEqual(0x00, bytes[4]);
-			Assert.AreEqual(0x02, bytes[5]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, bytes.ToArray());
 		}
 
 		[DataTestMethod]
 		[DataRow(0)]
-		[DataRow(126)]
+		[DataRow(2001)]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadHoldingRegisters(int count)
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadHoldingRegisters(UNIT_ID, 19, (ushort)count);
@@ -258,7 +243,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadHoldingRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadHoldingRegisters(UNIT_ID, ushort.MaxValue, 2);
@@ -270,10 +255,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldDeserializeReadHoldingRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0304022B0064";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			var registers = protocol.DeserializeReadHoldingRegisters([UNIT_ID, 0x03, 0x04, 0x02, 0x2B, 0x00, 0x64, 0x00, 0x00]);
+			var registers = protocol.DeserializeReadHoldingRegisters(responseBytes);
 
 			// Assert
 			Assert.IsNotNull(registers);
@@ -291,10 +280,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowExceptionOnDeserializeReadHoldingRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0304022B";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.DeserializeReadHoldingRegisters([UNIT_ID, 0x03, 0x04, 0x02, 0x2B, 0x00, 0x00]);
+			protocol.DeserializeReadHoldingRegisters(responseBytes);
 
 			// Assert - ModbusException
 		}
@@ -307,39 +300,28 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeReadInputRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string expectedResponse = $":{UNIT_ID:X2}0400130013";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			var bytes = protocol.SerializeReadInputRegisters(UNIT_ID, 107, 2);
+			var bytes = protocol.SerializeReadInputRegisters(UNIT_ID, 19, 19);
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(8, bytes.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, bytes[0]);
-
-			//    Function code
-			Assert.AreEqual(0x04, bytes[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, bytes[2]);
-			Assert.AreEqual(0x6B, bytes[3]);
-			//    Quantity
-			Assert.AreEqual(0x00, bytes[4]);
-			Assert.AreEqual(0x02, bytes[5]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, bytes.ToArray());
 		}
 
 		[DataTestMethod]
 		[DataRow(0)]
-		[DataRow(126)]
+		[DataRow(2001)]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadInputRegisters(int count)
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadInputRegisters(UNIT_ID, 19, (ushort)count);
@@ -352,7 +334,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadInputRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadInputRegisters(UNIT_ID, ushort.MaxValue, 2);
@@ -364,10 +346,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldDeserializeReadInputRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0404022B0064";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			var registers = protocol.DeserializeReadInputRegisters([UNIT_ID, 0x04, 0x04, 0x02, 0x2B, 0x00, 0x64, 0x00, 0x00]);
+			var registers = protocol.DeserializeReadInputRegisters(responseBytes);
 
 			// Assert
 			Assert.IsNotNull(registers);
@@ -385,10 +371,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowExceptionOnDeserializeReadInputRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0404022B";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.DeserializeReadInputRegisters([UNIT_ID, 0x04, 0x04, 0x02, 0x2B, 0x00, 0x00]);
+			protocol.DeserializeReadInputRegisters(responseBytes);
 
 			// Assert - ModbusException
 		}
@@ -405,31 +395,18 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeReadDeviceIdentification(ModbusDeviceIdentificationCategory category)
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			string expectedResponse = $":{UNIT_ID:X2}2B0E{(byte)category:X2}{(byte)ModbusDeviceIdentificationObject.ProductCode:X2}";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var bytes = protocol.SerializeReadDeviceIdentification(UNIT_ID, category, ModbusDeviceIdentificationObject.ProductCode);
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(7, bytes.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, bytes[0]);
-
-			//    Function code
-			Assert.AreEqual(0x2B, bytes[1]);
-
-			//    MEI Type
-			Assert.AreEqual(0x0E, bytes[2]);
-
-			//    Category
-			Assert.AreEqual((byte)category, bytes[3]);
-
-			//    Object Id
-			Assert.AreEqual((byte)ModbusDeviceIdentificationObject.ProductCode, bytes[4]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, bytes.ToArray());
 		}
 
 		[TestMethod]
@@ -437,7 +414,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowOutOfRangeExceptionForCategoryOnSerializeReadDeviceIdentification()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeReadDeviceIdentification(UNIT_ID, (ModbusDeviceIdentificationCategory)10, ModbusDeviceIdentificationObject.ProductCode);
@@ -451,11 +428,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldDeserializeReadDeviceIdentification(bool moreAndIndividual)
 		{
 			// Arrange
-			byte[] response = [UNIT_ID, 0x2B, 0x0E, 0x02, (byte)(moreAndIndividual ? 0x82 : 0x02), (byte)(moreAndIndividual ? 0xFF : 0x00), (byte)(moreAndIndividual ? 0x05 : 0x00), 0x01, 0x04, 0x02, 0x41, 0x4D, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}2B0E02{(moreAndIndividual ? "82" : "02")}{(moreAndIndividual ? "FF" : "00")}{(moreAndIndividual ? "05" : "00")}010402414D";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			var result = protocol.DeserializeReadDeviceIdentification(response);
+			var result = protocol.DeserializeReadDeviceIdentification(responseBytes);
 
 			// Assert
 			Assert.IsNotNull(result);
@@ -473,11 +453,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowExceptionOnDeserializeReadDeviceIdentificationForMeiType()
 		{
 			// Arrange
-			byte[] response = [UNIT_ID, 0x2B, 0x0D, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}2B0D";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.DeserializeReadDeviceIdentification(response);
+			protocol.DeserializeReadDeviceIdentification(responseBytes);
 		}
 
 		[TestMethod]
@@ -485,11 +468,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowExceptionOnDeserializeReadDeviceIdentificationForCategory()
 		{
 			// Arrange
-			byte[] response = [UNIT_ID, 0x2B, 0x0E, 0x08, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}2B0E08";
+			AddTrailer(ref response);
+			byte[] responseBytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.DeserializeReadDeviceIdentification(response);
+			protocol.DeserializeReadDeviceIdentification(responseBytes);
 		}
 
 		#endregion Read Device Identification
@@ -500,31 +486,19 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeWriteSingleCoil()
 		{
 			// Arrange
+			string expectedResponse = $":{UNIT_ID:X2}05006DFF00";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
 			var coil = new Coil { Address = 109, Value = true };
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var result = protocol.SerializeWriteSingleCoil(UNIT_ID, coil);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(8, result.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, result[0]);
-
-			//    Function code
-			Assert.AreEqual(0x05, result[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, result[2]);
-			Assert.AreEqual(0x6D, result[3]);
-
-			//    Value
-			Assert.AreEqual(0xFF, result[4]);
-			Assert.AreEqual(0x00, result[5]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, result.ToArray());
 		}
 
 		[TestMethod]
@@ -532,7 +506,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowArgumentNullOnSerializeWriteSingleCoil()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteSingleCoil(UNIT_ID, null);
@@ -544,8 +518,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldDeserializeWriteSingleCoil()
 		{
 			// Arrange
-			byte[] bytes = [UNIT_ID, 0x05, 0x01, 0x0A, 0xFF, 0x00, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}05010AFF00";
+			AddTrailer(ref response);
+			byte[] bytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var coil = protocol.DeserializeWriteSingleCoil(bytes);
@@ -564,31 +541,19 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeWriteSingleHoldingRegister()
 		{
 			// Arrange
+			string expectedResponse = $":{UNIT_ID:X2}06006D007B";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
 			var register = new HoldingRegister { Address = 109, Value = 123 };
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var result = protocol.SerializeWriteSingleHoldingRegister(UNIT_ID, register);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(8, result.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, result[0]);
-
-			//    Function code
-			Assert.AreEqual(0x06, result[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, result[2]);
-			Assert.AreEqual(0x6D, result[3]);
-
-			//    Value
-			Assert.AreEqual(0x00, result[4]);
-			Assert.AreEqual(0x7B, result[5]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, result.ToArray());
 		}
 
 		[TestMethod]
@@ -596,7 +561,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowArgumentNullOnSerializeWriteSingleHoldingRegister()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteSingleHoldingRegister(UNIT_ID, null);
@@ -608,8 +573,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldDeserializeWriteSingleHoldingRegister()
 		{
 			// Arrange
-			byte[] bytes = [UNIT_ID, 0x06, 0x02, 0x02, 0x01, 0x23, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0602020123";
+			AddTrailer(ref response);
+			byte[] bytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var register = protocol.DeserializeWriteSingleHoldingRegister(bytes);
@@ -628,6 +596,10 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeWriteMultipleCoils()
 		{
 			// Arrange
+			string expectedResponse = $":{UNIT_ID:X2}0F000A00050115";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
 			var coils = new Coil[]
 			{
 				new() { Address = 10, Value = true },
@@ -636,36 +608,14 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 				new() { Address = 13, Value = false },
 				new() { Address = 14, Value = true },
 			};
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var result = protocol.SerializeWriteMultipleCoils(UNIT_ID, coils);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(10, result.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, result[0]);
-
-			//    Function code
-			Assert.AreEqual(0x0F, result[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, result[2]);
-			Assert.AreEqual(0x0A, result[3]);
-
-			//    Quantity
-			Assert.AreEqual(0x00, result[4]);
-			Assert.AreEqual(0x05, result[5]);
-
-			//    Byte count
-			Assert.AreEqual(0x01, result[6]);
-
-			//    Values
-			Assert.AreEqual(0x15, result[7]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, result.ToArray());
 		}
 
 		[TestMethod]
@@ -673,7 +623,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowArgumentNullOnSerializeWriteMultipleCoils()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleCoils(UNIT_ID, null);
@@ -692,7 +642,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			for (int i = 0; i < count; i++)
 				coils.Add(new() { Address = (ushort)i });
 
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleCoils(UNIT_ID, coils);
@@ -710,7 +660,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 				new() { Address = 10, Value = true },
 				new() { Address = 10, Value = false },
 			};
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleCoils(UNIT_ID, coils);
@@ -728,7 +678,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 				new() { Address = 10, Value = true },
 				new() { Address = 12, Value = false },
 			};
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleCoils(UNIT_ID, coils);
@@ -740,8 +690,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldDeserializeWriteMultipleCoils()
 		{
 			// Arrange
-			byte[] bytes = [UNIT_ID, 0x0F, 0x01, 0x0A, 0x00, 0x0B, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}0F010A000B";
+			AddTrailer(ref response);
+			byte[] bytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var (firstAddress, numberOfCoils) = protocol.DeserializeWriteMultipleCoils(bytes);
@@ -759,44 +712,23 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldSerializeWriteMultipleHoldingRegisters()
 		{
 			// Arrange
+			string expectedResponse = $":{UNIT_ID:X2}10000A000204000A000B";
+			AddTrailer(ref expectedResponse);
+			byte[] expectedBytes = Encoding.ASCII.GetBytes(expectedResponse);
+
 			var registers = new HoldingRegister[]
 			{
 				new() { Address = 10, Value = 10 },
 				new() { Address = 11, Value = 11 }
 			};
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var result = protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(13, result.Count);
-
-			//    Unit id
-			Assert.AreEqual(UNIT_ID, result[0]);
-
-			//    Function code
-			Assert.AreEqual(0x10, result[1]);
-
-			//    Starting address
-			Assert.AreEqual(0x00, result[2]);
-			Assert.AreEqual(0x0A, result[3]);
-
-			//    Quantity
-			Assert.AreEqual(0x00, result[4]);
-			Assert.AreEqual(0x02, result[5]);
-
-			//    Byte count
-			Assert.AreEqual(0x04, result[6]);
-
-			//    Values
-			Assert.AreEqual(0x00, result[7]);
-			Assert.AreEqual(0x0A, result[8]);
-			Assert.AreEqual(0x00, result[9]);
-			Assert.AreEqual(0x0B, result[10]);
-
-			// CRC check will be ignored
+			CollectionAssert.AreEqual(expectedBytes, result.ToArray());
 		}
 
 		[TestMethod]
@@ -804,7 +736,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowArgumentNullOnSerializeWriteMultipleHoldingRegisters()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, null);
@@ -823,7 +755,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			for (int i = 0; i < count; i++)
 				registers.Add(new() { Address = (ushort)i });
 
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers);
@@ -841,7 +773,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 				new() { Address = 10 },
 				new() { Address = 10 },
 			};
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers);
@@ -859,7 +791,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 				new() { Address = 10 },
 				new() { Address = 12 },
 			};
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers);
@@ -871,8 +803,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldDeserializeWriteMultipleHoldingRegisters()
 		{
 			// Arrange
-			byte[] bytes = [UNIT_ID, 0x10, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			string response = $":{UNIT_ID:X2}10020A000A";
+			AddTrailer(ref response);
+			byte[] bytes = Encoding.ASCII.GetBytes(response);
+
+			var protocol = new AsciiProtocol();
 
 			// Act
 			var (firstAddress, numberOfCoils) = protocol.DeserializeWriteMultipleHoldingRegisters(bytes);
@@ -887,111 +822,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		#region Validation
 
 		[TestMethod]
-		public void ShouldReturnFalseForMinLengthOnCheckResponseComplete()
+		public void ShouldReturnTrueOnCheckResponseComplete()
 		{
 			// Arrange
-			byte[] bytes = [UNIT_ID, 0x01];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsFalse(complete);
-		}
-
-		[TestMethod]
-		public void ShouldReturnFalseForErrorOnCheckResponseComplete()
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, 0x81, 0x01, 0x00];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsFalse(complete);
-		}
-
-		[TestMethod]
-		public void ShouldReturnTrueForErrorOnCheckResponseComplete()
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, 0x81, 0x01, 0x00, 0x00];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsTrue(complete);
-		}
-
-		[DataTestMethod]
-		[DataRow(0x01)] // Read Coils
-		[DataRow(0x02)] // Read Discrete Inputs
-		[DataRow(0x03)] // Read Holding Registers
-		[DataRow(0x04)] // Read Input Registers
-		public void ShouldReturnFalseForMissingBytesOnReadFunctionsOnCheckResponseComplete(int functionCode)
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, (byte)functionCode, 0x01, 0x00, 0x00];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsFalse(complete);
-		}
-
-		[DataTestMethod]
-		[DataRow(0x01)] // Read Coils
-		[DataRow(0x02)] // Read Discrete Inputs
-		[DataRow(0x03)] // Read Holding Registers
-		[DataRow(0x04)] // Read Input Registers
-		public void ShouldReturnTrueOnReadFunctionsOnCheckResponseComplete(int functionCode)
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, (byte)functionCode, 0x01, 0x00, 0x12, 0x34];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsTrue(complete);
-		}
-
-		[DataTestMethod]
-		[DataRow(0x05)] // Write Single Coil
-		[DataRow(0x06)] // Write Single Register
-		[DataRow(0x0F)] // Write Multiple Coils
-		[DataRow(0x10)] // Write Multiple Registers
-		public void ShouldReturnFalseForMissingBytesOnWriteFunctionsOnCheckResponseComplete(int functionCode)
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, (byte)functionCode, 0x00, 0x10, 0xFF, 0x00, 0x00];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsFalse(complete);
-		}
-
-		[DataTestMethod]
-		[DataRow(0x05)] // Write Single Coil
-		[DataRow(0x06)] // Write Single Register
-		[DataRow(0x0F)] // Write Multiple Coils
-		[DataRow(0x10)] // Write Multiple Registers
-		public void ShouldReturnTrueOnWriteFunctionsOnCheckResponseComplete(int functionCode)
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, (byte)functionCode, 0x00, 0x10, 0xFF, 0x00, 0x12, 0x34];
-			var protocol = new RtuProtocol();
+			byte[] bytes = Encoding.ASCII.GetBytes($":{UNIT_ID:X2}0100050002XX\r\n");
+			var protocol = new AsciiProtocol();
 
 			// Act
 			bool complete = protocol.CheckResponseComplete(bytes);
@@ -1001,11 +836,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		public void ShouldReturnFalseForMissingBytesOnReadDeviceIdentificationOnCheckResponseComplete()
+		public void ShouldReturnFalseForLessBytesOnCheckResponseComplete()
 		{
 			// Arrange
-			byte[] bytes = [UNIT_ID, 0x2B, 0x0E, 0x01, 0x81, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			byte[] bytes = Encoding.ASCII.GetBytes(":\r");
+			var protocol = new AsciiProtocol();
 
 			// Act
 			bool complete = protocol.CheckResponseComplete(bytes);
@@ -1015,59 +850,17 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		public void ShouldReturnFalseForMissingCrcOnReadDeviceIdentificationOnCheckResponseComplete()
+		public void ShouldReturnFalseForMissingCrLfOnCheckResponseComplete()
 		{
 			// Arrange
-			byte[] bytes = [UNIT_ID, 0x2B, 0x0E, 0x01, 0x81, 0x00, 0x00, 0x00];
-			var protocol = new RtuProtocol();
+			byte[] bytes = Encoding.ASCII.GetBytes($":{UNIT_ID:X2}0100050002XX");
+			var protocol = new AsciiProtocol();
 
 			// Act
 			bool complete = protocol.CheckResponseComplete(bytes);
 
 			// Assert
 			Assert.IsFalse(complete);
-		}
-
-		[TestMethod]
-		public void ShouldReturnTrueOnReadDeviceIdentificationForZeroObjectsOnCheckResponseComplete()
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, 0x2B, 0x0E, 0x01, 0x81, 0x00, 0x00, 0x00, 0x12, 0x34];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsTrue(complete);
-		}
-
-		[TestMethod]
-		public void ShouldReturnFalseOnMissingBytesForDeviceIdentificationOnCheckResponseComplete()
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, 0x2B, 0x0E, 0x01, 0x81, 0x00, 0x00, 0x02, 0x00, 0x02, 0x55, 0x66];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsFalse(complete);
-		}
-
-		[TestMethod]
-		public void ShouldReturnTrueForDeviceIdentificationOnCheckResponseComplete()
-		{
-			// Arrange
-			byte[] bytes = [UNIT_ID, 0x2B, 0x0E, 0x01, 0x81, 0x00, 0x00, 0x02, 0x00, 0x02, 0x55, 0x66, 0x01, 0x01, 0x77, 0x12, 0x34];
-			var protocol = new RtuProtocol();
-
-			// Act
-			bool complete = protocol.CheckResponseComplete(bytes);
-
-			// Assert
-			Assert.IsTrue(complete);
 		}
 
 		[DataTestMethod]
@@ -1078,13 +871,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldValidateReadResponse(int fn)
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, (byte)fn, 0x00, 0x01, 0x00, 0x02]; // CRC missing, OK
-			byte[] response = [UNIT_ID, (byte)fn, 0x01, 0x00, 0x00, 0x00];
-			SetCrc(response);
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}{fn:X2}00010001";
+			string response = $":{UNIT_ID:X2}{fn:X2}0100";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
 		[DataTestMethod]
@@ -1095,13 +888,40 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldValidateWriteResponse(int fn)
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, (byte)fn, 0x00, 0x01, 0xFF, 0x00]; // CRC missing, OK
-			byte[] response = [UNIT_ID, (byte)fn, 0x00, 0x01, 0xFF, 0x00, 0x00, 0x00];
-			SetCrc(response);
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}{fn:X2}0001FF00";
+			string response = $":{UNIT_ID:X2}{fn:X2}0001FF00";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ModbusException))]
+		public void ShouldThrowForMissingHeaderOnValidateResponse()
+		{
+			// Arrange
+			string request = $":{UNIT_ID:X2}0100010001";
+			string response = $"{UNIT_ID:X2}0101009";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
+
+			// Act
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ModbusException))]
+		public void ShouldThrowForMissingTrailerOnValidateResponse()
+		{
+			// Arrange
+			string request = $":{UNIT_ID:X2}0100010001";
+			string response = $":{UNIT_ID:X2}010100";
+			var protocol = new AsciiProtocol();
+
+			// Act
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
 		[TestMethod]
@@ -1109,28 +929,26 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowForUnitIdOnValidateResponse()
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, 0x01, 0x00, 0x01, 0x00, 0x02]; // CRC missing, OK
-			byte[] response = [UNIT_ID + 1, 0x01, 0x01, 0x00, 0x00, 0x00];
-			SetCrc(response);
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}010001FF00";
+			string response = $":{UNIT_ID + 1:X2}010001FF00";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
-		[DataTestMethod]
-		[DataRow(0x57, 0x6C)]
-		[DataRow(0x58, 0x6B)]
+		[TestMethod]
 		[ExpectedException(typeof(ModbusException))]
-		public void ShouldThrowForCrcOnValidateResponse(int hi, int lo)
+		public void ShouldThrowForLrcOnValidateResponse()
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, 0x01, 0x00, 0x01, 0x00, 0x02]; // CRC missing, OK
-			byte[] response = [UNIT_ID, 0x01, 0x01, 0x00, (byte)hi, (byte)lo];
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}010001FF00";
+			string response = $":{UNIT_ID:X2}010001FF00XX\r\n";
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
 		[TestMethod]
@@ -1138,13 +956,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowForFunctionCodeOnValidateResponse()
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, 0x01, 0x00, 0x01, 0x00, 0x02]; // CRC missing, OK
-			byte[] response = [UNIT_ID, 0x02, 0x01, 0x00, 0x00, 0x00];
-			SetCrc(response);
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}010001FF00";
+			string response = $":{UNIT_ID:X2}020001FF00";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
 		[TestMethod]
@@ -1152,13 +970,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowForErrorOnValidateResponse()
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, 0x01, 0x00, 0x01, 0x00, 0x02]; // CRC missing, OK
-			byte[] response = [UNIT_ID, 0x81, 0x01, 0x00, 0x00];
-			SetCrc(response);
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}010001FF00";
+			string response = $":{UNIT_ID:X2}8101";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
 		[DataTestMethod]
@@ -1170,13 +988,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowForReadLengthOnValidateResponse(int fn)
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, (byte)fn, 0x00, 0x01, 0x00, 0x02]; // CRC missing, OK
-			byte[] response = [UNIT_ID, (byte)fn, 0xFF, 0x00, 0x00, 0x00, 0x00];
-			SetCrc(response);
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}{fn:X2}00010002";
+			string response = $":{UNIT_ID:X2}{fn:X2}FF0000";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
 		[DataTestMethod]
@@ -1188,94 +1006,107 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		public void ShouldThrowForWriteLengthOnValidateResponse(int fn)
 		{
 			// Arrange
-			byte[] request = [UNIT_ID, (byte)fn, 0x00, 0x01, 0x00, 0x02]; // CRC missing, OK
-			byte[] response = [UNIT_ID, (byte)fn, 0x00, 0x13, 0x00, 0x02, 0x00, 0x00, 0x00];
-			SetCrc(response);
-			var protocol = new RtuProtocol();
+			string request = $":{UNIT_ID:X2}{fn:X2}00010002";
+			string response = $":{UNIT_ID:X2}{fn:X2}0013000200";
+			AddTrailer(ref response);
+			var protocol = new AsciiProtocol();
 
 			// Act
-			protocol.ValidateResponse(request, response);
+			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
 		}
 
 		[TestMethod]
-		public void ShouldReturnValidCrc16()
+		public void ShouldReturnValidLrc()
 		{
-			// This is the example of the spec, page 41.
-
 			// Arrange
-			byte[] bytes = [0x02, 0x07];
+			string msg = "0207";
 
 			// Act
-			byte[] crc = RtuProtocol.CRC16(bytes);
+			string lrc = AsciiProtocol.LRC(msg, 0, 4);
 
 			// Assert
-			Assert.AreEqual(2, crc.Length);
-			Assert.AreEqual(0x41, crc[0]);
-			Assert.AreEqual(0x12, crc[1]);
+			Assert.AreEqual("F7", lrc);
 		}
 
 		[DataTestMethod]
 		[DataRow(null)]
-		[DataRow(new byte[0])]
+		[DataRow("")]
+		[DataRow("     ")]
+		[DataRow("\t")]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void ShuldThrowArgumentNullExceptionForBytesOnCrc16(byte[] bytes)
+		public void ShouldThrowArgumentNullExceptionForMessageOnLrc(string msg)
 		{
+			// Arrange
+
 			// Act
-			_ = RtuProtocol.CRC16(bytes);
+			AsciiProtocol.LRC(msg);
 
 			// Assert - ArgumentNullException
 		}
 
 		[DataTestMethod]
 		[DataRow(-1)]
-		[DataRow(10)]
+		[DataRow(4)]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void ShouldThrowArgumentOutOfRangeForStartOnCrc16(int start)
+		public void ShouldThrowArgumentOutOfRangeExceptionForStartOnLrc(int start)
 		{
 			// Arrange
-			byte[] bytes = Encoding.UTF8.GetBytes("0123456789");
+			string msg = "0207";
 
 			// Act
-			_ = RtuProtocol.CRC16(bytes, start);
+			AsciiProtocol.LRC(msg, start);
 
 			// Assert - ArgumentOutOfRangeException
 		}
 
 		[DataTestMethod]
 		[DataRow(0)]
-		[DataRow(11)]
+		[DataRow(5)]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void ShouldThrowArgumentOutOfRangeForLengthOnCrc16(int length)
+		public void ShouldThrowArgumentOutOfRangeExceptionForLengthOnLrc(int length)
 		{
 			// Arrange
-			byte[] bytes = Encoding.UTF8.GetBytes("0123456789");
+			string msg = "0207";
 
 			// Act
-			_ = RtuProtocol.CRC16(bytes, 0, length);
+			AsciiProtocol.LRC(msg, 0, length);
 
 			// Assert - ArgumentOutOfRangeException
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ShouldThrowArgumentExceptionForMessageLengthOnLrc()
+		{
+			// Arrange
+			string msg = "0207";
+
+			// Act
+			AsciiProtocol.LRC(msg);
+
+			// Assert - ArgumentException
 		}
 
 		#endregion Validation
 
 		[TestMethod]
-		public void ShouldNameRtu()
+		public void ShouldNameAscii()
 		{
 			// Arrange
-			var protocol = new RtuProtocol();
+			var protocol = new AsciiProtocol();
 
 			// Act
 			string result = protocol.Name;
 
 			// Assert
-			Assert.AreEqual("RTU", result);
+			Assert.AreEqual("ASCII", result);
 		}
 
-		private static void SetCrc(byte[] bytes)
+		private static void AddTrailer(ref string str)
 		{
-			byte[] crc = RtuProtocol.CRC16(bytes, 0, bytes.Length - 2);
-			bytes[^2] = crc[0];
-			bytes[^1] = crc[1];
+			string lrc = AsciiProtocol.LRC(str);
+			str += lrc;
+			str += "\r\n";
 		}
 	}
 }

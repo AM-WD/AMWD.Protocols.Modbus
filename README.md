@@ -34,7 +34,8 @@ It uses a specific TCP connection implementation and plugs all things from the C
 
 ---
 
-Published under [MIT License] (see [**tl;dr**Legal])
+Published under [MIT License] (see [**tl;dr**Legal])    
+[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com)
 
 
 

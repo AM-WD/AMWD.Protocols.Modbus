@@ -91,8 +91,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			byte[] request = new byte[12];
 
-			byte[] header = GetHeader(unitId, 6);
+			byte[] header = GetHeader(6);
 			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Unit id
+			request[6] = unitId;
 
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.ReadCoils;
@@ -146,8 +149,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			byte[] request = new byte[12];
 
-			byte[] header = GetHeader(unitId, 6);
+			byte[] header = GetHeader(6);
 			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Unit id
+			request[6] = unitId;
 
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.ReadDiscreteInputs;
@@ -201,8 +207,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			byte[] request = new byte[12];
 
-			byte[] header = GetHeader(unitId, 6);
+			byte[] header = GetHeader(6);
 			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Unit id
+			request[6] = unitId;
 
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.ReadHoldingRegisters;
@@ -253,8 +262,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			byte[] request = new byte[12];
 
-			byte[] header = GetHeader(unitId, 6);
+			byte[] header = GetHeader(6);
 			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Unit id
+			request[6] = unitId;
 
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.ReadInputRegisters;
@@ -302,8 +314,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			byte[] request = new byte[11];
 
-			byte[] header = GetHeader(unitId, 5);
+			byte[] header = GetHeader(5);
 			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Unit id
+			request[6] = unitId;
 
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.EncapsulatedInterface;
@@ -365,8 +380,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			byte[] request = new byte[12];
 
-			byte[] header = GetHeader(unitId, 6);
+			byte[] header = GetHeader(6);
 			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Unit id
+			request[6] = unitId;
 
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.WriteSingleCoil;
@@ -404,8 +422,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			byte[] request = new byte[12];
 
-			byte[] header = GetHeader(unitId, 6);
+			byte[] header = GetHeader(6);
 			Array.Copy(header, 0, request, 0, header.Length);
+
+			// Unit id
+			request[6] = unitId;
 
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.WriteSingleRegister;
@@ -458,21 +479,29 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			byte byteCount = (byte)Math.Ceiling(orderedList.Count / 8.0);
 			byte[] request = new byte[13 + byteCount];
 
-			byte[] header = GetHeader(unitId, byteCount + 7);
+			byte[] header = GetHeader(byteCount + 7);
 			Array.Copy(header, 0, request, 0, header.Length);
 
+			// Unit id
+			request[6] = unitId;
+
+			// Function code
 			request[7] = (byte)ModbusFunctionCode.WriteMultipleCoils;
 
+			// Starting address
 			byte[] addrBytes = firstAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
+			// Quantity
 			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
+			// Byte count
 			request[12] = byteCount;
 
+			// Coils
 			int baseOffset = 13;
 			for (int i = 0; i < orderedList.Count; i++)
 			{
@@ -525,21 +554,29 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			byte byteCount = (byte)(orderedList.Count * 2);
 			byte[] request = new byte[13 + byteCount];
 
-			byte[] header = GetHeader(unitId, byteCount + 7);
+			byte[] header = GetHeader(byteCount + 7);
 			Array.Copy(header, 0, request, 0, header.Length);
 
+			// Unit id
+			request[6] = unitId;
+
+			// Function code
 			request[7] = (byte)ModbusFunctionCode.WriteMultipleRegisters;
 
+			// Starting address
 			byte[] addrBytes = firstAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
+			// Quantity
 			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
+			// Byte count
 			request[12] = byteCount;
 
+			// Registers
 			int baseOffset = 13;
 			for (int i = 0; i < orderedList.Count; i++)
 			{
@@ -633,15 +670,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <summary>
 		/// Generates the header for a Modbus request.
 		/// </summary>
-		/// <param name="unitId">The unit identifier.</param>
 		/// <param name="followingBytes">The number of following bytes.</param>
-		/// <returns>The header ready to copy to the request bytes.</returns>
-		/// <remarks>
-		/// <strong>ATTENTION:</strong> Do not forget the <paramref name="unitId"/>. It is placed after the count information.
-		/// </remarks>
-		private byte[] GetHeader(byte unitId, int followingBytes)
+		/// <returns>The header ready to copy to the request bytes (6 bytes).</returns>
+		private byte[] GetHeader(int followingBytes)
 		{
-			byte[] header = new byte[7];
+			byte[] header = new byte[6];
 
 			// Transaction id
 			ushort txId = GetNextTransacitonId();
@@ -657,9 +690,6 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			byte[] countBytes = ((ushort)followingBytes).ToBigEndianBytes();
 			header[4] = countBytes[0];
 			header[5] = countBytes[1];
-
-			// Unit identifier
-			header[6] = unitId;
 
 			return header;
 		}
