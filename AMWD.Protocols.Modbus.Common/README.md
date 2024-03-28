@@ -58,7 +58,7 @@ Here you have the specific default implementations for the Modbus Protocol.
 
 - ASCII
 - RTU
-- RTU over TCP _(in progress)_
+- RTU over TCP
 - TCP
 
 **NOTE:**    
