@@ -17,6 +17,7 @@
     <Compile Include="../AMWD.Protocols.Modbus.Common/InternalsVisibleTo.cs" Link="InternalsVisibleTo.cs" />
     <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
     <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ReaderWriterLockSlimExtensions.cs" Link="Extensions/ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Utils/AsyncQueue.cs" Link="Utils/AsyncQueue.cs" />
   </ItemGroup>
 
   <ItemGroup>

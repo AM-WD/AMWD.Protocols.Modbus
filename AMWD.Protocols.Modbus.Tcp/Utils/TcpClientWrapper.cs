@@ -10,7 +10,16 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	internal class TcpClientWrapper : IDisposable
 	{
+		#region Fields
+
 		private readonly TcpClient _client = new();
+
+		#endregion Fields
+
+		#region Properties
+
+		/// <inheritdoc cref="TcpClient.Connected" />
+		public virtual bool Connected => _client.Connected;
 
 		/// <inheritdoc cref="TcpClient.ReceiveTimeout" />
 		public virtual int ReceiveTimeout
@@ -26,15 +35,9 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 			set => _client.SendTimeout = value;
 		}
 
-		/// <inheritdoc cref="TcpClient.Connected" />
-		public virtual bool Connected => _client.Connected;
+		#endregion Properties
 
-		/// <inheritdoc cref="TcpClient.Client" />
-		public virtual SocketWrapper Client
-		{
-			get => new(_client.Client);
-			set => _client.Client = value.Client;
-		}
+		#region Methods
 
 		/// <inheritdoc cref="TcpClient.Close" />
 		public virtual void Close()
@@ -52,12 +55,18 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 
 #endif
 
+		/// <inheritdoc cref="TcpClient.GetStream" />
+		public virtual NetworkStreamWrapper GetStream()
+			=> new(_client.GetStream());
+
+		#endregion Methods
+
+		#region IDisposable
+
 		/// <inheritdoc cref="TcpClient.Dispose()" />
 		public virtual void Dispose()
 			=> _client.Dispose();
 
-		/// <inheritdoc cref="TcpClient.GetStream" />
-		public virtual NetworkStreamWrapper GetStream()
-			=> new(_client.GetStream());
+		#endregion IDisposable
 	}
 }

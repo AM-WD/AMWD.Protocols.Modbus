@@ -20,7 +20,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 		private Mock<IModbusProtocol> _protocol;
 
 		// Responses
-		private bool _connectionIsConnectecd;
 		private List<Coil> _readCoilsResponse;
 		private List<DiscreteInput> _readDiscreteInputsResponse;
 		private List<HoldingRegister> _readHoldingRegistersResponse;
@@ -35,8 +34,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 		[TestInitialize]
 		public void Initialize()
 		{
-			_connectionIsConnectecd = true;
-
 			_readCoilsResponse = [];
 			_readDiscreteInputsResponse = [];
 			_readHoldingRegistersResponse = [];
@@ -75,13 +72,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 				MoreRequestsNeeded = false,
 				NextObjectIdToRequest = 0x00,
 			};
-			_firstDeviceIdentificationResponse.Objects.Add(0x00, Encoding.ASCII.GetBytes("AM.WD"));
-			_firstDeviceIdentificationResponse.Objects.Add(0x01, Encoding.ASCII.GetBytes("AMWD-MB"));
-			_firstDeviceIdentificationResponse.Objects.Add(0x02, Encoding.ASCII.GetBytes("1.2.3"));
-			_firstDeviceIdentificationResponse.Objects.Add(0x03, Encoding.ASCII.GetBytes("https://github.com/AM-WD/AMWD.Protocols.Modbus"));
-			_firstDeviceIdentificationResponse.Objects.Add(0x04, Encoding.ASCII.GetBytes("AM.WD Modbus Library"));
-			_firstDeviceIdentificationResponse.Objects.Add(0x05, Encoding.ASCII.GetBytes("UnitTests"));
-			_firstDeviceIdentificationResponse.Objects.Add(0x06, Encoding.ASCII.GetBytes("Modbus Client Base Unit Test"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x00, Encoding.UTF8.GetBytes("AM.WD"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x01, Encoding.UTF8.GetBytes("AMWD-MB"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x02, Encoding.UTF8.GetBytes("1.2.3"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x03, Encoding.UTF8.GetBytes("https://github.com/AM-WD/AMWD.Protocols.Modbus"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x04, Encoding.UTF8.GetBytes("AM.WD Modbus Library"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x05, Encoding.UTF8.GetBytes("UnitTests"));
+			_firstDeviceIdentificationResponse.Objects.Add(0x06, Encoding.UTF8.GetBytes("Modbus Client Base Unit Test"));
 
 			_deviceIdentificationResponseQueue = new Queue<DeviceIdentificationRaw>();
 			_deviceIdentificationResponseQueue.Enqueue(_firstDeviceIdentificationResponse);
@@ -119,38 +116,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			new ModbusClientBaseWrapper(connection);
 
 			// Assert - ArgumentNullException
-		}
-
-		[TestMethod]
-		public async Task ShouldConnectSuccessfully()
-		{
-			// Arrange
-			var client = GetClient();
-
-			// Act
-			await client.ConnectAsync();
-
-			// Assert
-			_connection.Verify(c => c.ConnectAsync(It.IsAny<CancellationToken>()), Times.Once);
-			_connection.VerifyNoOtherCalls();
-
-			_protocol.VerifyNoOtherCalls();
-		}
-
-		[TestMethod]
-		public async Task ShouldDisconnectSuccessfully()
-		{
-			// Arrange
-			var client = GetClient();
-
-			// Act
-			await client.DisconnectAsync();
-
-			// Assert
-			_connection.Verify(c => c.DisconnectAsync(It.IsAny<CancellationToken>()), Times.Once);
-			_connection.VerifyNoOtherCalls();
-
-			_protocol.VerifyNoOtherCalls();
 		}
 
 		[DataTestMethod]
@@ -218,20 +183,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert - ArgumentNullException
 		}
 
-		[TestMethod]
-		[ExpectedException(typeof(ApplicationException))]
-		public async Task ShouldAssertConnected()
-		{
-			// Arrange
-			_connectionIsConnectecd = false;
-			var client = GetClient();
-
-			// Act
-			await client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT);
-
-			// Assert - ApplicationException
-		}
-
 		#endregion Common/Connection/Assertions
 
 		#region Read
@@ -256,7 +207,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 				Assert.AreEqual(i % 2 == 0, result[i].Value);
 			}
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -286,7 +236,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 				Assert.AreEqual(i % 2 == 1, result[i].Value);
 			}
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -315,7 +264,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 				Assert.AreEqual(i + 10, result[i].Value);
 			}
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -344,7 +292,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 				Assert.AreEqual(i + 15, result[i].Value);
 			}
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -376,7 +323,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 
 			Assert.AreEqual(0, result.ExtendedObjects.Count);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -422,7 +368,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			Assert.AreEqual(0x07, result.ExtendedObjects.First().Key);
 			CollectionAssert.AreEqual(new byte[] { 0x01, 0x02, 0x03 }, result.ExtendedObjects.First().Value);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
 			_connection.VerifyNoOtherCalls();
 
@@ -454,7 +399,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsTrue(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -481,7 +425,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -508,7 +451,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -535,7 +477,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsTrue(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -562,7 +503,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -589,7 +529,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -620,7 +559,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsTrue(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -652,7 +590,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -684,7 +621,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -715,7 +651,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsTrue(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -747,7 +682,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -779,7 +713,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			// Assert
 			Assert.IsFalse(result);
 
-			_connection.VerifyGet(c => c.IsConnected, Times.Once);
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
 
@@ -797,9 +730,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			_connection
 				.SetupGet(c => c.Name)
 				.Returns("Mock");
-			_connection
-				.SetupGet(c => c.IsConnected)
-				.Returns(() => _connectionIsConnectecd);
 
 			_protocol = new Mock<IModbusProtocol>();
 			_protocol

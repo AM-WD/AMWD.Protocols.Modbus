@@ -21,6 +21,7 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 			_stream = stream;
 		}
 
+		/// <inheritdoc cref="NetworkStream.Dispose" />
 		public virtual void Dispose()
 			=> _stream.Dispose();
 

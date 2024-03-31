@@ -6,7 +6,8 @@ This package contains all basic tools to build your own clients.
 
 **IModbusConnection**    
 This is the interface used on the base client to communicate with the remote device.
-If you want to use a custom connection type, you should implement this interface yourself.
+If you want to use a custom connection type, you should implement this interface yourself.    
+The `IModbusConnection` is responsible to open and close the data channel in the background.
 
 **IModbusProtocol**    
 If you want to speak a custom type of protocol with the clients, you can implement this interface.

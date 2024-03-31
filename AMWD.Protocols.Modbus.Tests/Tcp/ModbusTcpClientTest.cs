@@ -19,8 +19,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_tcpConnectionMock.Setup(c => c.Port).Returns(502);
 			_tcpConnectionMock.Setup(c => c.ReadTimeout).Returns(TimeSpan.FromSeconds(10));
 			_tcpConnectionMock.Setup(c => c.WriteTimeout).Returns(TimeSpan.FromSeconds(20));
-			_tcpConnectionMock.Setup(c => c.ReconnectTimeout).Returns(TimeSpan.FromSeconds(30));
-			_tcpConnectionMock.Setup(c => c.KeepAliveInterval).Returns(TimeSpan.FromSeconds(40));
+			_tcpConnectionMock.Setup(c => c.ConnectTimeout).Returns(TimeSpan.FromSeconds(30));
+			_tcpConnectionMock.Setup(c => c.IdleTimeout).Returns(TimeSpan.FromSeconds(40));
 		}
 
 		[TestMethod]
@@ -35,7 +35,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			TimeSpan readTimeout = client.ReadTimeout;
 			TimeSpan writeTimeout = client.WriteTimeout;
 			TimeSpan reconnectTimeout = client.ReconnectTimeout;
-			TimeSpan keepAliveInterval = client.KeepAliveInterval;
+			TimeSpan idleTimeout = client.IdleTimeout;
 
 			// Assert
 			Assert.IsNull(hostname);
@@ -43,7 +43,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			Assert.AreEqual(TimeSpan.Zero, readTimeout);
 			Assert.AreEqual(TimeSpan.Zero, writeTimeout);
 			Assert.AreEqual(TimeSpan.Zero, reconnectTimeout);
-			Assert.AreEqual(TimeSpan.Zero, keepAliveInterval);
+			Assert.AreEqual(TimeSpan.Zero, idleTimeout);
 
 			_genericConnectionMock.VerifyNoOtherCalls();
 		}
@@ -60,7 +60,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			client.ReadTimeout = TimeSpan.FromSeconds(123);
 			client.WriteTimeout = TimeSpan.FromSeconds(456);
 			client.ReconnectTimeout = TimeSpan.FromSeconds(789);
-			client.KeepAliveInterval = TimeSpan.FromSeconds(321);
+			client.IdleTimeout = TimeSpan.FromSeconds(321);
 
 			// Assert
 			_genericConnectionMock.VerifyNoOtherCalls();
@@ -78,7 +78,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			TimeSpan readTimeout = client.ReadTimeout;
 			TimeSpan writeTimeout = client.WriteTimeout;
 			TimeSpan reconnectTimeout = client.ReconnectTimeout;
-			TimeSpan keepAliveInterval = client.KeepAliveInterval;
+			TimeSpan keepAliveInterval = client.IdleTimeout;
 
 			// Assert
 			Assert.AreEqual("127.0.0.1", hostname);
@@ -92,8 +92,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_tcpConnectionMock.VerifyGet(c => c.Port, Times.Once);
 			_tcpConnectionMock.VerifyGet(c => c.ReadTimeout, Times.Once);
 			_tcpConnectionMock.VerifyGet(c => c.WriteTimeout, Times.Once);
-			_tcpConnectionMock.VerifyGet(c => c.ReconnectTimeout, Times.Once);
-			_tcpConnectionMock.VerifyGet(c => c.KeepAliveInterval, Times.Once);
+			_tcpConnectionMock.VerifyGet(c => c.ConnectTimeout, Times.Once);
+			_tcpConnectionMock.VerifyGet(c => c.IdleTimeout, Times.Once);
 			_tcpConnectionMock.VerifyNoOtherCalls();
 		}
 
@@ -109,15 +109,15 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			client.ReadTimeout = TimeSpan.FromSeconds(123);
 			client.WriteTimeout = TimeSpan.FromSeconds(456);
 			client.ReconnectTimeout = TimeSpan.FromSeconds(789);
-			client.KeepAliveInterval = TimeSpan.FromSeconds(321);
+			client.IdleTimeout = TimeSpan.FromSeconds(321);
 
 			// Assert
 			_tcpConnectionMock.VerifySet(c => c.Hostname = "localhost", Times.Once);
 			_tcpConnectionMock.VerifySet(c => c.Port = 205, Times.Once);
 			_tcpConnectionMock.VerifySet(c => c.ReadTimeout = TimeSpan.FromSeconds(123), Times.Once);
 			_tcpConnectionMock.VerifySet(c => c.WriteTimeout = TimeSpan.FromSeconds(456), Times.Once);
-			_tcpConnectionMock.VerifySet(c => c.ReconnectTimeout = TimeSpan.FromSeconds(789), Times.Once);
-			_tcpConnectionMock.VerifySet(c => c.KeepAliveInterval = TimeSpan.FromSeconds(321), Times.Once);
+			_tcpConnectionMock.VerifySet(c => c.ConnectTimeout = TimeSpan.FromSeconds(789), Times.Once);
+			_tcpConnectionMock.VerifySet(c => c.IdleTimeout = TimeSpan.FromSeconds(321), Times.Once);
 			_tcpConnectionMock.VerifyNoOtherCalls();
 		}
 	}

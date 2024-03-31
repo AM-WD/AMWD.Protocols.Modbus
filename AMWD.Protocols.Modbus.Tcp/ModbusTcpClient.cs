@@ -111,37 +111,37 @@ namespace AMWD.Protocols.Modbus.Tcp
 			}
 		}
 
-		/// <inheritdoc cref="ModbusTcpConnection.ReconnectTimeout"/>
+		/// <inheritdoc cref="ModbusTcpConnection.ConnectTimeout"/>
 		public TimeSpan ReconnectTimeout
 		{
 			get
 			{
 				if (connection is ModbusTcpConnection tcpConnection)
-					return tcpConnection.ReconnectTimeout;
+					return tcpConnection.ConnectTimeout;
 
 				return default;
 			}
 			set
 			{
 				if (connection is ModbusTcpConnection tcpConnection)
-					tcpConnection.ReconnectTimeout = value;
+					tcpConnection.ConnectTimeout = value;
 			}
 		}
 
-		/// <inheritdoc cref="ModbusTcpConnection.KeepAliveInterval"/>
-		public TimeSpan KeepAliveInterval
+		/// <inheritdoc cref="ModbusTcpConnection.IdleTimeout"/>
+		public TimeSpan IdleTimeout
 		{
 			get
 			{
 				if (connection is ModbusTcpConnection tcpConnection)
-					return tcpConnection.KeepAliveInterval;
+					return tcpConnection.IdleTimeout;
 
 				return default;
 			}
 			set
 			{
 				if (connection is ModbusTcpConnection tcpConnection)
-					tcpConnection.KeepAliveInterval = value;
+					tcpConnection.IdleTimeout = value;
 			}
 		}
 	}

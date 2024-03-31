@@ -47,39 +47,12 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		}
 
 		/// <summary>
-		/// Gets a value indicating whether the client is connected.
-		/// </summary>
-		public bool IsConnected => connection.IsConnected;
-
-		/// <summary>
 		/// Gets or sets the protocol type to use.
 		/// </summary>
 		/// <remarks>
 		/// The default protocol used by the client should be initialized in the constructor.
 		/// </remarks>
 		public abstract IModbusProtocol Protocol { get; set; }
-
-		/// <summary>
-		/// Starts the connection to the remote endpoint.
-		/// </summary>
-		/// <param name="cancellationToken">A cancellation token used to propagate notification that this operation should be canceled.</param>
-		/// <returns>An awaitable <see cref="Task"/>.</returns>
-		public virtual Task ConnectAsync(CancellationToken cancellationToken = default)
-		{
-			Assertions(false);
-			return connection.ConnectAsync(cancellationToken);
-		}
-
-		/// <summary>
-		/// Stops the connection to the remote endpoint.
-		/// </summary>
-		/// <param name="cancellationToken">A cancellation token used to propagate notification that this operation should be canceled.</param>
-		/// <returns>An awaitable <see cref="Task"/>.</returns>
-		public virtual Task DisconnectAsync(CancellationToken cancellationToken = default)
-		{
-			Assertions(false);
-			return connection.DisconnectAsync(cancellationToken);
-		}
 
 		/// <summary>
 		/// Reads multiple <see cref="Coil"/>s.
@@ -222,31 +195,31 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 					switch ((ModbusDeviceIdentificationObject)item.Key)
 					{
 						case ModbusDeviceIdentificationObject.VendorName:
-							devIdent.VendorName = Encoding.ASCII.GetString(item.Value);
+							devIdent.VendorName = Encoding.UTF8.GetString(item.Value);
 							break;
 
 						case ModbusDeviceIdentificationObject.ProductCode:
-							devIdent.ProductCode = Encoding.ASCII.GetString(item.Value);
+							devIdent.ProductCode = Encoding.UTF8.GetString(item.Value);
 							break;
 
 						case ModbusDeviceIdentificationObject.MajorMinorRevision:
-							devIdent.MajorMinorRevision = Encoding.ASCII.GetString(item.Value);
+							devIdent.MajorMinorRevision = Encoding.UTF8.GetString(item.Value);
 							break;
 
 						case ModbusDeviceIdentificationObject.VendorUrl:
-							devIdent.VendorUrl = Encoding.ASCII.GetString(item.Value);
+							devIdent.VendorUrl = Encoding.UTF8.GetString(item.Value);
 							break;
 
 						case ModbusDeviceIdentificationObject.ProductName:
-							devIdent.ProductName = Encoding.ASCII.GetString(item.Value);
+							devIdent.ProductName = Encoding.UTF8.GetString(item.Value);
 							break;
 
 						case ModbusDeviceIdentificationObject.ModelName:
-							devIdent.ModelName = Encoding.ASCII.GetString(item.Value);
+							devIdent.ModelName = Encoding.UTF8.GetString(item.Value);
 							break;
 
 						case ModbusDeviceIdentificationObject.UserApplicationName:
-							devIdent.UserApplicationName = Encoding.ASCII.GetString(item.Value);
+							devIdent.UserApplicationName = Encoding.UTF8.GetString(item.Value);
 							break;
 
 						default:
@@ -375,7 +348,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		/// <summary>
 		/// Performs basic assertions.
 		/// </summary>
-		protected virtual void Assertions(bool checkConnected = true)
+		protected virtual void Assertions()
 		{
 #if NET8_0_OR_GREATER
 			ObjectDisposedException.ThrowIf(_isDisposed, this);
@@ -390,12 +363,6 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			if (Protocol == null)
 				throw new ArgumentNullException(nameof(Protocol));
 #endif
-
-			if (!checkConnected)
-				return;
-
-			if (!IsConnected)
-				throw new ApplicationException($"Connection is not open");
 		}
 	}
 }

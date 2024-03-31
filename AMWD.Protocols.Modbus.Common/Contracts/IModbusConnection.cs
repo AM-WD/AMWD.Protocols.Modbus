@@ -16,23 +16,14 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		string Name { get; }
 
 		/// <summary>
-		/// Gets a value indicating whether the connection is open.
+		/// Gets or sets the idle time after that the connection is closed.
 		/// </summary>
-		bool IsConnected { get; }
-
-		/// <summary>
-		/// Opens the connection to the remote device.
-		/// </summary>
-		/// <param name="cancellationToken">A cancellation token used to propagate notification that this operation should be canceled.</param>
-		/// <returns>An awaitable <see cref="Task"/>.</returns>
-		Task ConnectAsync(CancellationToken cancellationToken = default);
-
-		/// <summary>
-		/// Closes the connection to the remote device.
-		/// </summary>
-		/// <param name="cancellationToken">A cancellation token used to propagate notification that this operation should be canceled.</param>
-		/// <returns>An awaitable <see cref="Task"/>.</returns>
-		Task DisconnectAsync(CancellationToken cancellationToken = default);
+		/// <remarks>
+		/// Set to <see cref="Timeout.InfiniteTimeSpan"/> to disable idle closing the connection.
+		/// <br/>
+		/// Set to <see cref="TimeSpan.Zero"/> to close the connection immediately after each request.
+		/// </remarks>
+		TimeSpan IdleTimeout { get; set; }
 
 		/// <summary>
 		/// Invokes a Modbus request.
