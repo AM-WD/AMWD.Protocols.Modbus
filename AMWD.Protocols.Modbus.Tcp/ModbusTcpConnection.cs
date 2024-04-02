@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Common.Protocols;
+using AMWD.Protocols.Modbus.Common.Utils;
 using AMWD.Protocols.Modbus.Tcp.Utils;
 
 namespace AMWD.Protocols.Modbus.Tcp
@@ -26,7 +27,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 		private readonly CancellationTokenSource _disposeCts = new();
 
 		private readonly SemaphoreSlim _clientLock = new(1, 1);
-		private readonly TcpClientWrapper _client = new();
+		private readonly TcpClientWrapper _tcpClient = new();
 		private readonly Timer _idleTimer;
 
 		private readonly Task _processingTask;
@@ -49,7 +50,24 @@ namespace AMWD.Protocols.Modbus.Tcp
 		public string Name => "TCP";
 
 		/// <inheritdoc/>
-		public  virtual TimeSpan IdleTimeout { get; set; } = TimeSpan.FromSeconds(6);
+		public virtual TimeSpan IdleTimeout { get; set; } = TimeSpan.FromSeconds(6);
+
+		/// <inheritdoc/>
+		public virtual TimeSpan ConnectTimeout { get; set; } = TimeSpan.MaxValue;
+
+		/// <inheritdoc/>
+		public virtual TimeSpan ReadTimeout
+		{
+			get => TimeSpan.FromMilliseconds(_tcpClient.ReceiveTimeout);
+			set => _tcpClient.ReceiveTimeout = (int)value.TotalMilliseconds;
+		}
+
+		/// <inheritdoc/>
+		public virtual TimeSpan WriteTimeout
+		{
+			get => TimeSpan.FromMilliseconds(_tcpClient.SendTimeout);
+			set => _tcpClient.SendTimeout = (int)value.TotalMilliseconds;
+		}
 
 		/// <summary>
 		/// The DNS name of the remote host to which the connection is intended to.
@@ -81,32 +99,11 @@ namespace AMWD.Protocols.Modbus.Tcp
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the receive time out value of the connection.
-		/// </summary>
-		public virtual TimeSpan ReadTimeout
-		{
-			get => TimeSpan.FromMilliseconds(_client.ReceiveTimeout);
-			set => _client.ReceiveTimeout = (int)value.TotalMilliseconds;
-		}
-
-		/// <summary>
-		/// Gets or sets the send time out value of the connection.
-		/// </summary>
-		public virtual TimeSpan WriteTimeout
-		{
-			get => TimeSpan.FromMilliseconds(_client.SendTimeout);
-			set => _client.SendTimeout = (int)value.TotalMilliseconds;
-		}
-
-		/// <summary>
-		/// Gets or sets the maximum time until the connect attempt is given up.
-		/// </summary>
-		public virtual TimeSpan ConnectTimeout { get; set; } = TimeSpan.MaxValue;
-
 		#endregion Properties
 
-		/// <inheritdoc/>
+		/// <summary>
+		/// Releases all managed and unmanaged resources used by the <see cref="ModbusTcpConnection"/>.
+		/// </summary>
 		public void Dispose()
 		{
 			if (_isDisposed)
@@ -127,7 +124,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 			OnIdleTimer(null);
 
-			_client.Dispose();
+			_tcpClient.Dispose();
 			_clientLock.Dispose();
 
 			while (_requestQueue.TryDequeue(out var item))
@@ -204,7 +201,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 						// Ensure connection is up
 						await AssertConnection(linkedCts.Token).ConfigureAwait(false);
 
-						var stream = _client.GetStream();
+						var stream = _tcpClient.GetStream();
 						await stream.FlushAsync(linkedCts.Token).ConfigureAwait(false);
 
 #if NET6_0_OR_GREATER
@@ -270,7 +267,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 		// Has to be called within _clientLock!
 		private async Task AssertConnection(CancellationToken cancellationToken)
 		{
-			if (_client.Connected)
+			if (_tcpClient.Connected)
 				return;
 
 			int delay = 1;
@@ -287,17 +284,17 @@ namespace AMWD.Protocols.Modbus.Tcp
 				{
 					foreach (var ipAddress in ipAddresses)
 					{
-						_client.Close();
+						_tcpClient.Close();
 
 #if NET6_0_OR_GREATER
-						using var connectTask = _client.ConnectAsync(ipAddress, Port, cancellationToken);
+						using var connectTask = _tcpClient.ConnectAsync(ipAddress, Port, cancellationToken);
 #else
-						using var connectTask = _client.ConnectAsync(ipAddress, Port);
+						using var connectTask = _tcpClient.ConnectAsync(ipAddress, Port);
 #endif
 						if (await Task.WhenAny(connectTask, Task.Delay(ReadTimeout, cancellationToken)) == connectTask)
 						{
 							await connectTask;
-							if (_client.Connected)
+							if (_tcpClient.Connected)
 								return;
 						}
 					}
@@ -327,10 +324,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 				_clientLock.Wait(_disposeCts.Token);
 				try
 				{
-					if (!_client.Connected)
+					if (!_tcpClient.Connected)
 						return;
 
-					_client.Close();
+					_tcpClient.Close();
 				}
 				finally
 				{

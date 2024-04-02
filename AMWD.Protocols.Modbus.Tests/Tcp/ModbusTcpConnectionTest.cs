@@ -4,7 +4,6 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Tcp;
 using AMWD.Protocols.Modbus.Tcp.Utils;
 using Moq;
@@ -528,18 +527,12 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				Port = 502
 			};
 
-			// Replace real TCP client with mock
-			var clientField = connection.GetType().GetField("_client", BindingFlags.NonPublic | BindingFlags.Instance);
-			(clientField.GetValue(connection) as TcpClientWrapper)?.Dispose();
-			clientField.SetValue(connection, _tcpClientMock.Object);
+			// Replace real connection with mock
+			var connectionField = connection.GetType().GetField("_tcpClient", BindingFlags.NonPublic | BindingFlags.Instance);
+			(connectionField.GetValue(connection) as TcpClientWrapper)?.Dispose();
+			connectionField.SetValue(connection, _tcpClientMock.Object);
 
 			return connection;
-		}
-
-		private void ClearInvocations()
-		{
-			_networkStreamMock.Invocations.Clear();
-			_tcpClientMock.Invocations.Clear();
 		}
 	}
 }

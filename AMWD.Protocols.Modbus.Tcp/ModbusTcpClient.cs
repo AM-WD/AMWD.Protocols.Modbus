@@ -27,7 +27,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 		{ }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ModbusClientBase"/> class with a specific <see cref="IModbusConnection"/>.
+		/// Initializes a new instance of the <see cref="ModbusTcpClient"/> class with a specific <see cref="IModbusConnection"/>.
 		/// </summary>
 		/// <param name="connection">The <see cref="IModbusConnection"/> responsible for invoking the requests.</param>
 		/// <param name="disposeConnection">
@@ -42,6 +42,34 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 		/// <inheritdoc/>
 		public override IModbusProtocol Protocol { get; set; }
+
+		/// <inheritdoc cref="IModbusConnection.IdleTimeout"/>
+		public TimeSpan IdleTimeout
+		{
+			get => connection.IdleTimeout;
+			set => connection.IdleTimeout = value;
+		}
+
+		/// <inheritdoc cref="IModbusConnection.ConnectTimeout"/>
+		public TimeSpan ConnectTimeout
+		{
+			get => connection.ConnectTimeout;
+			set => connection.ConnectTimeout = value;
+		}
+
+		/// <inheritdoc cref="IModbusConnection.ReadTimeout"/>
+		public TimeSpan ReadTimeout
+		{
+			get => connection.ReadTimeout;
+			set => connection.ReadTimeout = value;
+		}
+
+		/// <inheritdoc cref="IModbusConnection.WriteTimeout"/>
+		public TimeSpan WriteTimeout
+		{
+			get => connection.WriteTimeout;
+			set => connection.WriteTimeout = value;
+		}
 
 		/// <inheritdoc cref="ModbusTcpConnection.Hostname"/>
 		public string Hostname
@@ -74,74 +102,6 @@ namespace AMWD.Protocols.Modbus.Tcp
 			{
 				if (connection is ModbusTcpConnection tcpConnection)
 					tcpConnection.Port = value;
-			}
-		}
-
-		/// <inheritdoc cref="ModbusTcpConnection.ReadTimeout"/>
-		public TimeSpan ReadTimeout
-		{
-			get
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					return tcpConnection.ReadTimeout;
-
-				return default;
-			}
-			set
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					tcpConnection.ReadTimeout = value;
-			}
-		}
-
-		/// <inheritdoc cref="ModbusTcpConnection.WriteTimeout"/>
-		public TimeSpan WriteTimeout
-		{
-			get
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					return tcpConnection.WriteTimeout;
-
-				return default;
-			}
-			set
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					tcpConnection.WriteTimeout = value;
-			}
-		}
-
-		/// <inheritdoc cref="ModbusTcpConnection.ConnectTimeout"/>
-		public TimeSpan ReconnectTimeout
-		{
-			get
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					return tcpConnection.ConnectTimeout;
-
-				return default;
-			}
-			set
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					tcpConnection.ConnectTimeout = value;
-			}
-		}
-
-		/// <inheritdoc cref="ModbusTcpConnection.IdleTimeout"/>
-		public TimeSpan IdleTimeout
-		{
-			get
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					return tcpConnection.IdleTimeout;
-
-				return default;
-			}
-			set
-			{
-				if (connection is ModbusTcpConnection tcpConnection)
-					tcpConnection.IdleTimeout = value;
 			}
 		}
 	}

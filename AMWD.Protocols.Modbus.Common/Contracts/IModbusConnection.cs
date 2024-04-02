@@ -26,6 +26,21 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		TimeSpan IdleTimeout { get; set; }
 
 		/// <summary>
+		/// Gets or sets the maximum time until the connect attempt is given up.
+		/// </summary>
+		TimeSpan ConnectTimeout { get; set; }
+
+		/// <summary>
+		/// Gets or sets the receive time out value of the connection.
+		/// </summary>
+		TimeSpan ReadTimeout { get; set; }
+
+		/// <summary>
+		/// Gets or sets the send time out value of the connection.
+		/// </summary>
+		TimeSpan WriteTimeout { get; set; }
+
+		/// <summary>
 		/// Invokes a Modbus request.
 		/// </summary>
 		/// <param name="request">The Modbus request serialized in bytes.</param>

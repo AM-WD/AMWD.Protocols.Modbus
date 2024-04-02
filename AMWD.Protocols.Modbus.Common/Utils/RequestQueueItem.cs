@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AMWD.Protocols.Modbus.Tcp.Utils
+namespace AMWD.Protocols.Modbus.Common.Utils
 {
 	internal class RequestQueueItem
 	{
