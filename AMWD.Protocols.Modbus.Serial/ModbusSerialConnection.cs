@@ -90,7 +90,13 @@ namespace AMWD.Protocols.Modbus.Serial
 		/// <summary>
 		/// Gets or sets a wait-time between requests.
 		/// </summary>
-		public virtual TimeSpan InterRequestDelay { get; set; } = TimeSpan.Zero;
+		/// <remarks>
+		/// The specification says:
+		/// <br/>
+		/// For baud rates greater than 19.2k Bps, fixed values for the two timers should be used:
+		/// [...] a value of 1.750ms for inter-frame delay (t_3.5).
+		/// </remarks>
+		public virtual TimeSpan InterRequestDelay { get; set; } = TimeSpan.FromMilliseconds(1.75);
 
 		#region SerialPort Properties
 

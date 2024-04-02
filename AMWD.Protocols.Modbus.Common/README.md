@@ -14,7 +14,7 @@ If you want to speak a custom type of protocol with the clients, you can impleme
 
 **ModbusBaseClient**    
 This abstract base client contains all the basic methods and handlings required to communicate via Modbus Protocol.
-The packages `AMWD.Protocols.Modbus.Serial` _(in progress)_ and `AMWD.Protocols.Modbus.Tcp` have specific derived implementations to match the communication types.
+The packages `AMWD.Protocols.Modbus.Serial` and `AMWD.Protocols.Modbus.Tcp` have specific derived implementations to match the communication types.
 
 
 ### Enums
@@ -63,8 +63,8 @@ Here you have the specific default implementations for the Modbus Protocol.
 - TCP
 
 **NOTE:**    
-The implementations over serial line (RTU and ASCII) have a minimum unit ID of one (1) referring to the specification.
-This validation is _not_ implemented here due to real world experience, that some manufactures do not care about it.
+The implementations over serial line (RTU and ASCII) have a minimum unit ID of one (1) and maximum unit ID of 247 referring to the specification.
+This validation is _not_ implemented here due to real world experience, that some manufactures don't care about it.
 
 ---
 

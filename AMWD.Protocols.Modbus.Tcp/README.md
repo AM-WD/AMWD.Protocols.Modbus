@@ -20,7 +20,7 @@ ushort count = 2;
 var registers = await client.ReadHoldingRegistersAsync(unitId, startAddress, count);
 float voltage = registers.GetSingle();
 
-Console.WriteLine($"The voltage between L1 and N is: {voltage:N2}V");
+Console.WriteLine($"The voltage of device #{unitId} between L1 and N is: {voltage:N2}V");
 ```
 
 
