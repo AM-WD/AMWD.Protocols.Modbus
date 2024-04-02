@@ -31,12 +31,12 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		TimeSpan ConnectTimeout { get; set; }
 
 		/// <summary>
-		/// Gets or sets the receive time out value of the connection.
+		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a read/receive operation does not finish.
 		/// </summary>
 		TimeSpan ReadTimeout { get; set; }
 
 		/// <summary>
-		/// Gets or sets the send time out value of the connection.
+		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a write/send operation does not finish.
 		/// </summary>
 		TimeSpan WriteTimeout { get; set; }
 

@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AMWD.Protocols.Modbus.Common;
+using AMWD.Protocols.Modbus.Common.Events;
 using AMWD.Protocols.Modbus.Common.Models;
 using AMWD.Protocols.Modbus.Common.Protocols;
-using AMWD.Protocols.Modbus.Tcp.Events;
 
 namespace AMWD.Protocols.Modbus.Tcp
 {
@@ -45,8 +45,6 @@ namespace AMWD.Protocols.Modbus.Tcp
 		/// </summary>
 		/// <param name="listenAddress">An <see cref="IPAddress"/> to listen on (Default: <see cref="IPAddress.Loopback"/>).</param>
 		/// <param name="listenPort">A port to listen on (Default: 502).</param>
-		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		/// <exception cref="ArgumentException"></exception>
 		public ModbusTcpServer(IPAddress listenAddress = null, int listenPort = 502)
 		{
 			ListenAddress = listenAddress ?? IPAddress.Loopback;

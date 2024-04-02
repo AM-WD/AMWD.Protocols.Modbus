@@ -10,15 +10,39 @@
 
     <Product>Modbus RTU/ASCII Protocol</Product>
     <Description>Implementation of the Modbus protocol communicating via serial line using RTU or ASCII encoding.</Description>
-    <PackageTags>Modbus Protocol Serial Line RTU ASCII COM TTY</PackageTags>
+    <PackageTags>Modbus Protocol Serial Line RTU ASCII COM TTY USB</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../AMWD.Protocols.Modbus.Common/InternalsVisibleTo.cs" Link="InternalsVisibleTo.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ReaderWriterLockSlimExtensions.cs" Link="Extensions/ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Utils/AsyncQueue.cs" Link="Utils/AsyncQueue.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Utils/RequestQueueItem.cs" Link="Utils/RequestQueueItem.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.IO.Ports" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="System.IO.Ports" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>

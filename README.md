@@ -35,7 +35,8 @@ It uses a specific TCP connection implementation and plugs all things from the C
 ---
 
 Published under [MIT License] (see [**tl;dr**Legal])    
-[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com/profile/andreasmueller)
+[![Buy me a Coffee](https://shields.am-wd.de/badge/PayPal-Buy_me_a_Coffee-yellow?style=flat&logo=paypal)](https://link.am-wd.de/donate)
+[![built with Codeium](https://codeium.com/badges/main)](https://link.am-wd.de/codeium)
 
 
 
