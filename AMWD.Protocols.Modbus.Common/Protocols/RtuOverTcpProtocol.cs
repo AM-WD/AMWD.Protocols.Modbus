@@ -41,7 +41,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <remarks>
 		/// Reading the specification, the max allowed unit id would be <strong>247</strong>!
 		/// </remarks>
-		public const byte MAX_UNIT_ID = 0xFF;
+		public const byte MAX_UNIT_ID = 0xF7;
 
 		/// <summary>
 		/// The minimum allowed read count specified by the Modbus SerialLine protocol.

@@ -1,6 +1,4 @@
-﻿using AMWD.Protocols.Modbus.Common;
-
-namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
+﻿namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 {
 	[TestClass]
 	public class ModbusDecimalExtensionsTest
