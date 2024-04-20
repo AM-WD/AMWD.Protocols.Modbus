@@ -40,9 +40,6 @@ namespace AMWD.Protocols.Modbus.Tcp
 			Protocol = new TcpProtocol();
 		}
 
-		/// <inheritdoc/>
-		public override IModbusProtocol Protocol { get; set; }
-
 		/// <inheritdoc cref="IModbusConnection.IdleTimeout"/>
 		public TimeSpan IdleTimeout
 		{

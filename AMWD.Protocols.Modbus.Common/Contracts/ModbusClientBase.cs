@@ -52,7 +52,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		/// <remarks>
 		/// The default protocol used by the client should be initialized in the constructor.
 		/// </remarks>
-		public abstract IModbusProtocol Protocol { get; set; }
+		public virtual IModbusProtocol Protocol { get; set; }
 
 		/// <summary>
 		/// Reads multiple <see cref="Coil"/>s.

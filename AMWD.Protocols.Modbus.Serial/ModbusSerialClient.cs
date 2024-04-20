@@ -43,9 +43,6 @@ namespace AMWD.Protocols.Modbus.Serial
 		/// <inheritdoc cref="SerialPort.GetPortNames" />
 		public static string[] AvailablePortNames => SerialPort.GetPortNames();
 
-		/// <inheritdoc/>
-		public override IModbusProtocol Protocol { get; set; }
-
 		/// <inheritdoc cref="IModbusConnection.IdleTimeout"/>
 		public TimeSpan IdleTimeout
 		{
