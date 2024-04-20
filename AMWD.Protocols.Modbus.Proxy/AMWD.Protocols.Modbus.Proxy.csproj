@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
+    <LangVersion>12.0</LangVersion>
+
+    <PackageId>AMWD.Protocols.Modbus.Proxy</PackageId>
+    <AssemblyName>amwd-modbus-proxy</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.Proxy</RootNamespace>
+
+    <Product>Modbus Proxy Clients</Product>
+    <Description>Plugging Modbus Servers and Clients together to create Modbus Proxies.</Description>
+    <PackageTags>Modbus Protocol Proxy</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../AMWD.Protocols.Modbus.Common/InternalsVisibleTo.cs" Link="InternalsVisibleTo.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Tcp/Extensions/StreamExtensions.cs" Link="Extensions/StreamExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
+  </ItemGroup>
+
+</Project>

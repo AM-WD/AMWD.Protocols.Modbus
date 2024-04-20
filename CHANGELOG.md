@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `AMWD.Protocols.Modbus.Proxy` package, that contains the server implementations as proxies.
+
 ### Changed
 
 - Renamed `ModbusSerialServer` to `ModbusRtuServer` so clearify the protocol, that is used.
