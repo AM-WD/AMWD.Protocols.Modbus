@@ -1,69 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.IO.Ports;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AMWD.Protocols.Modbus.Common;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Common.Protocols;
+using AMWD.Protocols.Modbus.Serial;
 
 namespace AMWD.Protocols.Modbus.Proxy
 {
 	/// <summary>
-	/// Implements a Modbus TCP server proxying all requests to a Modbus client of choice.
+	/// Implements a Modbus serial line RTU server proxying all requests to a Modbus client of choice.
 	/// </summary>
-	public class ModbusTcpProxy : IDisposable
+	public class ModbusRtuProxy : IDisposable
 	{
 		#region Fields
 
 		private bool _isDisposed;
 
-		private TcpListener _listener;
+		private readonly SerialPort _serialPort;
 		private CancellationTokenSource _stopCts;
-		private Task _clientConnectTask = Task.CompletedTask;
-
-		private readonly SemaphoreSlim _clientListLock = new(1, 1);
-		private readonly List<TcpClient> _clients = [];
-		private readonly List<Task> _clientTasks = [];
 
 		#endregion Fields
 
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ModbusTcpProxy"/> class.
+		/// Initializes a new instance of the <see cref="ModbusRtuProxy"/> class.
 		/// </summary>
 		/// <param name="client">The <see cref="ModbusClientBase"/> used to request the remote device, that should be proxied.</param>
-		/// <param name="listenAddress">An <see cref="IPAddress"/> to listen on (Default: <see cref="IPAddress.Loopback"/>).</param>
-		/// <param name="listenPort">A port to listen on (Default: 502).</param>
-		public ModbusTcpProxy(ModbusClientBase client, IPAddress listenAddress = null, int listenPort = 502)
+		/// <param name="portName">The name of the serial port to use.</param>
+		/// <param name="baudRate">The baud rate of the serial port (Default: 19.200).</param>
+		public ModbusRtuProxy(ModbusClientBase client, string portName, BaudRate baudRate = BaudRate.Baud19200)
 		{
 			Client = client ?? throw new ArgumentNullException(nameof(client));
 
-			ListenAddress = listenAddress ?? IPAddress.Loopback;
+			if (string.IsNullOrWhiteSpace(portName))
+				throw new ArgumentNullException(nameof(portName));
 
-			if (ushort.MinValue < listenPort || listenPort < ushort.MaxValue)
-				throw new ArgumentOutOfRangeException(nameof(listenPort));
+			if (!Enum.IsDefined(typeof(BaudRate), baudRate))
+				throw new ArgumentOutOfRangeException(nameof(baudRate));
 
-			try
+			if (!ModbusSerialClient.AvailablePortNames.Contains(portName))
+				throw new ArgumentException($"The serial port ({portName}) is not available.", nameof(portName));
+
+			_serialPort = new SerialPort
 			{
-#if NET8_0_OR_GREATER
-				using var testListener = new TcpListener(ListenAddress, listenPort);
-#else
-				var testListener = new TcpListener(ListenAddress, listenPort);
-#endif
-				testListener.Start(1);
-				ListenPort = (testListener.LocalEndpoint as IPEndPoint).Port;
-				testListener.Stop();
-			}
-			catch (Exception ex)
-			{
-				throw new ArgumentException($"{nameof(ListenPort)} ({listenPort}) is already in use.", ex);
-			}
+				PortName = portName,
+				BaudRate = (int)baudRate,
+				Handshake = Handshake.None,
+				DataBits = 8,
+				ReadTimeout = 1000,
+				RtsEnable = false,
+				StopBits = StopBits.One,
+				WriteTimeout = 1000,
+				Parity = Parity.Even
+			};
 		}
 
 		#endregion Constructors
@@ -75,25 +70,73 @@ namespace AMWD.Protocols.Modbus.Proxy
 		/// </summary>
 		public ModbusClientBase Client { get; }
 
-		/// <summary>
-		/// Gets the <see cref="IPAddress"/> to listen on.
-		/// </summary>
-		public IPAddress ListenAddress { get; }
+		/// <inheritdoc cref="SerialPort.PortName"/>
+		public string PortName => _serialPort.PortName;
 
 		/// <summary>
-		/// Get the port to listen on.
+		/// Gets or sets the baud rate of the serial port.
 		/// </summary>
-		public int ListenPort { get; }
+		public BaudRate BaudRate
+		{
+			get => (BaudRate)_serialPort.BaudRate;
+			set => _serialPort.BaudRate = (int)value;
+		}
+
+		/// <inheritdoc cref="SerialPort.Handshake"/>
+		public Handshake Handshake
+		{
+			get => _serialPort.Handshake;
+			set => _serialPort.Handshake = value;
+		}
+
+		/// <inheritdoc cref="SerialPort.DataBits"/>
+		public int DataBits
+		{
+			get => _serialPort.DataBits;
+			set => _serialPort.DataBits = value;
+		}
+
+		/// <inheritdoc cref="SerialPort.IsOpen"/>
+		public bool IsOpen => _serialPort.IsOpen;
 
 		/// <summary>
-		/// Gets a value indicating whether the server is running.
+		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a read operation does not finish.
 		/// </summary>
-		public bool IsRunning => _listener?.Server.IsBound ?? false;
+		public TimeSpan ReadTimeout
+		{
+			get => TimeSpan.FromMilliseconds(_serialPort.ReadTimeout);
+			set => _serialPort.ReadTimeout = (int)value.TotalMilliseconds;
+		}
+
+		/// <inheritdoc cref="SerialPort.RtsEnable"/>
+		public bool RtsEnable
+		{
+			get => _serialPort.RtsEnable;
+			set => _serialPort.RtsEnable = value;
+		}
+
+		/// <inheritdoc cref="SerialPort.StopBits"/>
+		public StopBits StopBits
+		{
+			get => _serialPort.StopBits;
+			set => _serialPort.StopBits = value;
+		}
 
 		/// <summary>
-		/// Gets or sets the read/write timeout for the incoming connections (not the <see cref="Client"/>!).
+		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a write operation does not finish.
 		/// </summary>
-		public TimeSpan ReadWriteTimeout { get; set; }
+		public TimeSpan WriteTimeout
+		{
+			get => TimeSpan.FromMilliseconds(_serialPort.WriteTimeout);
+			set => _serialPort.WriteTimeout = (int)value.TotalMilliseconds;
+		}
+
+		/// <inheritdoc cref="SerialPort.Parity"/>
+		public Parity Parity
+		{
+			get => _serialPort.Parity;
+			set => _serialPort.Parity = value;
+		}
 
 		#endregion Properties
 
@@ -108,21 +151,14 @@ namespace AMWD.Protocols.Modbus.Proxy
 			Assertions();
 
 			_stopCts?.Cancel();
-
-			_listener?.Stop();
-#if NET8_0_OR_GREATER
-			_listener?.Dispose();
-#endif
+			_serialPort.Close();
+			_serialPort.DataReceived -= OnDataReceived;
 
 			_stopCts?.Dispose();
 			_stopCts = new CancellationTokenSource();
 
-			_listener = new TcpListener(ListenAddress, ListenPort);
-			if (ListenAddress.AddressFamily == AddressFamily.InterNetworkV6)
-				_listener.Server.DualMode = true;
-
-			_listener.Start();
-			_clientConnectTask = WaitForClientAsync(_stopCts.Token);
+			_serialPort.DataReceived += OnDataReceived;
+			_serialPort.Open();
 
 			return Task.CompletedTask;
 		}
@@ -137,35 +173,18 @@ namespace AMWD.Protocols.Modbus.Proxy
 			return StopAsyncInternal(cancellationToken);
 		}
 
-		private async Task StopAsyncInternal(CancellationToken cancellationToken = default)
+		private Task StopAsyncInternal(CancellationToken cancellationToken)
 		{
 			_stopCts.Cancel();
 
-			_listener.Stop();
-#if NET8_0_OR_GREATER
-			_listener.Dispose();
-#endif
-			try
-			{
-				await Task.WhenAny(_clientConnectTask, Task.Delay(Timeout.Infinite, cancellationToken));
-			}
-			catch (OperationCanceledException)
-			{
-				// Terminated
-			}
+			_serialPort.Close();
+			_serialPort.DataReceived -= OnDataReceived;
 
-			try
-			{
-				await Task.WhenAny(Task.WhenAll(_clientTasks), Task.Delay(Timeout.Infinite, cancellationToken));
-			}
-			catch (OperationCanceledException)
-			{
-				// Terminated
-			}
+			return Task.CompletedTask;
 		}
 
 		/// <summary>
-		/// Releases all managed and unmanaged resources used by the <see cref="ModbusTcpProxy"/>.
+		/// Releases all managed and unmanaged resources used by the <see cref="ModbusRtuProxy"/>.
 		/// </summary>
 		public void Dispose()
 		{
@@ -176,9 +195,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 			StopAsyncInternal(CancellationToken.None).Wait();
 
-			_clientListLock.Dispose();
-			_clients.Clear();
-
+			_serialPort.Dispose();
 			_stopCts?.Dispose();
 		}
 
@@ -196,142 +213,100 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 		#region Client Handling
 
-		private async Task WaitForClientAsync(CancellationToken cancellationToken)
-		{
-			while (!cancellationToken.IsCancellationRequested)
-			{
-				try
-				{
-#if NET8_0_OR_GREATER
-					var client = await _listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
-#else
-					var client = await _listener.AcceptTcpClientAsync().ConfigureAwait(false);
-#endif
-					await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-					try
-					{
-						_clients.Add(client);
-						_clientTasks.Add(HandleClientAsync(client, cancellationToken));
-					}
-					finally
-					{
-						_clientListLock.Release();
-					}
-				}
-				catch
-				{
-					// There might be a failure here, that's ok, just keep it quiet
-				}
-			}
-		}
-
-		private async Task HandleClientAsync(TcpClient client, CancellationToken cancellationToken)
+		private void OnDataReceived(object _, SerialDataReceivedEventArgs evArgs)
 		{
 			try
 			{
-				var stream = client.GetStream();
-				while (!cancellationToken.IsCancellationRequested)
+				var requestBytes = new List<byte>();
+				do
 				{
-					var requestBytes = new List<byte>();
+					byte[] buffer = new byte[RtuProtocol.MAX_ADU_LENGTH];
+					int count = _serialPort.Read(buffer, 0, buffer.Length);
+					requestBytes.AddRange(buffer.Take(count));
 
-					using (var cts = new CancellationTokenSource(ReadWriteTimeout))
-					using (cancellationToken.Register(cts.Cancel))
-					{
-						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token).ConfigureAwait(false);
-						requestBytes.AddRange(headerBytes);
-
-						byte[] followingCountBytes = headerBytes.Skip(4).Take(2).ToArray();
-						followingCountBytes.SwapBigEndian();
-						int followingCount = BitConverter.ToUInt16(followingCountBytes, 0);
-
-						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(followingCount, cts.Token).ConfigureAwait(false);
-						requestBytes.AddRange(bodyBytes);
-					}
-
-					byte[] responseBytes = await HandleRequestAsync([.. requestBytes], cancellationToken).ConfigureAwait(false);
-					if (responseBytes != null)
-						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken).ConfigureAwait(false);
+					_stopCts.Token.ThrowIfCancellationRequested();
 				}
+				while (_serialPort.BytesToRead > 0);
+
+				_stopCts.Token.ThrowIfCancellationRequested();
+				byte[] responseBytes = HandleRequest([.. requestBytes]);
+				if (responseBytes == null)
+					return;
+
+				_stopCts.Token.ThrowIfCancellationRequested();
+				_serialPort.Write(responseBytes, 0, responseBytes.Length);
 			}
 			catch
-			{
-				// Keep client processing quiet
-			}
-			finally
-			{
-				await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-				try
-				{
-					_clients.Remove(client);
-					client.Dispose();
-				}
-				finally
-				{
-					_clientListLock.Release();
-				}
-			}
+			{ /* keep it quiet */ }
 		}
 
 		#endregion Client Handling
 
 		#region Request Handling
 
-		private Task<byte[]> HandleRequestAsync(byte[] requestBytes, CancellationToken cancellationToken)
+		private byte[] HandleRequest(byte[] requestBytes)
 		{
-			switch ((ModbusFunctionCode)requestBytes[7])
+			byte[] recvCrc = requestBytes.Skip(requestBytes.Length - 2).ToArray();
+			byte[] calcCrc = RtuProtocol.CRC16(requestBytes, 0, requestBytes.Length - 2);
+			if (!recvCrc.SequenceEqual(calcCrc))
+				return null;
+
+			switch ((ModbusFunctionCode)requestBytes[1])
 			{
 				case ModbusFunctionCode.ReadCoils:
-					return HandleReadCoilsAsync(requestBytes, cancellationToken);
+					return HandleReadCoilsAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.ReadDiscreteInputs:
-					return HandleReadDiscreteInputsAsync(requestBytes, cancellationToken);
+					return HandleReadDiscreteInputsAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.ReadHoldingRegisters:
-					return HandleReadHoldingRegistersAsync(requestBytes, cancellationToken);
+					return HandleReadHoldingRegistersAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.ReadInputRegisters:
-					return HandleReadInputRegistersAsync(requestBytes, cancellationToken);
+					return HandleReadInputRegistersAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.WriteSingleCoil:
-					return HandleWriteSingleCoilAsync(requestBytes, cancellationToken);
+					return HandleWriteSingleCoilAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.WriteSingleRegister:
-					return HandleWriteSingleRegisterAsync(requestBytes, cancellationToken);
+					return HandleWriteSingleRegisterAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.WriteMultipleCoils:
-					return HandleWriteMultipleCoilsAsync(requestBytes, cancellationToken);
+					return HandleWriteMultipleCoilsAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.WriteMultipleRegisters:
-					return HandleWriteMultipleRegistersAsync(requestBytes, cancellationToken);
+					return HandleWriteMultipleRegistersAsync(requestBytes, _stopCts.Token).Result;
 
 				case ModbusFunctionCode.EncapsulatedInterface:
-					return HandleEncapsulatedInterfaceAsync(requestBytes, cancellationToken);
+					return HandleEncapsulatedInterfaceAsync(requestBytes, _stopCts.Token).Result;
 
 				default: // unknown function
 					{
-						byte[] responseBytes = new byte[9];
-						Array.Copy(requestBytes, 0, responseBytes, 0, 8);
+						byte[] responseBytes = new byte[5];
+						Array.Copy(requestBytes, 0, responseBytes, 0, 2);
 
 						// Mark as error
-						responseBytes[7] |= 0x80;
+						responseBytes[1] |= 0x80;
 
-						responseBytes[8] = (byte)ModbusErrorCode.IllegalFunction;
-						return Task.FromResult(responseBytes);
+						responseBytes[2] = (byte)ModbusErrorCode.IllegalFunction;
+
+						SetCrc(responseBytes);
+						return responseBytes;
 					}
 			}
 		}
 
 		private async Task<byte[]> HandleReadCoilsAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 12)
+			if (requestBytes.Length < 8)
 				return null;
 
-			byte unitId = requestBytes[6];
-			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
-			ushort count = requestBytes.GetBigEndianUInt16(10);
+			byte unitId = requestBytes[0];
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
+			ushort count = requestBytes.GetBigEndianUInt16(4);
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
 				var coils = await Client.ReadCoilsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
@@ -353,24 +328,25 @@ namespace AMWD.Protocols.Modbus.Proxy
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleReadDiscreteInputsAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 12)
+			if (requestBytes.Length < 8)
 				return null;
 
-			byte unitId = requestBytes[6];
-			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
-			ushort count = requestBytes.GetBigEndianUInt16(10);
+			byte unitId = requestBytes[0];
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
+			ushort count = requestBytes.GetBigEndianUInt16(4);
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
 				var discreteInputs = await Client.ReadDiscreteInputsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
@@ -392,24 +368,25 @@ namespace AMWD.Protocols.Modbus.Proxy
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleReadHoldingRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 12)
+			if (requestBytes.Length < 8)
 				return null;
 
-			byte unitId = requestBytes[6];
-			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
-			ushort count = requestBytes.GetBigEndianUInt16(10);
+			byte unitId = requestBytes[0];
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
+			ushort count = requestBytes.GetBigEndianUInt16(4);
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
 				var holdingRegisters = await Client.ReadHoldingRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
@@ -426,24 +403,25 @@ namespace AMWD.Protocols.Modbus.Proxy
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleReadInputRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 12)
+			if (requestBytes.Length < 8)
 				return null;
 
-			byte unitId = requestBytes[6];
-			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
-			ushort count = requestBytes.GetBigEndianUInt16(10);
+			byte unitId = requestBytes[0];
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
+			ushort count = requestBytes.GetBigEndianUInt16(4);
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
 				var inputRegisters = await Client.ReadInputRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
@@ -460,27 +438,30 @@ namespace AMWD.Protocols.Modbus.Proxy
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleWriteSingleCoilAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 12)
+			if (requestBytes.Length < 8)
 				return null;
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 
-			ushort address = requestBytes.GetBigEndianUInt16(8);
+			ushort address = requestBytes.GetBigEndianUInt16(2);
 
-			if (requestBytes[10] != 0x00 && requestBytes[10] != 0xFF)
+			if (requestBytes[4] != 0x00 && requestBytes[4] != 0xFF)
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 
@@ -489,93 +470,96 @@ namespace AMWD.Protocols.Modbus.Proxy
 				var coil = new Coil
 				{
 					Address = address,
-					HighByte = requestBytes[10],
-					LowByte = requestBytes[11],
+					HighByte = requestBytes[4],
+					LowByte = requestBytes[5],
 				};
 
-				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[6], coil, cancellationToken).ConfigureAwait(false);
+				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[0], coil, cancellationToken).ConfigureAwait(false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
-					responseBytes.AddRange(requestBytes.Skip(8).Take(4));
+					responseBytes.AddRange(requestBytes.Skip(2).Take(4));
 				}
 				else
 				{
-					responseBytes[7] |= 0x80;
+					responseBytes[1] |= 0x80;
 					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleWriteSingleRegisterAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 12)
+			if (requestBytes.Length < 8)
 				return null;
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 
-			ushort address = requestBytes.GetBigEndianUInt16(8);
-
+			ushort address = requestBytes.GetBigEndianUInt16(2);
 			try
 			{
 				var register = new HoldingRegister
 				{
 					Address = address,
-					HighByte = requestBytes[10],
-					LowByte = requestBytes[11]
+					HighByte = requestBytes[4],
+					LowByte = requestBytes[5]
 				};
 
-				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[6], register, cancellationToken).ConfigureAwait(false);
+				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[0], register, cancellationToken).ConfigureAwait(false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
-					responseBytes.AddRange(requestBytes.Skip(8).Take(4));
+					responseBytes.AddRange(requestBytes.Skip(2).Take(4));
 				}
 				else
 				{
-					responseBytes[7] |= 0x80;
+					responseBytes[1] |= 0x80;
 					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleWriteMultipleCoilsAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 13)
+			if (requestBytes.Length < 9)
 				return null;
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 
-			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
-			ushort count = requestBytes.GetBigEndianUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
+			ushort count = requestBytes.GetBigEndianUInt16(4);
 
 			int byteCount = (int)Math.Ceiling(count / 8.0);
-			if (requestBytes.Length < 13 + byteCount)
+			if (requestBytes.Length < 9 + byteCount)
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 
 			try
 			{
-				int baseOffset = 13;
+				int baseOffset = 7;
 				var coils = new List<Coil>();
 				for (int i = 0; i < count; i++)
 				{
@@ -592,49 +576,52 @@ namespace AMWD.Protocols.Modbus.Proxy
 					});
 				}
 
-				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[6], coils, cancellationToken).ConfigureAwait(false);
+				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[0], coils, cancellationToken).ConfigureAwait(false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
-					responseBytes.AddRange(requestBytes.Skip(8).Take(4));
+					responseBytes.AddRange(requestBytes.Skip(2).Take(4));
 				}
 				else
 				{
-					responseBytes[7] |= 0x80;
+					responseBytes[1] |= 0x80;
 					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleWriteMultipleRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
-			if (requestBytes.Length < 13)
+			if (requestBytes.Length < 9)
 				return null;
 
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(8));
 
-			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
-			ushort count = requestBytes.GetBigEndianUInt16(10);
+			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
+			ushort count = requestBytes.GetBigEndianUInt16(4);
 
 			int byteCount = count * 2;
-			if (requestBytes.Length < 13 + byteCount)
+			if (requestBytes.Length < 9 + byteCount)
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 
 			try
 			{
-				int baseOffset = 13;
+				int baseOffset = 7;
 				var list = new List<HoldingRegister>();
 				for (int i = 0; i < count; i++)
 				{
@@ -647,53 +634,60 @@ namespace AMWD.Protocols.Modbus.Proxy
 						LowByte = requestBytes[baseOffset + i * 2 + 1]
 					});
 
-					bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[6], list, cancellationToken).ConfigureAwait(false);
+					bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[0], list, cancellationToken).ConfigureAwait(false);
 					if (isSuccess)
 					{
 						// Response is an echo of the request
-						responseBytes.AddRange(requestBytes.Skip(8).Take(4));
+						responseBytes.AddRange(requestBytes.Skip(2).Take(4));
 					}
 					else
 					{
-						responseBytes[7] |= 0x80;
+						responseBytes[1] |= 0x80;
 						responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 					}
 				}
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
+			AddCrc(responseBytes);
 			return [.. responseBytes];
 		}
 
 		private async Task<byte[]> HandleEncapsulatedInterfaceAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 
-			if (requestBytes[8] != 0x0E)
+			if (requestBytes[2] != 0x0E)
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalFunction);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 
-			var firstObject = (ModbusDeviceIdentificationObject)requestBytes[10];
-			if (0x06 < requestBytes[10] && requestBytes[10] < 0x80)
+			var firstObject = (ModbusDeviceIdentificationObject)requestBytes[4];
+			if (0x06 < requestBytes[4] && requestBytes[4] < 0x80)
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataAddress);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 
-			var category = (ModbusDeviceIdentificationCategory)requestBytes[9];
+			var category = (ModbusDeviceIdentificationCategory)requestBytes[3];
 			if (!Enum.IsDefined(typeof(ModbusDeviceIdentificationCategory), category))
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 
@@ -704,7 +698,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				var bodyBytes = new List<byte>();
 
 				// MEI, Category
-				bodyBytes.AddRange(requestBytes.Skip(8).Take(2));
+				bodyBytes.AddRange(requestBytes.Skip(2).Take(2));
 
 				// Conformity
 				bodyBytes.Add((byte)category);
@@ -730,12 +724,12 @@ namespace AMWD.Protocols.Modbus.Proxy
 						break;
 
 					default: // Individual
-						maxObjectId = requestBytes[10];
+						maxObjectId = requestBytes[4];
 						break;
 				}
 
 				byte numberOfObjects = 0;
-				for (int i = requestBytes[10]; i <= maxObjectId; i++)
+				for (int i = requestBytes[4]; i <= maxObjectId; i++)
 				{
 					// Reserved
 					if (0x07 <= i && i <= 0x7F)
@@ -744,7 +738,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 					byte[] objBytes = GetDeviceObject((byte)i, res);
 
 					// We need to split the response if it would exceed the max ADU size
-					if (responseBytes.Count + bodyBytes.Count + objBytes.Length > TcpProtocol.MAX_ADU_LENGTH)
+					if (responseBytes.Count + bodyBytes.Count + objBytes.Length > RtuProtocol.MAX_ADU_LENGTH)
 					{
 						bodyBytes[3] = 0xFF;
 						bodyBytes[4] = (byte)i;
@@ -760,12 +754,16 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 				bodyBytes[5] = numberOfObjects;
 				responseBytes.AddRange(bodyBytes);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 			catch
 			{
-				responseBytes[7] |= 0x80;
+				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+
+				AddCrc(responseBytes);
 				return [.. responseBytes];
 			}
 		}
@@ -848,6 +846,20 @@ namespace AMWD.Protocols.Modbus.Proxy
 			}
 
 			return [.. result];
+		}
+
+		private static void SetCrc(byte[] bytes)
+		{
+			byte[] crc = RtuProtocol.CRC16(bytes, 0, bytes.Length - 2);
+			bytes[bytes.Length - 2] = crc[0];
+			bytes[bytes.Length - 1] = crc[1];
+		}
+
+		private static void AddCrc(List<byte> bytes)
+		{
+			byte[] crc = RtuProtocol.CRC16(bytes);
+			bytes.Add(crc[0]);
+			bytes.Add(crc[1]);
 		}
 
 		#endregion Request Handling

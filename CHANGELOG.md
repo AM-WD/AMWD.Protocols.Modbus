@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Renamed `ModbusSerialServer` to `ModbusRtuServer` so clearify the protocol, that is used.
+- Renamed `ModbusSerialServer` to `ModbusRtuServer` to clearify the protocol that is used.
 - Made `Protocol` property of `ModbusClientBase` non-abstract.
 
 
