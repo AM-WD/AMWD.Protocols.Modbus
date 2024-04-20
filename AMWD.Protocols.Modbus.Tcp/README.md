@@ -23,6 +23,18 @@ float voltage = registers.GetSingle();
 Console.WriteLine($"The voltage of device #{unitId} between L1 and N is: {voltage:N2}V");
 ```
 
+If you want to use the `RTU over TCP` protocol instead, you can do this on initialization:
+
+```csharp
+// [...]
+
+using var client = new ModbusTcpClient(host, port)
+{
+	Protocol = new RtuOverTcpProtocol();
+};
+
+// [...]
+```
 
 ## Sources
 

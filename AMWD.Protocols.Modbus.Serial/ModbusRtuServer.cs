@@ -14,7 +14,7 @@ using AMWD.Protocols.Modbus.Common.Protocols;
 namespace AMWD.Protocols.Modbus.Serial
 {
 	/// <summary>
-	/// A basic implementation of a Modbus serial line server.
+	/// A basic implementation of a Modbus serial line RTU server.
 	/// </summary>
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	public class ModbusRtuServer : IDisposable
@@ -208,6 +208,9 @@ namespace AMWD.Protocols.Modbus.Serial
 
 			_deviceListLock.Dispose();
 			_devices.Clear();
+
+			_serialPort.Dispose();
+			_stopCts?.Dispose();
 		}
 
 		private void Assertions()

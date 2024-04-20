@@ -193,6 +193,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 			_clients.Clear();
 			_devices.Clear();
+
+			_stopCts?.Dispose();
 		}
 
 		private void Assertions()
