@@ -17,7 +17,7 @@ namespace AMWD.Protocols.Modbus.Serial
 	/// A basic implementation of a Modbus serial line server.
 	/// </summary>
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-	public class ModbusSerialServer : IDisposable
+	public class ModbusRtuServer : IDisposable
 	{
 		#region Fields
 
@@ -34,11 +34,11 @@ namespace AMWD.Protocols.Modbus.Serial
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ModbusSerialServer"/> class.
+		/// Initializes a new instance of the <see cref="ModbusRtuServer"/> class.
 		/// </summary>
 		/// <param name="portName">The name of the serial port to use.</param>
 		/// <param name="baudRate">The baud rate of the serial port (Default: 19.200).</param>
-		public ModbusSerialServer(string portName, BaudRate baudRate = BaudRate.Baud19200)
+		public ModbusRtuServer(string portName, BaudRate baudRate = BaudRate.Baud19200)
 		{
 			if (string.IsNullOrWhiteSpace(portName))
 				throw new ArgumentNullException(nameof(portName));
@@ -195,7 +195,7 @@ namespace AMWD.Protocols.Modbus.Serial
 		}
 
 		/// <summary>
-		/// Releases all managed and unmanaged resources used by the <see cref="ModbusSerialServer"/>.
+		/// Releases all managed and unmanaged resources used by the <see cref="ModbusRtuServer"/>.
 		/// </summary>
 		public void Dispose()
 		{

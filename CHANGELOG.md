@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_nothing changed yet_
+### Changed
+
+- Renamed `ModbusSerialServer` to `ModbusRtuServer` so clearify the protocol, that is used.
 
 
 ## [v0.2.0] (2024-04-02)
