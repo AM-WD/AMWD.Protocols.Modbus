@@ -25,6 +25,8 @@ build-debug:
     - mkdir ./artifacts
     - mv ./AMWD.Protocols.Modbus.Common/bin/Debug/*.nupkg    ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Common/bin/Debug/*.snupkg   ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Debug/*.nupkg     ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Debug/*.snupkg    ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Serial/bin/Debug/*.nupkg    ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Serial/bin/Debug/*.snupkg   ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Tcp/bin/Debug/*.nupkg       ./artifacts/
@@ -80,6 +82,8 @@ build-release:
     - mkdir ./artifacts
     - mv ./AMWD.Protocols.Modbus.Common/bin/Release/*.nupkg    ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Common/bin/Release/*.snupkg   ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Release/*.nupkg     ./artifacts/
+    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Release/*.snupkg    ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Serial/bin/Release/*.nupkg    ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Serial/bin/Release/*.snupkg   ./artifacts/
     - mv ./AMWD.Protocols.Modbus.Tcp/bin/Release/*.nupkg       ./artifacts/
