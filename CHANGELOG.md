@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `ModbusSerialServer` to `ModbusRtuServer` to clearify the protocol that is used.
 - Made `Protocol` property of `ModbusClientBase` non-abstract.
 
+### Fixed
+
+- Issue with missing client on TCP connection when using default constructor (`AddressFamily.Unknown`)
+
 
 ## [v0.2.0] (2024-04-02)
 

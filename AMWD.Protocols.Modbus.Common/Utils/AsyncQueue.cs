@@ -45,7 +45,7 @@ namespace System.Collections.Generic
 					internalDequeueTcs = ResetToken(ref _dequeueTcs);
 				}
 
-				await WaitAsync(internalDequeueTcs, cancellationToken).ConfigureAwait(false);
+				await WaitAsync(internalDequeueTcs, cancellationToken);
 			}
 		}
 
@@ -113,7 +113,7 @@ namespace System.Collections.Generic
 		{
 			if (await Task.WhenAny(tcs.Task, Task.Delay(-1, cancellationToken)) == tcs.Task)
 			{
-				await tcs.Task.ConfigureAwait(false);
+				await tcs.Task;
 				return;
 			}
 

@@ -11,7 +11,7 @@ namespace System.IO
 			int offset = 0;
 			do
 			{
-				int count = await stream.ReadAsync(buffer, offset, expectedBytes - offset, cancellationToken).ConfigureAwait(false);
+				int count = await stream.ReadAsync(buffer, offset, expectedBytes - offset, cancellationToken);
 				if (count < 1)
 					throw new EndOfStreamException();
 

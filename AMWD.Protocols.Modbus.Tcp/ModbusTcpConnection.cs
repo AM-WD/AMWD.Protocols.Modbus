@@ -26,12 +26,16 @@ namespace AMWD.Protocols.Modbus.Tcp
 		private bool _isDisposed;
 		private readonly CancellationTokenSource _disposeCts = new();
 
+		private readonly TcpClientWrapperFactory _tcpClientFactory = new();
 		private readonly SemaphoreSlim _clientLock = new(1, 1);
-		private readonly TcpClientWrapper _tcpClient = new();
+		private TcpClientWrapper _tcpClient = null;
 		private readonly Timer _idleTimer;
 
 		private readonly Task _processingTask;
 		private readonly AsyncQueue<RequestQueueItem> _requestQueue = new();
+
+		private TimeSpan _readTimeout = TimeSpan.FromMilliseconds(1);
+		private TimeSpan _writeTimeout = TimeSpan.FromMilliseconds(1);
 
 		#endregion Fields
 
@@ -58,15 +62,33 @@ namespace AMWD.Protocols.Modbus.Tcp
 		/// <inheritdoc/>
 		public virtual TimeSpan ReadTimeout
 		{
-			get => TimeSpan.FromMilliseconds(_tcpClient.ReceiveTimeout);
-			set => _tcpClient.ReceiveTimeout = (int)value.TotalMilliseconds;
+			get => _readTimeout;
+			set
+			{
+				if (value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value));
+
+				_readTimeout = value;
+
+				if (_tcpClient != null)
+					_tcpClient.ReceiveTimeout = (int)value.TotalMilliseconds;
+			}
 		}
 
 		/// <inheritdoc/>
 		public virtual TimeSpan WriteTimeout
 		{
-			get => TimeSpan.FromMilliseconds(_tcpClient.SendTimeout);
-			set => _tcpClient.SendTimeout = (int)value.TotalMilliseconds;
+			get => _writeTimeout;
+			set
+			{
+				if (value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value));
+
+				_writeTimeout = value;
+
+				if (_tcpClient != null)
+					_tcpClient.SendTimeout = (int)value.TotalMilliseconds;
+			}
 		}
 
 		/// <summary>
@@ -116,7 +138,6 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 			try
 			{
-				_processingTask.Wait();
 				_processingTask.Dispose();
 			}
 			catch
@@ -124,7 +145,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 			OnIdleTimer(null);
 
-			_tcpClient.Dispose();
+			_tcpClient?.Dispose();
 			_clientLock.Dispose();
 
 			while (_requestQueue.TryDequeue(out var item))
@@ -164,7 +185,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			{
 				Request = [.. request],
 				ValidateResponseComplete = validateResponseComplete,
-				TaskCompletionSource = new(),
+				TaskCompletionSource = new TaskCompletionSource<IReadOnlyList<byte>>(),
 				CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)
 			};
 
@@ -187,7 +208,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 				try
 				{
 					// Get next request to process
-					var item = await _requestQueue.DequeueAsync(cancellationToken).ConfigureAwait(false);
+					var item = await _requestQueue.DequeueAsync(cancellationToken);
 
 					// Remove registration => already removed from queue
 					item.CancellationTokenRegistration.Dispose();
@@ -195,19 +216,19 @@ namespace AMWD.Protocols.Modbus.Tcp
 					// Build combined cancellation token
 					using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, item.CancellationTokenSource.Token);
 					// Wait for exclusive access
-					await _clientLock.WaitAsync(linkedCts.Token).ConfigureAwait(false);
+					await _clientLock.WaitAsync(linkedCts.Token);
 					try
 					{
 						// Ensure connection is up
-						await AssertConnection(linkedCts.Token).ConfigureAwait(false);
+						await AssertConnection(linkedCts.Token);
 
 						var stream = _tcpClient.GetStream();
-						await stream.FlushAsync(linkedCts.Token).ConfigureAwait(false);
+						await stream.FlushAsync(linkedCts.Token);
 
 #if NET6_0_OR_GREATER
-						await stream.WriteAsync(item.Request, linkedCts.Token).ConfigureAwait(false);
+						await stream.WriteAsync(item.Request, linkedCts.Token);
 #else
-						await stream.WriteAsync(item.Request, 0, item.Request.Length, linkedCts.Token).ConfigureAwait(false);
+						await stream.WriteAsync(item.Request, 0, item.Request.Length, linkedCts.Token);
 #endif
 
 						linkedCts.Token.ThrowIfCancellationRequested();
@@ -218,9 +239,9 @@ namespace AMWD.Protocols.Modbus.Tcp
 						do
 						{
 #if NET6_0_OR_GREATER
-							int readCount = await stream.ReadAsync(buffer, linkedCts.Token).ConfigureAwait(false);
+							int readCount = await stream.ReadAsync(buffer, linkedCts.Token);
 #else
-							int readCount = await stream.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token).ConfigureAwait(false);
+							int readCount = await stream.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token);
 #endif
 							if (readCount < 1)
 								throw new EndOfStreamException();
@@ -267,7 +288,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 		// Has to be called within _clientLock!
 		private async Task AssertConnection(CancellationToken cancellationToken)
 		{
-			if (_tcpClient.Connected)
+			if (_tcpClient?.Connected == true)
 				return;
 
 			int delay = 1;
@@ -284,14 +305,16 @@ namespace AMWD.Protocols.Modbus.Tcp
 				{
 					foreach (var ipAddress in ipAddresses)
 					{
-						_tcpClient.Close();
+						_tcpClient?.Close();
+						_tcpClient?.Dispose();
 
+						_tcpClient = _tcpClientFactory.Create(ipAddress.AddressFamily, _readTimeout, _writeTimeout);
 #if NET6_0_OR_GREATER
-						using var connectTask = _tcpClient.ConnectAsync(ipAddress, Port, cancellationToken);
+						var connectTask = _tcpClient.ConnectAsync(ipAddress, Port, cancellationToken);
 #else
-						using var connectTask = _tcpClient.ConnectAsync(ipAddress, Port);
+						var connectTask = _tcpClient.ConnectAsync(ipAddress, Port);
 #endif
-						if (await Task.WhenAny(connectTask, Task.Delay(ReadTimeout, cancellationToken)) == connectTask)
+						if (await Task.WhenAny(connectTask, Task.Delay(_readTimeout, cancellationToken)) == connectTask)
 						{
 							await connectTask;
 							if (_tcpClient.Connected)
@@ -309,7 +332,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 					try
 					{
-						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken).ConfigureAwait(false);
+						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken);
 					}
 					catch
 					{ /* keep it quiet */ }

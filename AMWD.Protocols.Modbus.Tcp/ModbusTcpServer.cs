@@ -218,11 +218,11 @@ namespace AMWD.Protocols.Modbus.Tcp
 				try
 				{
 #if NET8_0_OR_GREATER
-					var client = await _listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
+					var client = await _listener.AcceptTcpClientAsync(cancellationToken);
 #else
-					var client = await _listener.AcceptTcpClientAsync().ConfigureAwait(false);
+					var client = await _listener.AcceptTcpClientAsync();
 #endif
-					await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+					await _clientListLock.WaitAsync(cancellationToken);
 					try
 					{
 						_clients.Add(client);
@@ -252,20 +252,20 @@ namespace AMWD.Protocols.Modbus.Tcp
 					using (var cts = new CancellationTokenSource(ReadWriteTimeout))
 					using (cancellationToken.Register(cts.Cancel))
 					{
-						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token).ConfigureAwait(false);
+						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token);
 						requestBytes.AddRange(headerBytes);
 
 						byte[] followingCountBytes = headerBytes.Skip(4).Take(2).ToArray();
 						followingCountBytes.SwapBigEndian();
 						int followingCount = BitConverter.ToUInt16(followingCountBytes, 0);
 
-						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(followingCount, cts.Token).ConfigureAwait(false);
+						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(followingCount, cts.Token);
 						requestBytes.AddRange(bodyBytes);
 					}
 
 					byte[] responseBytes = HandleRequest([.. requestBytes]);
 					if (responseBytes != null)
-						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken).ConfigureAwait(false);
+						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken);
 				}
 			}
 			catch
@@ -274,7 +274,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			}
 			finally
 			{
-				await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+				await _clientListLock.WaitAsync(cancellationToken);
 				try
 				{
 					_clients.Remove(client);

@@ -203,11 +203,11 @@ namespace AMWD.Protocols.Modbus.Proxy
 				try
 				{
 #if NET8_0_OR_GREATER
-					var client = await _listener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(false);
+					var client = await _listener.AcceptTcpClientAsync(cancellationToken);
 #else
-					var client = await _listener.AcceptTcpClientAsync().ConfigureAwait(false);
+					var client = await _listener.AcceptTcpClientAsync();
 #endif
-					await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+					await _clientListLock.WaitAsync(cancellationToken);
 					try
 					{
 						_clients.Add(client);
@@ -237,20 +237,20 @@ namespace AMWD.Protocols.Modbus.Proxy
 					using (var cts = new CancellationTokenSource(ReadWriteTimeout))
 					using (cancellationToken.Register(cts.Cancel))
 					{
-						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token).ConfigureAwait(false);
+						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token);
 						requestBytes.AddRange(headerBytes);
 
 						byte[] followingCountBytes = headerBytes.Skip(4).Take(2).ToArray();
 						followingCountBytes.SwapBigEndian();
 						int followingCount = BitConverter.ToUInt16(followingCountBytes, 0);
 
-						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(followingCount, cts.Token).ConfigureAwait(false);
+						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(followingCount, cts.Token);
 						requestBytes.AddRange(bodyBytes);
 					}
 
-					byte[] responseBytes = await HandleRequestAsync([.. requestBytes], cancellationToken).ConfigureAwait(false);
+					byte[] responseBytes = await HandleRequestAsync([.. requestBytes], cancellationToken);
 					if (responseBytes != null)
-						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken).ConfigureAwait(false);
+						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken);
 				}
 			}
 			catch
@@ -259,7 +259,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 			}
 			finally
 			{
-				await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+				await _clientListLock.WaitAsync(cancellationToken);
 				try
 				{
 					_clients.Remove(client);
@@ -334,7 +334,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var coils = await Client.ReadCoilsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
+				var coils = await Client.ReadCoilsAsync(unitId, firstAddress, count, cancellationToken);
 
 				byte[] values = new byte[(int)Math.Ceiling(coils.Count / 8.0)];
 				for (int i = 0; i < coils.Count; i++)
@@ -373,7 +373,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var discreteInputs = await Client.ReadDiscreteInputsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
+				var discreteInputs = await Client.ReadDiscreteInputsAsync(unitId, firstAddress, count, cancellationToken);
 
 				byte[] values = new byte[(int)Math.Ceiling(discreteInputs.Count / 8.0)];
 				for (int i = 0; i < discreteInputs.Count; i++)
@@ -412,7 +412,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var holdingRegisters = await Client.ReadHoldingRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
+				var holdingRegisters = await Client.ReadHoldingRegistersAsync(unitId, firstAddress, count, cancellationToken);
 
 				byte[] values = new byte[holdingRegisters.Count * 2];
 				for (int i = 0; i < holdingRegisters.Count; i++)
@@ -446,7 +446,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var inputRegisters = await Client.ReadInputRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(false);
+				var inputRegisters = await Client.ReadInputRegistersAsync(unitId, firstAddress, count, cancellationToken);
 
 				byte[] values = new byte[count * 2];
 				for (int i = 0; i < count; i++)
@@ -493,7 +493,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 					LowByte = requestBytes[11],
 				};
 
-				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[6], coil, cancellationToken).ConfigureAwait(false);
+				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[6], coil, cancellationToken);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -533,7 +533,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 					LowByte = requestBytes[11]
 				};
 
-				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[6], register, cancellationToken).ConfigureAwait(false);
+				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[6], register, cancellationToken);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -592,7 +592,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 					});
 				}
 
-				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[6], coils, cancellationToken).ConfigureAwait(false);
+				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[6], coils, cancellationToken);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -647,7 +647,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 						LowByte = requestBytes[baseOffset + i * 2 + 1]
 					});
 
-					bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[6], list, cancellationToken).ConfigureAwait(false);
+					bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[6], list, cancellationToken);
 					if (isSuccess)
 					{
 						// Response is an echo of the request
@@ -699,7 +699,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 			try
 			{
-				var res = await Client.ReadDeviceIdentificationAsync(requestBytes[6], category, firstObject, cancellationToken).ConfigureAwait(false);
+				var res = await Client.ReadDeviceIdentificationAsync(requestBytes[6], category, firstObject, cancellationToken);
 
 				var bodyBytes = new List<byte>();
 

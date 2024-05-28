@@ -145,7 +145,7 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 
 			try
 			{
-				return await _serialPort.BaseStream.ReadAsync(buffer, offset, count, cts.Token).ConfigureAwait(false);
+				return await _serialPort.BaseStream.ReadAsync(buffer, offset, count, cts.Token);
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 			{
@@ -195,9 +195,9 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 			try
 			{
 #if NET6_0_OR_GREATER
-				await _serialPort.BaseStream.WriteAsync(buffer, cts.Token).ConfigureAwait(false);
+				await _serialPort.BaseStream.WriteAsync(buffer, cts.Token);
 #else
-				await _serialPort.BaseStream.WriteAsync(buffer, 0, buffer.Length, cts.Token).ConfigureAwait(false);
+				await _serialPort.BaseStream.WriteAsync(buffer, 0, buffer.Length, cts.Token);
 #endif
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

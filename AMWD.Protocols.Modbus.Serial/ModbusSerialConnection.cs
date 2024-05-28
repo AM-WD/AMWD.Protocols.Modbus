@@ -259,7 +259,7 @@ namespace AMWD.Protocols.Modbus.Serial
 				try
 				{
 					// Get next request to process
-					var item = await _requestQueue.DequeueAsync(cancellationToken).ConfigureAwait(false);
+					var item = await _requestQueue.DequeueAsync(cancellationToken);
 
 					// Remove registration => already removed from queue
 					item.CancellationTokenRegistration.Dispose();
@@ -267,13 +267,13 @@ namespace AMWD.Protocols.Modbus.Serial
 					// Build combined cancellation token
 					using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, item.CancellationTokenSource.Token);
 					// Wait for exclusive access
-					await _portLock.WaitAsync(linkedCts.Token).ConfigureAwait(false);
+					await _portLock.WaitAsync(linkedCts.Token);
 					try
 					{
 						// Ensure connection is up
-						await AssertConnection(linkedCts.Token).ConfigureAwait(false);
+						await AssertConnection(linkedCts.Token);
 
-						await _serialPort.WriteAsync(item.Request, linkedCts.Token).ConfigureAwait(false);
+						await _serialPort.WriteAsync(item.Request, linkedCts.Token);
 
 						linkedCts.Token.ThrowIfCancellationRequested();
 
@@ -282,7 +282,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 						do
 						{
-							int readCount = await _serialPort.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token).ConfigureAwait(false);
+							int readCount = await _serialPort.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token);
 							if (readCount < 1)
 								throw new EndOfStreamException();
 
@@ -313,7 +313,7 @@ namespace AMWD.Protocols.Modbus.Serial
 						_portLock.Release();
 						_idleTimer.Change(IdleTimeout, Timeout.InfiniteTimeSpan);
 
-						await Task.Delay(InterRequestDelay, cancellationToken).ConfigureAwait(false);
+						await Task.Delay(InterRequestDelay, cancellationToken);
 					}
 				}
 				catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -370,7 +370,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 					try
 					{
-						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken).ConfigureAwait(false);
+						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken);
 					}
 					catch
 					{ /* keep it quiet */ }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		private readonly string _hostname = "127.0.0.1";
 
 		private Mock<TcpClientWrapper> _tcpClientMock;
+		private Mock<TcpClientWrapperFactory> _tcpClientFactoryMock;
 		private Mock<NetworkStreamWrapper> _networkStreamMock;
 
 		private bool _alwaysConnected;
@@ -40,10 +42,19 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		}
 
 		[TestMethod]
-		public void ShouldGetAndSetPropertiesOfBaseClient()
+		public async Task ShouldSetPropertiesOfBaseClient()
 		{
 			// Arrange
+			byte[] request = [1, 2, 3];
+			byte[] expectedResponse = [9, 8, 7];
+			var validation = new Func<IReadOnlyList<byte>, bool>(_ => true);
+			_networkResponseQueue.Enqueue(expectedResponse);
+
 			var connection = GetTcpConnection();
+			await connection.InvokeAsync(request, validation);
+
+			_tcpClientMock.Invocations.Clear();
+			_networkStreamMock.Invocations.Clear();
 
 			// Act
 			connection.ReadTimeout = TimeSpan.FromSeconds(123);
@@ -51,8 +62,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			// Assert - part 1
 			Assert.AreEqual("TCP", connection.Name);
-			Assert.AreEqual(1, connection.ReadTimeout.TotalSeconds);
-			Assert.AreEqual(1, connection.WriteTimeout.TotalSeconds);
+			Assert.AreEqual(123, connection.ReadTimeout.TotalSeconds);
+			Assert.AreEqual(456, connection.WriteTimeout.TotalSeconds);
 
 			Assert.AreEqual(_hostname, connection.Hostname);
 			Assert.AreEqual(502, connection.Port);
@@ -60,9 +71,6 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			// Assert - part 2
 			_tcpClientMock.VerifySet(c => c.ReceiveTimeout = 123000, Times.Once);
 			_tcpClientMock.VerifySet(c => c.SendTimeout = 456000, Times.Once);
-
-			_tcpClientMock.VerifyGet(c => c.ReceiveTimeout, Times.Once);
-			_tcpClientMock.VerifyGet(c => c.SendTimeout, Times.Once);
 
 			_tcpClientMock.VerifyNoOtherCalls();
 			_networkStreamMock.VerifyNoOtherCalls();
@@ -173,6 +181,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
 			CollectionAssert.AreEqual(request, _networkRequestCallbacks.First());
 
+			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
 			_tcpClientMock.Verify(c => c.Connected, Times.Once);
 			_tcpClientMock.Verify(c => c.GetStream(), Times.Once);
 
@@ -211,11 +220,10 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
 			CollectionAssert.AreEqual(request, _networkRequestCallbacks.First());
 
-			_tcpClientMock.VerifyGet(c => c.ReceiveTimeout, Times.Once);
-
 			_tcpClientMock.Verify(c => c.Connected, Times.Exactly(3));
 			_tcpClientMock.Verify(c => c.Close(), Times.Exactly(2));
-			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+			_tcpClientMock.Verify(c => c.Dispose(), Times.Once);
+			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
 			_tcpClientMock.Verify(c => c.GetStream(), Times.Once);
 
 			_networkStreamMock.Verify(ns => ns.FlushAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -289,11 +297,10 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
 			CollectionAssert.AreEqual(request, _networkRequestCallbacks.First());
 
-			_tcpClientMock.VerifyGet(c => c.ReceiveTimeout, Times.Once);
-
 			_tcpClientMock.Verify(c => c.Connected, Times.Exactly(3));
 			_tcpClientMock.Verify(c => c.Close(), Times.Once);
-			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+			_tcpClientMock.Verify(c => c.Dispose(), Times.Once);
+			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
 			_tcpClientMock.Verify(c => c.GetStream(), Times.Once);
 
 			_networkStreamMock.Verify(ns => ns.FlushAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -329,11 +336,10 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
 			CollectionAssert.AreEqual(request, _networkRequestCallbacks.First());
 
-			_tcpClientMock.VerifyGet(c => c.ReceiveTimeout, Times.Exactly(2));
-
 			_tcpClientMock.Verify(c => c.Connected, Times.Exactly(3));
 			_tcpClientMock.Verify(c => c.Close(), Times.Exactly(2));
-			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+			_tcpClientMock.Verify(c => c.Dispose(), Times.Exactly(2));
+			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
 			_tcpClientMock.Verify(c => c.GetStream(), Times.Once);
 
 			_networkStreamMock.Verify(ns => ns.FlushAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -426,6 +432,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
 
 			_tcpClientMock.Verify(c => c.Connected, Times.Once);
+			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
 			_tcpClientMock.Verify(c => c.GetStream(), Times.Once);
 
 			_networkStreamMock.Verify(ns => ns.FlushAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -475,6 +482,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			CollectionAssert.AreEqual(request, _networkRequestCallbacks.First());
 
 			_tcpClientMock.Verify(c => c.Connected, Times.Once);
+			_tcpClientMock.Verify(c => c.ConnectAsync(It.IsAny<IPAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
 			_tcpClientMock.Verify(c => c.GetStream(), Times.Once);
 			_tcpClientMock.Verify(c => c.Dispose(), Times.Once);
 
@@ -508,7 +516,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 					return ValueTask.FromResult(0);
 				});
 
-			_tcpClientMock = new Mock<TcpClientWrapper>();
+			_tcpClientMock = new Mock<TcpClientWrapper>(AddressFamily.Unknown);
 			_tcpClientMock.Setup(c => c.Connected).Returns(() => _alwaysConnected || _connectedQueue.Dequeue());
 			_tcpClientMock.Setup(c => c.ReceiveTimeout).Returns(() => _clientReceiveTimeout);
 			_tcpClientMock.Setup(c => c.SendTimeout).Returns(() => _clientSendTimeout);
@@ -521,6 +529,11 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.Setup(c => c.GetStream())
 				.Returns(() => _networkStreamMock.Object);
 
+			_tcpClientFactoryMock = new Mock<TcpClientWrapperFactory>();
+			_tcpClientFactoryMock
+				.Setup(c => c.Create(It.IsAny<AddressFamily>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>()))
+				.Returns(_tcpClientMock.Object);
+
 			var connection = new ModbusTcpConnection
 			{
 				Hostname = _hostname,
@@ -528,9 +541,9 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			};
 
 			// Replace real connection with mock
-			var connectionField = connection.GetType().GetField("_tcpClient", BindingFlags.NonPublic | BindingFlags.Instance);
-			(connectionField.GetValue(connection) as TcpClientWrapper)?.Dispose();
-			connectionField.SetValue(connection, _tcpClientMock.Object);
+			var factoryField = connection.GetType().GetField("_tcpClientFactory", BindingFlags.NonPublic | BindingFlags.Instance);
+			(factoryField.GetValue(connection) as TcpClientWrapper)?.Dispose();
+			factoryField.SetValue(connection, _tcpClientFactoryMock.Object);
 
 			return connection;
 		}

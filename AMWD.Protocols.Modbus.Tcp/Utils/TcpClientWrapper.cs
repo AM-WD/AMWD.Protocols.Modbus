@@ -8,11 +8,11 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 {
 	/// <inheritdoc cref="TcpClient" />
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-	internal class TcpClientWrapper : IDisposable
+	internal class TcpClientWrapper(AddressFamily addressFamily) : IDisposable
 	{
 		#region Fields
 
-		private readonly TcpClient _client = new();
+		private readonly TcpClient _client = new(addressFamily);
 
 		#endregion Fields
 
