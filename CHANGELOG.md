@@ -7,23 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_no changes_
+
+
+## [v0.3.0] (2024-05-31)
+
 ### Added
 
-- New `AMWD.Protocols.Modbus.Proxy` package, that contains the server implementations as proxies.
+- New `AMWD.Protocols.Modbus.Proxy` package, that contains the server implementations as proxies
 
 ### Changed
 
-- Renamed `ModbusSerialServer` to `ModbusRtuServer` to clearify the protocol that is used.
-- Made `Protocol` property of `ModbusClientBase` non-abstract.
+- Renamed `ModbusSerialServer` to `ModbusRtuServer` to clearify the protocol that is used
+- Made `Protocol` property of `ModbusClientBase` non-abstract
 
 ### Fixed
 
-- Issue with missing client on TCP connection when using default constructor (`AddressFamily.Unknown`)
+- Issue with missing client on TCP connection when using default constructor (seems that `AddressFamily.Unknown` caused the problem)
 
 
 ## [v0.2.0] (2024-04-02)
 
-First "final" re-implementation.
+First "final" re-implementation
 
 
 ## v0.1.0 (2022-08-28)
@@ -33,5 +38,6 @@ So this tag is only here for documentation purposes of the NuGet Gallery.
 
 
 
-[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/AM-WD/AMWD.Protocols.Modbus/tree/v0.2.0

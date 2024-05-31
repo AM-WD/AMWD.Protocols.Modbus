@@ -4,7 +4,7 @@ Here you can find a basic implementation of the Modbus protocol.
 
 ## Overview
 
-The project is divided into three parts.
+The project is divided into four parts.
 
 To be mentioned at the beginning:    
 Only the clients are build very modular to fit any requirement reached on the first implementation back in 2018 ([see here]).    
