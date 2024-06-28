@@ -46,7 +46,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 			ListenAddress = listenAddress ?? IPAddress.Loopback;
 
-			if (ushort.MinValue < listenPort || listenPort < ushort.MaxValue)
+			if (listenPort < ushort.MinValue || ushort.MaxValue < listenPort)
 				throw new ArgumentOutOfRangeException(nameof(listenPort));
 
 			try

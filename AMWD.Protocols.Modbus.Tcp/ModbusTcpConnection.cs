@@ -34,8 +34,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 		private readonly Task _processingTask;
 		private readonly AsyncQueue<RequestQueueItem> _requestQueue = new();
 
-		private TimeSpan _readTimeout = TimeSpan.FromMilliseconds(1);
-		private TimeSpan _writeTimeout = TimeSpan.FromMilliseconds(1);
+		private TimeSpan _readTimeout = TimeSpan.FromSeconds(1);
+		private TimeSpan _writeTimeout = TimeSpan.FromSeconds(1);
 
 		#endregion Fields
 

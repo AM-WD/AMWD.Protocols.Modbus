@@ -186,7 +186,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 		private Task StopAsyncInternal(CancellationToken cancellationToken)
 		{
-			_stopCts.Cancel();
+			_stopCts?.Cancel();
 
 			_serialPort.Close();
 			_serialPort.DataReceived -= OnDataReceived;
@@ -328,7 +328,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
 			ushort count = requestBytes.GetBigEndianUInt16(4);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_DISCRETE_READ_COUNT)
+			if (count < RtuProtocol.MIN_READ_COUNT || RtuProtocol.MAX_DISCRETE_READ_COUNT < count)
 			{
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
@@ -385,7 +385,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
 			ushort count = requestBytes.GetBigEndianUInt16(4);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_DISCRETE_READ_COUNT)
+			if (count < RtuProtocol.MIN_READ_COUNT || RtuProtocol.MAX_DISCRETE_READ_COUNT < count)
 			{
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
@@ -442,7 +442,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
 			ushort count = requestBytes.GetBigEndianUInt16(4);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_REGISTER_READ_COUNT)
+			if (count < RtuProtocol.MIN_READ_COUNT || RtuProtocol.MAX_REGISTER_READ_COUNT < count)
 			{
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
@@ -496,7 +496,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
 			ushort count = requestBytes.GetBigEndianUInt16(4);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_REGISTER_READ_COUNT)
+			if (count < RtuProtocol.MIN_READ_COUNT || RtuProtocol.MAX_REGISTER_READ_COUNT < count)
 			{
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);

@@ -36,6 +36,8 @@ namespace AMWD.Protocols.Modbus.Tcp
 		private readonly ReaderWriterLockSlim _deviceListLock = new();
 		private readonly Dictionary<byte, ModbusDevice> _devices = [];
 
+		private TimeSpan _readWriteTimeout = TimeSpan.FromSeconds(1);
+
 		#endregion Fields
 
 		#region Constructors
@@ -49,7 +51,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 		{
 			ListenAddress = listenAddress ?? IPAddress.Loopback;
 
-			if (ushort.MinValue < listenPort || listenPort < ushort.MaxValue)
+			if (listenPort < ushort.MinValue || ushort.MaxValue < listenPort)
 				throw new ArgumentOutOfRangeException(nameof(listenPort));
 
 			try
@@ -105,7 +107,17 @@ namespace AMWD.Protocols.Modbus.Tcp
 		/// <summary>
 		/// Gets or sets the read/write timeout.
 		/// </summary>
-		public TimeSpan ReadWriteTimeout { get; set; }
+		public TimeSpan ReadWriteTimeout
+		{
+			get => _readWriteTimeout;
+			set
+			{
+				if (value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value));
+
+				_readWriteTimeout = value;
+			}
+		}
 
 		#endregion Properties
 
@@ -151,11 +163,11 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 		private async Task StopAsyncInternal(CancellationToken cancellationToken = default)
 		{
-			_stopCts.Cancel();
+			_stopCts?.Cancel();
 
-			_listener.Stop();
+			_listener?.Stop();
 #if NET8_0_OR_GREATER
-			_listener.Dispose();
+			_listener?.Dispose();
 #endif
 			try
 			{
@@ -354,7 +366,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
 			ushort count = requestBytes.GetBigEndianUInt16(10);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_DISCRETE_READ_COUNT)
+			if (count < TcpProtocol.MIN_READ_COUNT || TcpProtocol.MAX_DISCRETE_READ_COUNT < count)
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
@@ -406,7 +418,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
 			ushort count = requestBytes.GetBigEndianUInt16(10);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_DISCRETE_READ_COUNT)
+			if (count < TcpProtocol.MIN_READ_COUNT || TcpProtocol.MAX_DISCRETE_READ_COUNT < count)
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
@@ -458,7 +470,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
 			ushort count = requestBytes.GetBigEndianUInt16(10);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_REGISTER_READ_COUNT)
+			if (count < TcpProtocol.MIN_READ_COUNT || TcpProtocol.MAX_REGISTER_READ_COUNT < count)
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
@@ -507,7 +519,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(8);
 			ushort count = requestBytes.GetBigEndianUInt16(10);
 
-			if (TcpProtocol.MIN_READ_COUNT < count || count < TcpProtocol.MAX_REGISTER_READ_COUNT)
+			if (count < TcpProtocol.MIN_READ_COUNT || TcpProtocol.MAX_REGISTER_READ_COUNT < count)
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
