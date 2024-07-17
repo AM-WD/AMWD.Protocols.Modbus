@@ -59,8 +59,8 @@ Here you have the specific default implementations for the Modbus Protocol.
 
 - ASCII
 - RTU
-- RTU over TCP
 - TCP
+- [RTU over TCP]
 
 **NOTE:**    
 The implementations over serial line (RTU and ASCII) have a minimum unit ID of one (1) and maximum unit ID of 247 referring to the specification.
@@ -68,4 +68,9 @@ This validation is _not_ implemented here due to real world experience, that som
 
 ---
 
-Published under MIT License (see [**tl;dr**Legal](https://www.tldrlegal.com/license/mit-license))
+Published under MIT License (see [**tl;dr**Legal])
+
+
+
+[RTU over TCP]: https://www.fernhillsoftware.com/help/drivers/modbus/modbus-protocol.html
+[**tl;dr**Legal]: https://www.tldrlegal.com/license/mit-license

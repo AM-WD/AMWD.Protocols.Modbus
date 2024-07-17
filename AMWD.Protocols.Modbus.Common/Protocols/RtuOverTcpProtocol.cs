@@ -6,11 +6,13 @@ using AMWD.Protocols.Modbus.Common.Contracts;
 namespace AMWD.Protocols.Modbus.Common.Protocols
 {
 	/// <summary>
-	/// Implementation of the Modbus RTU over TCP protocol.
+	/// Implementation of the Modbus RTU over Modbus TCP protocol.
 	/// </summary>
 	/// <remarks>
 	/// The Modbus RTU over Modbus TCP is rarely used.
-	/// It is a non-standard variant of Modbus TCP that includes the Modbus RTU CRC at the end of the message.
+	/// It is a non-standard variant of Modbus TCP that includes wrapps a Modbus RTU message within a Modbus TCP message.
+	/// <br/>
+	/// Definition found on <see href="https://www.fernhillsoftware.com/help/drivers/modbus/modbus-protocol.html">Fernhill Software</see>.
 	/// </remarks>
 	public class RtuOverTcpProtocol : IModbusProtocol
 	{
