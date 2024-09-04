@@ -41,8 +41,4 @@
     <ProjectReference Include="..\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>

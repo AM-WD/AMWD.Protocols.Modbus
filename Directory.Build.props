@@ -25,6 +25,9 @@
     <Authors>Andreas Müller</Authors>
     <Copyright>© {copyright:2018-} AM.WD</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../AMWD.Protocols.Modbus.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITLAB_CI)' == 'true'">
