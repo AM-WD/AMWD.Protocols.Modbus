@@ -18,7 +18,6 @@
 
     <PackageIcon>package-icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageProjectUrl>https://wiki.am-wd.de/libs/modbus</PackageProjectUrl>
 
     <Title>Modbus Protocol for .NET</Title>
     <Company>AM.WD</Company>
@@ -27,7 +26,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../AMWD.Protocols.Modbus.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(SolutionDir)/AMWD.Protocols.Modbus.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITLAB_CI)' == 'true'">

@@ -22,15 +22,10 @@ build-debug:
   script:
     - dotnet restore --no-cache --force
     - dotnet build -c Debug --nologo --no-restore --no-incremental
+    - shopt -s globstar
     - mkdir ./artifacts
-    - mv ./AMWD.Protocols.Modbus.Common/bin/Debug/*.nupkg    ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Common/bin/Debug/*.snupkg   ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Debug/*.nupkg     ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Debug/*.snupkg    ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Serial/bin/Debug/*.nupkg    ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Serial/bin/Debug/*.snupkg   ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Debug/*.nupkg       ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Debug/*.snupkg      ./artifacts/
+    - mv ./**/*.nupkg    ./artifacts/
+    - mv ./**/*.snupkg   ./artifacts/
   artifacts:
     paths:
       - artifacts/*.nupkg
@@ -79,15 +74,10 @@ build-release:
   script:
     - dotnet restore --no-cache --force
     - dotnet build -c Release --nologo --no-restore --no-incremental
+    - shopt -s globstar
     - mkdir ./artifacts
-    - mv ./AMWD.Protocols.Modbus.Common/bin/Release/*.nupkg    ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Common/bin/Release/*.snupkg   ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Release/*.nupkg     ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Proxy/bin/Release/*.snupkg    ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Serial/bin/Release/*.nupkg    ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Serial/bin/Release/*.snupkg   ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Release/*.nupkg       ./artifacts/
-    - mv ./AMWD.Protocols.Modbus.Tcp/bin/Release/*.snupkg      ./artifacts/
+    - mv ./**/*.nupkg    ./artifacts/
+    - mv ./**/*.snupkg   ./artifacts/
   artifacts:
     paths:
       - artifacts/*.nupkg
