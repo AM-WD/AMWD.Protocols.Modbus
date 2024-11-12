@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
-    <LangVersion>12.0</LangVersion>
 
     <PackageId>AMWD.Protocols.Modbus.Serial</PackageId>
     <AssemblyName>amwd-modbus-serial</AssemblyName>
@@ -14,11 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../AMWD.Protocols.Modbus.Common/InternalsVisibleTo.cs" Link="InternalsVisibleTo.cs" />
-    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
-    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ReaderWriterLockSlimExtensions.cs" Link="Extensions/ReaderWriterLockSlimExtensions.cs" />
-    <Compile Include="../AMWD.Protocols.Modbus.Common/Utils/AsyncQueue.cs" Link="Utils/AsyncQueue.cs" />
-    <Compile Include="../AMWD.Protocols.Modbus.Common/Utils/RequestQueueItem.cs" Link="Utils/RequestQueueItem.cs" />
+    <Compile Include="$(SolutionDir)/AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
+    <Compile Include="$(SolutionDir)/AMWD.Protocols.Modbus.Common/Extensions/ReaderWriterLockSlimExtensions.cs" Link="Extensions/ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="$(SolutionDir)/AMWD.Protocols.Modbus.Common/Utils/AsyncQueue.cs" Link="Utils/AsyncQueue.cs" />
+    <Compile Include="$(SolutionDir)/AMWD.Protocols.Modbus.Common/Utils/RequestQueueItem.cs" Link="Utils/RequestQueueItem.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
-    <LangVersion>12.0</LangVersion>
 
     <PackageId>AMWD.Protocols.Modbus.Proxy</PackageId>
     <AssemblyName>amwd-modbus-proxy</AssemblyName>
@@ -14,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
-    <Compile Include="../AMWD.Protocols.Modbus.Tcp/Extensions/StreamExtensions.cs" Link="Extensions/StreamExtensions.cs" />
+    <Compile Include="$(SolutionDir)/AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
+    <Compile Include="$(SolutionDir)/AMWD.Protocols.Modbus.Tcp/Extensions/StreamExtensions.cs" Link="Extensions/StreamExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,8 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
-    <ProjectReference Include="..\AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj" />
+    <ProjectReference Include="$(SolutionDir)\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)\AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj" />
   </ItemGroup>
 
 </Project>

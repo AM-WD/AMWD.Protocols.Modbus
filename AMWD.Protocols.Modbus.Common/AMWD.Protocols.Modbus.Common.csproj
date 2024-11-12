@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
-    <LangVersion>12.0</LangVersion>
 
     <PackageId>AMWD.Protocols.Modbus.Common</PackageId>
     <AssemblyName>amwd-modbus-common</AssemblyName>
