@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_no changes_
+### Changed
+
+- The `ModbusTcpProxy.ReadWriteTimeout` has a default of 100 seconds (same default as a `HttpClient` has).
 
 
 ## [v0.3.2] (2024-09-04)

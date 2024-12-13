@@ -22,6 +22,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 		private bool _isDisposed;
 
+		private TimeSpan _readWriteTimeout = TimeSpan.FromSeconds(100);
+
 		private TcpListener _listener;
 		private CancellationTokenSource _stopCts;
 		private Task _clientConnectTask = Task.CompletedTask;
@@ -92,8 +94,19 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 		/// <summary>
 		/// Gets or sets the read/write timeout for the incoming connections (not the <see cref="Client"/>!).
+		/// Default: 100 seconds.
 		/// </summary>
-		public TimeSpan ReadWriteTimeout { get; set; }
+		public TimeSpan ReadWriteTimeout
+		{
+			get => _readWriteTimeout;
+			set
+			{
+				if (value != Timeout.InfiniteTimeSpan && value < TimeSpan.Zero)
+					throw new ArgumentOutOfRangeException(nameof(value));
+
+				_readWriteTimeout = value;
+			}
+		}
 
 		#endregion Properties
 
