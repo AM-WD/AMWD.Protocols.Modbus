@@ -436,6 +436,13 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 				responseBytes.Add((byte)values.Length);
 				responseBytes.AddRange(values);
+    
+			        //responseBytes[5]: The length of the following bytes.
+			        //slaveId 1
+			        //funcCode 1
+			        //dataLength 1
+			        //registerValue Length=holdingRegisterList.Count * 2=collection.Length=responseBytes[8]
+			        responseBytes[5] = (byte)(3 + collection.Length); 
 			}
 			catch
 			{
