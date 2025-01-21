@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace AMWD.Protocols.Modbus.Common
 {
@@ -91,5 +92,23 @@ namespace AMWD.Protocols.Modbus.Common
 		/// Gets or sets a value indicating whether individual access (<see cref="ModbusDeviceIdentificationCategory.Individual"/>) is allowed.
 		/// </summary>
 		public bool IsIndividualAccessAllowed { get; set; }
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine(nameof(DeviceIdentification));
+			sb.AppendLine($"  {nameof(VendorName)}:                {VendorName}");
+			sb.AppendLine($"  {nameof(ProductCode)}:               {ProductCode}");
+			sb.AppendLine($"  {nameof(MajorMinorRevision)}:        {MajorMinorRevision}");
+			sb.AppendLine($"  {nameof(VendorUrl)}:                 {VendorUrl}");
+			sb.AppendLine($"  {nameof(ProductName)}:               {ProductName}");
+			sb.AppendLine($"  {nameof(ModelName)}:                 {ModelName}");
+			sb.AppendLine($"  {nameof(UserApplicationName)}:       {UserApplicationName}");
+			sb.AppendLine($"  {nameof(IsIndividualAccessAllowed)}: {IsIndividualAccessAllowed}");
+
+			return sb.ToString();
+		}
 	}
 }

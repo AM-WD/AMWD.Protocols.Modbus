@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Common.Protocols;
 
@@ -100,6 +101,17 @@ namespace AMWD.Protocols.Modbus.Tcp
 				if (connection is ModbusTcpConnection tcpConnection)
 					tcpConnection.Port = value;
 			}
+		}
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"TCP Client {Hostname}");
+			sb.AppendLine($"  {nameof(Port)}:           {Port}");
+
+			return sb.ToString();
 		}
 	}
 }

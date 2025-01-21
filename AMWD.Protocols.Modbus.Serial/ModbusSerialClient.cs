@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Text;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Common.Protocols;
 
@@ -222,6 +223,23 @@ namespace AMWD.Protocols.Modbus.Serial
 				if (connection is ModbusSerialConnection serialConnection)
 					serialConnection.StopBits = value;
 			}
+		}
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"Serial Client {PortName}");
+			sb.AppendLine($"  {nameof(BaudRate)}:           {(int)BaudRate}");
+			sb.AppendLine($"  {nameof(DataBits)}:           {DataBits}");
+			sb.AppendLine($"  {nameof(StopBits)}:           {(StopBits == StopBits.OnePointFive ? "1.5" : ((int)StopBits).ToString())}");
+			sb.AppendLine($"  {nameof(Parity)}:             {Parity.ToString().ToLower()}");
+			sb.AppendLine($"  {nameof(Handshake)}:          {Handshake.ToString().ToLower()}");
+			sb.AppendLine($"  {nameof(RtsEnable)}:          {RtsEnable.ToString().ToLower()}");
+			sb.AppendLine($"  {nameof(DriverEnabledRS485)}: {DriverEnabledRS485.ToString().ToLower()}");
+
+			return sb.ToString();
 		}
 	}
 }

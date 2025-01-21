@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "--debug COM1",
+      "remoteDebugEnabled": false
+    }
+  }
+}

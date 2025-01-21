@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+
+    <AssemblyName>modbus-client</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.CliClient</RootNamespace>
+
+    <Product>Modbus CLI client</Product>
+    <Description>Small CLI client for Modbus communication.</Description>
+
+    <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="$(SolutionDir)/package-icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)\AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj" />
+    <ProjectReference Include="$(SolutionDir)\AMWD.Protocols.Modbus.Tcp\AMWD.Protocols.Modbus.Tcp.csproj" />
+  </ItemGroup>
+
+</Project>
