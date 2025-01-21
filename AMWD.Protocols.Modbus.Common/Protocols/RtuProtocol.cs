@@ -733,6 +733,10 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 		/// <summary>
 		/// Calculate CRC16 for Modbus RTU.
 		/// </summary>
+		/// <remarks>
+		/// The CRC 16 calculation algorithm is defined in the Modbus serial line specification.
+		/// See <see href="https://modbus.org/docs/Modbus_over_serial_line_V1_02.pdf">Modbus over Serial Line v1.02</see>, Appendix B, page 40.
+		/// </remarks>
 		/// <param name="bytes">The message bytes.</param>
 		/// <param name="start">The start index.</param>
 		/// <param name="length">The number of bytes to calculate.</param>

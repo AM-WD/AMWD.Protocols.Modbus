@@ -460,7 +460,7 @@ namespace AMWD.Protocols.Modbus.CliClient
 
 		private static void PrintHelp()
 		{
-			Console.WriteLine("Usage: amwd-modbus [OPTIONS] <serial-port>|<tcp-host>");
+			Console.WriteLine($"Usage: {typeof(Program).Assembly.GetName().Name} [OPTIONS] <serial-port>|<tcp-host>");
 			Console.WriteLine();
 			Console.WriteLine("Serial Port:");
 			Console.WriteLine("  COM1, COM2, ...                  on Windows");
@@ -522,7 +522,7 @@ namespace AMWD.Protocols.Modbus.CliClient
 			Console.WriteLine();
 			Console.WriteLine("Serial Options:");
 			Console.WriteLine("  -b, --baud #");
-			Console.WriteLine("    The baud rate (e.g. 9600, 19200, 38400, 115200). Default: 19200");
+			Console.WriteLine("    The baud rate (e.g. 9600). Default: 19200");
 			Console.WriteLine();
 			Console.WriteLine("  -d, --databits #");
 			Console.WriteLine("    The number of data bits (7/8 for ASCII, otherwise 8). Default: 8");
