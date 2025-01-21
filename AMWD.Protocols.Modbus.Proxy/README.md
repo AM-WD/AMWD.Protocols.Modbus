@@ -7,4 +7,8 @@ You can use any `ModbusBaseClient` implementation as target client and plug it i
 
 ---
 
-Published under MIT License (see [**tl;dr**Legal](https://www.tldrlegal.com/license/mit-license))
+Published under MIT License (see [choose a license])
+
+
+
+[choose a license]: https://choosealicense.com/licenses/mit/

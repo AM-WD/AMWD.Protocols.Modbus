@@ -44,10 +44,10 @@ using var client = new ModbusSerialClient(serialPort)
 
 ---
 
-Published under MIT License (see [**tl;dr**Legal])
+Published under MIT License (see [choose a license])
 
 
 
-[v1.1b3]:         https://modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf
-[v1.02]:          https://modbus.org/docs/Modbus_over_serial_line_V1_02.pdf
-[**tl;dr**Legal]: https://www.tldrlegal.com/license/mit-license
+[v1.1b3]:           https://modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf
+[v1.02]:            https://modbus.org/docs/Modbus_over_serial_line_V1_02.pdf
+[choose a license]: https://choosealicense.com/licenses/mit/

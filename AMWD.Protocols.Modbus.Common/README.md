@@ -68,9 +68,10 @@ This validation is _not_ implemented here due to real world experience, that som
 
 ---
 
-Published under MIT License (see [**tl;dr**Legal])
+Published under MIT License (see [choose a license])
 
 
 
-[RTU over TCP]: https://www.fernhillsoftware.com/help/drivers/modbus/modbus-protocol.html
-[**tl;dr**Legal]: https://www.tldrlegal.com/license/mit-license
+[RTU over TCP]:     https://www.fernhillsoftware.com/help/drivers/modbus/modbus-protocol.html
+[choose a license]: https://choosealicense.com/licenses/mit/
+

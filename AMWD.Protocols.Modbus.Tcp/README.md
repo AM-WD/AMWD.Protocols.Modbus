@@ -44,10 +44,10 @@ using var client = new ModbusTcpClient(host, port)
 
 ---
 
-Published under MIT License (see [**tl;dr**Legal])
+Published under MIT License (see [choose a license])
 
 
 
-[v1.1b3]:         https://modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf
-[v1.0b]:          https://modbus.org/docs/Modbus_Messaging_Implementation_Guide_V1_0b.pdf
-[**tl;dr**Legal]: https://www.tldrlegal.com/license/mit-license
+[v1.1b3]:           https://modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf
+[v1.0b]:            https://modbus.org/docs/Modbus_Messaging_Implementation_Guide_V1_0b.pdf
+[choose a license]: https://choosealicense.com/licenses/mit/
