@@ -370,7 +370,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleReadDiscreteInputsAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -409,7 +409,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleReadHoldingRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -443,7 +443,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleReadInputRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -477,7 +477,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteSingleCoilAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -494,7 +494,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -524,7 +525,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteSingleRegisterAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -564,7 +565,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteMultipleCoilsAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -583,7 +584,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -623,7 +625,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteMultipleRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -642,7 +644,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -679,7 +682,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleEncapsulatedInterfaceAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -691,7 +694,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalFunction);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 
 			var firstObject = (ModbusDeviceIdentificationObject)requestBytes[10];
@@ -699,7 +703,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataAddress);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 
 			var category = (ModbusDeviceIdentificationCategory)requestBytes[9];
@@ -707,7 +712,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -764,7 +770,8 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 						bodyBytes[5] = numberOfObjects;
 						responseBytes.AddRange(bodyBytes);
-						return [.. responseBytes];
+
+						return ReturnResponse(responseBytes);
 					}
 
 					bodyBytes.AddRange(objBytes);
@@ -773,13 +780,15 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 				bodyBytes[5] = numberOfObjects;
 				responseBytes.AddRange(bodyBytes);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 			catch
 			{
 				responseBytes[7] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
-				return [.. responseBytes];
+
+				return ReturnResponse(responseBytes);
 			}
 		}
 
@@ -861,6 +870,16 @@ namespace AMWD.Protocols.Modbus.Proxy
 			}
 
 			return [.. result];
+		}
+
+		private static byte[] ReturnResponse(List<byte> response)
+		{
+			ushort followingBytes = (ushort)(response.Count - 6);
+			byte[] bytes = followingBytes.ToBigEndianBytes();
+			response[4] = bytes[0];
+			response[5] = bytes[1];
+
+			return [.. response];
 		}
 
 		#endregion Request Handling

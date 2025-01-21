@@ -107,9 +107,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			set => _serialPort.PortName = value;
 		}
 
-		/// <summary>
-		/// Gets or sets the serial baud rate.
-		/// </summary>
+		/// <inheritdoc cref="SerialPort.BaudRate" />
 		public virtual BaudRate BaudRate
 		{
 			get => (BaudRate)_serialPort.BaudRate;
@@ -118,7 +116,11 @@ namespace AMWD.Protocols.Modbus.Serial
 
 		/// <inheritdoc cref="SerialPort.DataBits" />
 		/// <remarks>
-		/// Should be 7 for ASCII mode and 8 for RTU mode.
+		/// From the Specs:
+		/// <br/>
+		/// On <see cref="AsciiProtocol"/> it can be 7 or 8.
+		/// <br/>
+		/// On <see cref="RtuProtocol"/> it has to be 8.
 		/// </remarks>
 		public virtual int DataBits
 		{
@@ -159,9 +161,9 @@ namespace AMWD.Protocols.Modbus.Serial
 		/// <remarks>
 		/// From the Specs:
 		/// <br/>
-		/// Should be <see cref="StopBits.One"/> for <see cref="Parity.Even"/> or <see cref="Parity.Odd"/> and
+		/// Should be <see cref="StopBits.One"/> for <see cref="Parity.Even"/> or <see cref="Parity.Odd"/>.
 		/// <br/>
-		/// should be <see cref="StopBits.Two"/> for <see cref="Parity.None"/>.
+		/// Should be <see cref="StopBits.Two"/> for <see cref="Parity.None"/>.
 		/// </remarks>
 		public virtual StopBits StopBits
 		{
@@ -188,7 +190,6 @@ namespace AMWD.Protocols.Modbus.Serial
 
 			try
 			{
-				_processingTask.Wait();
 				_processingTask.Dispose();
 			}
 			catch

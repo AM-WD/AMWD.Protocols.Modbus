@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET6_0_OR_GREATER
+using System;
+#endif
 
 namespace AMWD.Protocols.Modbus.Common
 {

@@ -10,7 +10,9 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 	/// </summary>
 	/// <remarks>
 	/// The Modbus RTU over Modbus TCP is rarely used.
-	/// It is a non-standard variant of Modbus TCP that includes wrapps a Modbus RTU message within a Modbus TCP message.
+	/// It is a non-standard variant:
+	/// You can define it as RTU message with an additional TCP header
+	/// or as TCP message with an additional CRC16 checksum at the end (header not included!).
 	/// <br/>
 	/// Definition found on <see href="https://www.fernhillsoftware.com/help/drivers/modbus/modbus-protocol.html">Fernhill Software</see>.
 	/// </remarks>
