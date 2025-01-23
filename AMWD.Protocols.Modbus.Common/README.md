@@ -50,7 +50,8 @@ The different types handled by the Modbus Protocol.
 In addition, you'll find the `DeviceIdentification` there.    
 It is used for a "special" function called _Read Device Identification_ (0x2B / 43), not supported on all devices.
 
-The `ModbusDevice` is used for the server implementations in the derived packages.
+The `ModbusDevice` is used for the `VirtualModbusClient`.    
+In combination with the *Proxy implementations (in the derived packages) it can be used as server.
 
 
 ### Protocols

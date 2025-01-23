@@ -119,12 +119,12 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			request[7] = (byte)ModbusFunctionCode.ReadCoils;
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
@@ -182,12 +182,12 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			request[7] = (byte)ModbusFunctionCode.ReadDiscreteInputs;
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
@@ -245,12 +245,12 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			request[7] = (byte)ModbusFunctionCode.ReadHoldingRegisters;
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
@@ -305,12 +305,12 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			request[7] = (byte)ModbusFunctionCode.ReadInputRegisters;
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
@@ -432,7 +432,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.WriteSingleCoil;
 
-			byte[] addrBytes = coil.Address.ToBigEndianBytes();
+			var addrBytes = coil.Address.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
@@ -479,7 +479,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			// Function code
 			request[7] = (byte)ModbusFunctionCode.WriteSingleRegister;
 
-			byte[] addrBytes = register.Address.ToBigEndianBytes();
+			var addrBytes = register.Address.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
@@ -542,12 +542,12 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			request[7] = (byte)ModbusFunctionCode.WriteMultipleCoils;
 
 			// Starting address
-			byte[] addrBytes = firstAddress.ToBigEndianBytes();
+			var addrBytes = firstAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
 			// Quantity
-			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
+			var countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
@@ -622,12 +622,12 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			request[7] = (byte)ModbusFunctionCode.WriteMultipleRegisters;
 
 			// Starting address
-			byte[] addrBytes = firstAddress.ToBigEndianBytes();
+			var addrBytes = firstAddress.ToBigEndianBytes();
 			request[8] = addrBytes[0];
 			request[9] = addrBytes[1];
 
 			// Quantity
-			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
+			var countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
 			request[10] = countBytes[0];
 			request[11] = countBytes[1];
 
@@ -747,7 +747,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 			// Transaction id
 			ushort txId = GetNextTransacitonId();
-			byte[] txBytes = txId.ToBigEndianBytes();
+			var txBytes = txId.ToBigEndianBytes();
 			header[0] = txBytes[0];
 			header[1] = txBytes[1];
 
@@ -756,7 +756,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			header[3] = 0x00;
 
 			// Number of following bytes
-			byte[] countBytes = ((ushort)followingBytes).ToBigEndianBytes();
+			var countBytes = ((ushort)followingBytes).ToBigEndianBytes();
 			header[4] = countBytes[0];
 			header[5] = countBytes[1];
 

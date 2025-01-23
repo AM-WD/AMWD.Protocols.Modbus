@@ -92,11 +92,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadCoils:X2}";
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
 			// LRC
@@ -151,11 +151,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadDiscreteInputs:X2}";
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
 			// LRC
@@ -209,11 +209,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadHoldingRegisters:X2}";
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
 			// LRC
@@ -264,11 +264,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.ReadInputRegisters:X2}";
 
 			// Starting address
-			byte[] addrBytes = startAddress.ToBigEndianBytes();
+			var addrBytes = startAddress.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
-			byte[] countBytes = count.ToBigEndianBytes();
+			var countBytes = count.ToBigEndianBytes();
 			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
 			// LRC
@@ -383,7 +383,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteSingleCoil:X2}";
 
 			// Starting address
-			byte[] addrBytes = coil.Address.ToBigEndianBytes();
+			var addrBytes = coil.Address.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Value
@@ -426,7 +426,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteSingleRegister:X2}";
 
 			// Starting address
-			byte[] addrBytes = register.Address.ToBigEndianBytes();
+			var addrBytes = register.Address.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Value
@@ -497,11 +497,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteMultipleCoils:X2}";
 
 			// Starting address
-			byte[] addrBytes = firstAddress.ToBigEndianBytes();
+			var addrBytes = firstAddress.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
-			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
+			var countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
 			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
 			// Byte count
@@ -567,11 +567,11 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			string request = $":{unitId:X2}{(byte)ModbusFunctionCode.WriteMultipleRegisters:X2}";
 
 			// Starting address
-			byte[] addrBytes = firstAddress.ToBigEndianBytes();
+			var addrBytes = firstAddress.ToBigEndianBytes();
 			request += $"{addrBytes[0]:X2}{addrBytes[1]:X2}";
 
 			// Quantity
-			byte[] countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
+			var countBytes = ((ushort)orderedList.Count).ToBigEndianBytes();
 			request += $"{countBytes[0]:X2}{countBytes[1]:X2}";
 
 			// Byte count

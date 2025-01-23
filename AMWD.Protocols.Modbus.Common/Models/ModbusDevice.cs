@@ -11,7 +11,7 @@ namespace AMWD.Protocols.Modbus.Common.Models
 	/// Initializes a new instance of the <see cref="ModbusDevice"/> class.
 	/// </remarks>
 	/// <param name="id">The <see cref="ModbusDevice"/> ID.</param>
-	public class ModbusDevice(byte id) : IDisposable
+	internal class ModbusDevice(byte id) : IDisposable
 	{
 		private readonly ReaderWriterLockSlim _rwLockCoils = new();
 		private readonly ReaderWriterLockSlim _rwLockDiscreteInputs = new();
