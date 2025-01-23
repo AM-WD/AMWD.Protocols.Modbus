@@ -16,7 +16,7 @@ namespace AMWD.Protocols.Modbus.Serial
 		/// </summary>
 		/// <param name="portName">The name of the serial port to use.</param>
 		public ModbusSerialClient(string portName)
-			: this(new ModbusSerialConnection { PortName = portName })
+			: this(new ModbusSerialConnection(portName))
 		{ }
 
 		/// <summary>
@@ -41,8 +41,8 @@ namespace AMWD.Protocols.Modbus.Serial
 			Protocol = new RtuProtocol();
 		}
 
-		/// <inheritdoc cref="SerialPort.GetPortNames" />
-		public static string[] AvailablePortNames => SerialPort.GetPortNames();
+		/// <inheritdoc cref="ModbusSerialConnection.AvailablePortNames" />
+		public static string[] AvailablePortNames => ModbusSerialConnection.AvailablePortNames;
 
 		/// <inheritdoc cref="IModbusConnection.IdleTimeout"/>
 		public TimeSpan IdleTimeout

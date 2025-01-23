@@ -20,6 +20,39 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 
 		#endregion Fields
 
+		#region Constructor
+
+		public SerialPortWrapper()
+		{
+			_serialPort.DataReceived += OnDataReceived;
+			_serialPort.PinChanged += OnPinChanged;
+			_serialPort.ErrorReceived += OnErrorReceived;
+		}
+
+		#endregion Constructor
+
+		#region Events
+
+		/// <inheritdoc cref="SerialPort.DataReceived"/>
+		public virtual event SerialDataReceivedEventHandler DataReceived;
+
+		/// <inheritdoc cref="SerialPort.PinChanged"/>
+		public virtual event SerialPinChangedEventHandler PinChanged;
+
+		/// <inheritdoc cref="SerialPort.ErrorReceived"/>
+		public virtual event SerialErrorReceivedEventHandler ErrorReceived;
+
+		private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
+			=> DataReceived?.Invoke(sender, e);
+
+		private void OnPinChanged(object sender, SerialPinChangedEventArgs e)
+			=> PinChanged?.Invoke(sender, e);
+
+		private void OnErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+			=> ErrorReceived?.Invoke(sender, e);
+
+		#endregion Events
+
 		#region Properties
 
 		/// <inheritdoc cref="SerialPort.Handshake"/>
@@ -82,12 +115,20 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 			set => _serialPort.Parity = value;
 		}
 
+		/// <inheritdoc cref="SerialPort.BytesToWrite"/>
+		public virtual int BytesToWrite
+			=> _serialPort.BytesToWrite;
+
 		/// <inheritdoc cref="SerialPort.BaudRate"/>
 		public virtual int BaudRate
 		{
 			get => _serialPort.BaudRate;
 			set => _serialPort.BaudRate = value;
 		}
+
+		/// <inheritdoc cref="SerialPort.BytesToRead"/>
+		public virtual int BytesToRead
+			=> _serialPort.BytesToRead;
 
 		#endregion Properties
 
@@ -100,6 +141,14 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 		/// <inheritdoc cref="SerialPort.Open"/>
 		public virtual void Open()
 			=> _serialPort.Open();
+
+		/// <inheritdoc cref="SerialPort.Read(byte[], int, int)"/>
+		public virtual int Read(byte[] buffer, int offset, int count)
+			=> _serialPort.Read(buffer, offset, count);
+
+		/// <inheritdoc cref="SerialPort.Write(byte[], int, int)"/>
+		public virtual void Write(byte[] buffer, int offset, int count)
+			=> _serialPort.Write(buffer, offset, count);
 
 		/// <inheritdoc cref="SerialPort.Dispose"/>
 		public virtual void Dispose()
@@ -117,7 +166,7 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 		/// <remarks>
 		/// There seems to be a bug with the async stream implementation on Windows.
 		/// <br/>
-		/// See this StackOverflow answer: <see href="https://stackoverflow.com/a/54610437/11906695" />
+		/// See this StackOverflow answer: <see href="https://stackoverflow.com/a/54610437/11906695" />.
 		/// </remarks>
 		/// <param name="buffer">The buffer to write the data into.</param>
 		/// <param name="offset">The byte offset in buffer at which to begin writing data from the serial port.</param>

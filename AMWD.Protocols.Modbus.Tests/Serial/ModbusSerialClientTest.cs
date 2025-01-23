@@ -13,13 +13,15 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 		[TestInitialize]
 		public void Initialize()
 		{
+			string portName = "COM-42";
+
 			_genericConnectionMock = new Mock<IModbusConnection>();
 			_genericConnectionMock.Setup(c => c.IdleTimeout).Returns(TimeSpan.FromSeconds(40));
 			_genericConnectionMock.Setup(c => c.ConnectTimeout).Returns(TimeSpan.FromSeconds(30));
 			_genericConnectionMock.Setup(c => c.ReadTimeout).Returns(TimeSpan.FromSeconds(20));
 			_genericConnectionMock.Setup(c => c.WriteTimeout).Returns(TimeSpan.FromSeconds(10));
 
-			_serialConnectionMock = new Mock<ModbusSerialConnection>();
+			_serialConnectionMock = new Mock<ModbusSerialConnection>(portName);
 
 			_serialConnectionMock.Setup(c => c.IdleTimeout).Returns(TimeSpan.FromSeconds(10));
 			_serialConnectionMock.Setup(c => c.ConnectTimeout).Returns(TimeSpan.FromSeconds(20));
@@ -28,7 +30,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			_serialConnectionMock.Setup(c => c.DriverEnabledRS485).Returns(true);
 			_serialConnectionMock.Setup(c => c.InterRequestDelay).Returns(TimeSpan.FromSeconds(50));
-			_serialConnectionMock.Setup(c => c.PortName).Returns("COM-42");
+			_serialConnectionMock.Setup(c => c.PortName).Returns(portName);
 			_serialConnectionMock.Setup(c => c.BaudRate).Returns(BaudRate.Baud2400);
 			_serialConnectionMock.Setup(c => c.DataBits).Returns(7);
 			_serialConnectionMock.Setup(c => c.Handshake).Returns(Handshake.XOnXOff);
@@ -230,6 +232,19 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_serialConnectionMock.VerifySet(c => c.WriteTimeout = TimeSpan.FromSeconds(10), Times.Once);
 
 			_serialConnectionMock.VerifyNoOtherCalls();
+		}
+
+		[TestMethod]
+		public void ShouldPrintCleanString()
+		{
+			// Arrange
+			using var client = new ModbusSerialClient(_serialConnectionMock.Object);
+
+			// Act
+			string str = client.ToString();
+
+			// Assert
+			SnapshotAssert.AreEqual(str);
 		}
 	}
 }

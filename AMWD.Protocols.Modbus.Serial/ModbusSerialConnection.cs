@@ -39,10 +39,15 @@ namespace AMWD.Protocols.Modbus.Serial
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ModbusSerialConnection"/> class.
 		/// </summary>
-		public ModbusSerialConnection()
+		public ModbusSerialConnection(string portName)
 		{
+			if (string.IsNullOrWhiteSpace(portName))
+				throw new ArgumentNullException(nameof(portName));
+
 			_serialPort = new SerialPortWrapper
 			{
+				PortName = portName,
+
 				BaudRate = (int)BaudRate.Baud19200,
 				DataBits = 8,
 				Handshake = Handshake.None,
@@ -59,6 +64,9 @@ namespace AMWD.Protocols.Modbus.Serial
 
 		#region Properties
 
+		/// <inheritdoc cref="SerialPort.GetPortNames" />
+		public static string[] AvailablePortNames => SerialPort.GetPortNames();
+
 		/// <inheritdoc/>
 		public string Name => "Serial";
 
@@ -67,20 +75,6 @@ namespace AMWD.Protocols.Modbus.Serial
 
 		/// <inheritdoc/>
 		public virtual TimeSpan ConnectTimeout { get; set; } = TimeSpan.MaxValue;
-
-		/// <inheritdoc/>
-		public virtual TimeSpan ReadTimeout
-		{
-			get => TimeSpan.FromMilliseconds(_serialPort.ReadTimeout);
-			set => _serialPort.ReadTimeout = (int)value.TotalMilliseconds;
-		}
-
-		/// <inheritdoc/>
-		public virtual TimeSpan WriteTimeout
-		{
-			get => TimeSpan.FromMilliseconds(_serialPort.WriteTimeout);
-			set => _serialPort.WriteTimeout = (int)value.TotalMilliseconds;
-		}
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the RS485 driver has to be enabled via software switch.
@@ -169,6 +163,20 @@ namespace AMWD.Protocols.Modbus.Serial
 		{
 			get => _serialPort.StopBits;
 			set => _serialPort.StopBits = value;
+		}
+
+		/// <inheritdoc/>
+		public virtual TimeSpan ReadTimeout
+		{
+			get => TimeSpan.FromMilliseconds(_serialPort.ReadTimeout);
+			set => _serialPort.ReadTimeout = (int)value.TotalMilliseconds;
+		}
+
+		/// <inheritdoc/>
+		public virtual TimeSpan WriteTimeout
+		{
+			get => TimeSpan.FromMilliseconds(_serialPort.WriteTimeout);
+			set => _serialPort.WriteTimeout = (int)value.TotalMilliseconds;
 		}
 
 		#endregion SerialPort Properties

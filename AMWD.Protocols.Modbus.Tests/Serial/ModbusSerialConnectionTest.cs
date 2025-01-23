@@ -90,6 +90,21 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			connection.Dispose();
 		}
 
+		[DataTestMethod]
+		[DataRow(null)]
+		[DataRow("")]
+		[DataRow("  ")]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ShouldThrowArgumentNullExceptionOnCreate(string portName)
+		{
+			// Arrange
+
+			// Act
+			using var test = new ModbusSerialClient(portName);
+
+			// Assert - ArgumentNullException
+		}
+
 		[TestMethod]
 		[ExpectedException(typeof(ObjectDisposedException))]
 		public async Task ShouldThrowDisposedExceptionOnInvokeAsync()
@@ -467,7 +482,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 					return Task.FromResult(0);
 				});
 
-			var connection = new ModbusSerialConnection();
+			var connection = new ModbusSerialConnection("some-port");
 
 			// Replace real connection with mock
 			var connectionField = connection.GetType().GetField("_serialPort", BindingFlags.NonPublic | BindingFlags.Instance);
