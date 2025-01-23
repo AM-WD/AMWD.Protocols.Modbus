@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The `ModbusTcpProxy.ReadWriteTimeout` has a default value of 100 seconds (same default as a `HttpClient` has).
+- The `ModbusRtuProxy` moved from `AMWD.Protocols.Modbus.Proxy` to `AMWD.Protocols.Modbus.Serial`.
+- The `ModbusTcpProxy` moved from `AMWD.Protocols.Modbus.Proxy` to `AMWD.Protocols.Modbus.Tcp`.
+
+### Removed
+
+- The `AMWD.Protocols.Modbus.Proxy` (introduced in [v0.3.0]) has been removed.
 
 ### Fixed
 

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using AMWD.Protocols.Modbus.Common;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Common.Protocols;
-using AMWD.Protocols.Modbus.Serial;
+using AMWD.Protocols.Modbus.Serial.Utils;
 
-namespace AMWD.Protocols.Modbus.Proxy
+namespace AMWD.Protocols.Modbus.Serial
 {
 	/// <summary>
 	/// Implements a Modbus serial line RTU server proxying all requests to a Modbus client of choice.
@@ -21,7 +21,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 		private bool _isDisposed;
 
-		private readonly SerialPort _serialPort;
+		private readonly SerialPortWrapper _serialPort;
 		private CancellationTokenSource _stopCts;
 
 		#endregion Fields
@@ -33,31 +33,25 @@ namespace AMWD.Protocols.Modbus.Proxy
 		/// </summary>
 		/// <param name="client">The <see cref="ModbusClientBase"/> used to request the remote device, that should be proxied.</param>
 		/// <param name="portName">The name of the serial port to use.</param>
-		/// <param name="baudRate">The baud rate of the serial port (Default: 19.200).</param>
-		public ModbusRtuProxy(ModbusClientBase client, string portName, BaudRate baudRate = BaudRate.Baud19200)
+		public ModbusRtuProxy(ModbusClientBase client, string portName)
 		{
 			Client = client ?? throw new ArgumentNullException(nameof(client));
 
 			if (string.IsNullOrWhiteSpace(portName))
 				throw new ArgumentNullException(nameof(portName));
 
-			if (!Enum.IsDefined(typeof(BaudRate), baudRate))
-				throw new ArgumentOutOfRangeException(nameof(baudRate));
-
-			if (!ModbusSerialClient.AvailablePortNames.Contains(portName))
-				throw new ArgumentException($"The serial port ({portName}) is not available.", nameof(portName));
-
-			_serialPort = new SerialPort
+			_serialPort = new SerialPortWrapper
 			{
 				PortName = portName,
-				BaudRate = (int)baudRate,
-				Handshake = Handshake.None,
+
+				BaudRate = (int)BaudRate.Baud19200,
 				DataBits = 8,
-				ReadTimeout = 1000,
-				RtsEnable = false,
 				StopBits = StopBits.One,
+				Parity = Parity.Even,
+				Handshake = Handshake.None,
+				ReadTimeout = 1000,
 				WriteTimeout = 1000,
-				Parity = Parity.Even
+				RtsEnable = false,
 			};
 		}
 
@@ -70,73 +64,101 @@ namespace AMWD.Protocols.Modbus.Proxy
 		/// </summary>
 		public ModbusClientBase Client { get; }
 
-		/// <inheritdoc cref="SerialPort.PortName"/>
-		public string PortName => _serialPort.PortName;
+		#region SerialPort Properties
 
-		/// <summary>
-		/// Gets or sets the baud rate of the serial port.
-		/// </summary>
-		public BaudRate BaudRate
+		/// <inheritdoc cref="SerialPort.PortName" />
+		public virtual string PortName
+		{
+			get => _serialPort.PortName;
+			set => _serialPort.PortName = value;
+		}
+
+		/// <inheritdoc cref="SerialPort.BaudRate" />
+		public virtual BaudRate BaudRate
 		{
 			get => (BaudRate)_serialPort.BaudRate;
 			set => _serialPort.BaudRate = (int)value;
 		}
 
-		/// <inheritdoc cref="SerialPort.Handshake"/>
-		public Handshake Handshake
-		{
-			get => _serialPort.Handshake;
-			set => _serialPort.Handshake = value;
-		}
-
-		/// <inheritdoc cref="SerialPort.DataBits"/>
-		public int DataBits
+		/// <inheritdoc cref="SerialPort.DataBits" />
+		/// <remarks>
+		/// From the Specs:
+		/// <br/>
+		/// On <see cref="AsciiProtocol"/> it can be 7 or 8.
+		/// <br/>
+		/// On <see cref="RtuProtocol"/> it has to be 8.
+		/// </remarks>
+		public virtual int DataBits
 		{
 			get => _serialPort.DataBits;
 			set => _serialPort.DataBits = value;
 		}
 
-		/// <inheritdoc cref="SerialPort.IsOpen"/>
-		public bool IsOpen => _serialPort.IsOpen;
-
-		/// <summary>
-		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a read operation does not finish.
-		/// </summary>
-		public TimeSpan ReadTimeout
+		/// <inheritdoc cref="SerialPort.Handshake" />
+		public virtual Handshake Handshake
 		{
-			get => TimeSpan.FromMilliseconds(_serialPort.ReadTimeout);
-			set => _serialPort.ReadTimeout = (int)value.TotalMilliseconds;
+			get => _serialPort.Handshake;
+			set => _serialPort.Handshake = value;
 		}
 
-		/// <inheritdoc cref="SerialPort.RtsEnable"/>
-		public bool RtsEnable
+		/// <inheritdoc cref="SerialPort.Parity" />
+		/// <remarks>
+		/// From the Specs:
+		/// <br/>
+		/// <see cref="Parity.Even"/> is recommended and therefore the default value.
+		/// <br/>
+		/// If you use <see cref="Parity.None"/>, <see cref="StopBits.Two"/> is required,
+		/// otherwise <see cref="StopBits.One"/> should work fine.
+		/// </remarks>
+		public virtual Parity Parity
+		{
+			get => _serialPort.Parity;
+			set => _serialPort.Parity = value;
+		}
+
+		/// <inheritdoc cref="SerialPort.RtsEnable" />
+		public virtual bool RtsEnable
 		{
 			get => _serialPort.RtsEnable;
 			set => _serialPort.RtsEnable = value;
 		}
 
-		/// <inheritdoc cref="SerialPort.StopBits"/>
-		public StopBits StopBits
+		/// <inheritdoc cref="SerialPort.StopBits" />
+		/// <remarks>
+		/// From the Specs:
+		/// <br/>
+		/// Should be <see cref="StopBits.One"/> for <see cref="Parity.Even"/> or <see cref="Parity.Odd"/>.
+		/// <br/>
+		/// Should be <see cref="StopBits.Two"/> for <see cref="Parity.None"/>.
+		/// </remarks>
+		public virtual StopBits StopBits
 		{
 			get => _serialPort.StopBits;
 			set => _serialPort.StopBits = value;
 		}
 
+		/// <inheritdoc cref="SerialPortWrapper.IsOpen"/>
+		public bool IsOpen => _serialPort.IsOpen;
+
 		/// <summary>
-		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a write operation does not finish.
+		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a read/receive operation does not finish.
 		/// </summary>
-		public TimeSpan WriteTimeout
+		public virtual TimeSpan ReadTimeout
+		{
+			get => TimeSpan.FromMilliseconds(_serialPort.ReadTimeout);
+			set => _serialPort.ReadTimeout = (int)value.TotalMilliseconds;
+		}
+
+		/// <summary>
+		/// Gets or sets the <see cref="TimeSpan"/> before a time-out occurs when a write/send operation does not finish.
+		/// </summary>
+		public virtual TimeSpan WriteTimeout
 		{
 			get => TimeSpan.FromMilliseconds(_serialPort.WriteTimeout);
 			set => _serialPort.WriteTimeout = (int)value.TotalMilliseconds;
 		}
 
-		/// <inheritdoc cref="SerialPort.Parity"/>
-		public Parity Parity
-		{
-			get => _serialPort.Parity;
-			set => _serialPort.Parity = value;
-		}
+		#endregion SerialPort Properties
 
 		#endregion Properties
 
@@ -175,7 +197,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 		private Task StopAsyncInternal(CancellationToken cancellationToken)
 		{
-			_stopCts.Cancel();
+			_stopCts?.Cancel();
 
 			_serialPort.Close();
 			_serialPort.DataReceived -= OnDataReceived;
@@ -207,13 +229,16 @@ namespace AMWD.Protocols.Modbus.Proxy
 			if (_isDisposed)
 				throw new ObjectDisposedException(GetType().FullName);
 #endif
+
+			if (string.IsNullOrWhiteSpace(PortName))
+				throw new ArgumentNullException(nameof(PortName), "The serial port name cannot be empty.");
 		}
 
 		#endregion Control Methods
 
 		#region Client Handling
 
-		private void OnDataReceived(object _, SerialDataReceivedEventArgs evArgs)
+		private void OnDataReceived(object _, SerialDataReceivedEventArgs __)
 		{
 			try
 			{
@@ -282,16 +307,14 @@ namespace AMWD.Protocols.Modbus.Proxy
 
 				default: // unknown function
 					{
-						byte[] responseBytes = new byte[5];
-						Array.Copy(requestBytes, 0, responseBytes, 0, 2);
+						var responseBytes = new List<byte>();
+						responseBytes.AddRange(requestBytes.Take(2));
+						responseBytes.Add((byte)ModbusErrorCode.IllegalFunction);
 
 						// Mark as error
 						responseBytes[1] |= 0x80;
 
-						responseBytes[2] = (byte)ModbusErrorCode.IllegalFunction;
-
-						SetCrc(responseBytes);
-						return responseBytes;
+						return ReturnResponse(responseBytes);
 					}
 			}
 		}
@@ -332,8 +355,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleReadDiscreteInputsAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -372,8 +394,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleReadHoldingRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -407,8 +428,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleReadInputRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -442,8 +462,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteSingleCoilAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -461,8 +480,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -492,8 +510,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteSingleRegisterAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -532,8 +549,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteMultipleCoilsAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -553,8 +569,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -594,8 +609,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleWriteMultipleRegistersAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -615,8 +629,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -653,8 +666,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 			}
 
-			AddCrc(responseBytes);
-			return [.. responseBytes];
+			return ReturnResponse(responseBytes);
 		}
 
 		private async Task<byte[]> HandleEncapsulatedInterfaceAsync(byte[] requestBytes, CancellationToken cancellationToken)
@@ -667,8 +679,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalFunction);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 
 			var firstObject = (ModbusDeviceIdentificationObject)requestBytes[4];
@@ -677,8 +688,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataAddress);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 
 			var category = (ModbusDeviceIdentificationCategory)requestBytes[3];
@@ -687,8 +697,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.IllegalDataValue);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 
 			try
@@ -755,16 +764,14 @@ namespace AMWD.Protocols.Modbus.Proxy
 				bodyBytes[5] = numberOfObjects;
 				responseBytes.AddRange(bodyBytes);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 			catch
 			{
 				responseBytes[1] |= 0x80;
 				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 
-				AddCrc(responseBytes);
-				return [.. responseBytes];
+				return ReturnResponse(responseBytes);
 			}
 		}
 
@@ -848,18 +855,10 @@ namespace AMWD.Protocols.Modbus.Proxy
 			return [.. result];
 		}
 
-		private static void SetCrc(byte[] bytes)
+		private static byte[] ReturnResponse(List<byte> response)
 		{
-			byte[] crc = RtuProtocol.CRC16(bytes, 0, bytes.Length - 2);
-			bytes[bytes.Length - 2] = crc[0];
-			bytes[bytes.Length - 1] = crc[1];
-		}
-
-		private static void AddCrc(List<byte> bytes)
-		{
-			byte[] crc = RtuProtocol.CRC16(bytes);
-			bytes.Add(crc[0]);
-			bytes.Add(crc[1]);
+			response.AddRange(RtuProtocol.CRC16(response));
+			return [.. response];
 		}
 
 		#endregion Request Handling

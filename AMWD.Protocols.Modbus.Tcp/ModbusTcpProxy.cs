@@ -11,7 +11,7 @@ using AMWD.Protocols.Modbus.Common;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Common.Protocols;
 
-namespace AMWD.Protocols.Modbus.Proxy
+namespace AMWD.Protocols.Modbus.Tcp
 {
 	/// <summary>
 	/// Implements a Modbus TCP server proxying all requests to a Modbus client of choice.
@@ -875,7 +875,7 @@ namespace AMWD.Protocols.Modbus.Proxy
 		private static byte[] ReturnResponse(List<byte> response)
 		{
 			ushort followingBytes = (ushort)(response.Count - 6);
-			byte[] bytes = followingBytes.ToBigEndianBytes();
+			var bytes = followingBytes.ToBigEndianBytes();
 			response[4] = bytes[0];
 			response[5] = bytes[1];
 

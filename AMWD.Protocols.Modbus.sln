@@ -35,9 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AMWD.Protocols.Modbus.Tcp",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AMWD.Protocols.Modbus.Serial", "AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj", "{D966826F-EE6C-4BC0-9185-C2A9A50FD586}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AMWD.Protocols.Modbus.Proxy", "AMWD.Protocols.Modbus.Proxy\AMWD.Protocols.Modbus.Proxy.csproj", "{C30EBE45-E3B8-4997-95DF-8F94B31C8E1A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLI Client", "CliClient\CliClient.csproj", "{B0E53462-B0ED-4685-8AA5-948DC160EE27}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CliClient", "CliClient\CliClient.csproj", "{B0E53462-B0ED-4685-8AA5-948DC160EE27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,10 +59,6 @@ Global
 		{D966826F-EE6C-4BC0-9185-C2A9A50FD586}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D966826F-EE6C-4BC0-9185-C2A9A50FD586}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D966826F-EE6C-4BC0-9185-C2A9A50FD586}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C30EBE45-E3B8-4997-95DF-8F94B31C8E1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C30EBE45-E3B8-4997-95DF-8F94B31C8E1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C30EBE45-E3B8-4997-95DF-8F94B31C8E1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C30EBE45-E3B8-4997-95DF-8F94B31C8E1A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B0E53462-B0ED-4685-8AA5-948DC160EE27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B0E53462-B0ED-4685-8AA5-948DC160EE27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0E53462-B0ED-4685-8AA5-948DC160EE27}.Release|Any CPU.ActiveCfg = Release|Any CPU
