@@ -618,7 +618,7 @@ namespace AMWD.Protocols.Modbus.Serial
 				return null;
 
 			var responseBytes = new List<byte>();
-			responseBytes.AddRange(requestBytes.Take(8));
+			responseBytes.AddRange(requestBytes.Take(2));
 
 			ushort firstAddress = requestBytes.GetBigEndianUInt16(2);
 			ushort count = requestBytes.GetBigEndianUInt16(4);
@@ -646,18 +646,18 @@ namespace AMWD.Protocols.Modbus.Serial
 						HighByte = requestBytes[baseOffset + i * 2],
 						LowByte = requestBytes[baseOffset + i * 2 + 1]
 					});
+				}
 
-					bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[0], list, cancellationToken);
-					if (isSuccess)
-					{
-						// Response is an echo of the request
-						responseBytes.AddRange(requestBytes.Skip(2).Take(4));
-					}
-					else
-					{
-						responseBytes[1] |= 0x80;
-						responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
-					}
+				bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[0], list, cancellationToken);
+				if (isSuccess)
+				{
+					// Response is an echo of the request
+					responseBytes.AddRange(requestBytes.Skip(2).Take(4));
+				}
+				else
+				{
+					responseBytes[1] |= 0x80;
+					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
 			catch
@@ -671,6 +671,9 @@ namespace AMWD.Protocols.Modbus.Serial
 
 		private async Task<byte[]> HandleEncapsulatedInterfaceAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
+			if (requestBytes.Length < 7)
+				return null;
+
 			var responseBytes = new List<byte>();
 			responseBytes.AddRange(requestBytes.Take(2));
 
@@ -702,7 +705,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 			try
 			{
-				var res = await Client.ReadDeviceIdentificationAsync(requestBytes[6], category, firstObject, cancellationToken);
+				var deviceInfo = await Client.ReadDeviceIdentificationAsync(requestBytes[0], category, firstObject, cancellationToken);
 
 				var bodyBytes = new List<byte>();
 
@@ -711,31 +714,20 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				// Conformity
 				bodyBytes.Add((byte)category);
-				if (res.IsIndividualAccessAllowed)
+				if (deviceInfo.IsIndividualAccessAllowed)
 					bodyBytes[2] |= 0x80;
 
 				// More, NextId, NumberOfObjects
 				bodyBytes.AddRange(new byte[3]);
 
-				int maxObjectId;
-				switch (category)
+				int maxObjectId = category switch
 				{
-					case ModbusDeviceIdentificationCategory.Basic:
-						maxObjectId = 0x02;
-						break;
-
-					case ModbusDeviceIdentificationCategory.Regular:
-						maxObjectId = 0x06;
-						break;
-
-					case ModbusDeviceIdentificationCategory.Extended:
-						maxObjectId = 0xFF;
-						break;
-
-					default: // Individual
-						maxObjectId = requestBytes[4];
-						break;
-				}
+					ModbusDeviceIdentificationCategory.Basic => 0x02,
+					ModbusDeviceIdentificationCategory.Regular => 0x06,
+					ModbusDeviceIdentificationCategory.Extended => 0xFF,
+					// Individual
+					_ => requestBytes[4],
+				};
 
 				byte numberOfObjects = 0;
 				for (int i = requestBytes[4]; i <= maxObjectId; i++)
@@ -744,7 +736,7 @@ namespace AMWD.Protocols.Modbus.Serial
 					if (0x07 <= i && i <= 0x7F)
 						continue;
 
-					byte[] objBytes = GetDeviceObject((byte)i, res);
+					byte[] objBytes = GetDeviceObject((byte)i, deviceInfo);
 
 					// We need to split the response if it would exceed the max ADU size
 					if (responseBytes.Count + bodyBytes.Count + objBytes.Length > RtuProtocol.MAX_ADU_LENGTH)
@@ -754,7 +746,8 @@ namespace AMWD.Protocols.Modbus.Serial
 
 						bodyBytes[5] = numberOfObjects;
 						responseBytes.AddRange(bodyBytes);
-						return [.. responseBytes];
+
+						return ReturnResponse(responseBytes);
 					}
 
 					bodyBytes.AddRange(objBytes);
@@ -782,7 +775,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			{
 				case ModbusDeviceIdentificationObject.VendorName:
 					{
-						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.VendorName);
+						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.VendorName ?? "");
 						result.Add((byte)bytes.Length);
 						result.AddRange(bytes);
 					}
@@ -790,7 +783,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				case ModbusDeviceIdentificationObject.ProductCode:
 					{
-						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.ProductCode);
+						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.ProductCode ?? "");
 						result.Add((byte)bytes.Length);
 						result.AddRange(bytes);
 					}
@@ -798,7 +791,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				case ModbusDeviceIdentificationObject.MajorMinorRevision:
 					{
-						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.MajorMinorRevision);
+						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.MajorMinorRevision ?? "");
 						result.Add((byte)bytes.Length);
 						result.AddRange(bytes);
 					}
@@ -806,7 +799,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				case ModbusDeviceIdentificationObject.VendorUrl:
 					{
-						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.VendorUrl);
+						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.VendorUrl ?? "");
 						result.Add((byte)bytes.Length);
 						result.AddRange(bytes);
 					}
@@ -814,7 +807,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				case ModbusDeviceIdentificationObject.ProductName:
 					{
-						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.ProductName);
+						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.ProductName ?? "");
 						result.Add((byte)bytes.Length);
 						result.AddRange(bytes);
 					}
@@ -822,7 +815,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				case ModbusDeviceIdentificationObject.ModelName:
 					{
-						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.ModelName);
+						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.ModelName ?? "");
 						result.Add((byte)bytes.Length);
 						result.AddRange(bytes);
 					}
@@ -830,7 +823,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				case ModbusDeviceIdentificationObject.UserApplicationName:
 					{
-						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.UserApplicationName);
+						byte[] bytes = Encoding.UTF8.GetBytes(deviceIdentification.UserApplicationName ?? "");
 						result.Add((byte)bytes.Length);
 						result.AddRange(bytes);
 					}

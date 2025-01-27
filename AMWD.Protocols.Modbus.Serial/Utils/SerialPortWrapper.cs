@@ -24,9 +24,9 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 
 		public SerialPortWrapper()
 		{
-			_serialPort.DataReceived += OnDataReceived;
-			_serialPort.PinChanged += OnPinChanged;
-			_serialPort.ErrorReceived += OnErrorReceived;
+			_serialPort.DataReceived += (sender, e) => DataReceived?.Invoke(this, e);
+			_serialPort.PinChanged += (sender, e) => PinChanged?.Invoke(this, e);
+			_serialPort.ErrorReceived += (sender, e) => ErrorReceived?.Invoke(this, e);
 		}
 
 		#endregion Constructor
@@ -41,15 +41,6 @@ namespace AMWD.Protocols.Modbus.Serial.Utils
 
 		/// <inheritdoc cref="SerialPort.ErrorReceived"/>
 		public virtual event SerialErrorReceivedEventHandler ErrorReceived;
-
-		private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
-			=> DataReceived?.Invoke(sender, e);
-
-		private void OnPinChanged(object sender, SerialPinChangedEventArgs e)
-			=> PinChanged?.Invoke(sender, e);
-
-		private void OnErrorReceived(object sender, SerialErrorReceivedEventArgs e)
-			=> ErrorReceived?.Invoke(sender, e);
 
 		#endregion Events
 

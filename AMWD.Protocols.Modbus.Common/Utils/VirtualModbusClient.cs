@@ -48,7 +48,8 @@ namespace AMWD.Protocols.Modbus.Common.Utils
 
 		#region Properties
 
-		internal VirtualProtocol TypedProtocol => Protocol as VirtualProtocol;
+		internal VirtualProtocol TypedProtocol
+			=> Protocol as VirtualProtocol;
 
 		#endregion Properties
 

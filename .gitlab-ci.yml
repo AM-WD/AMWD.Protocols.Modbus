@@ -20,10 +20,10 @@ build-debug:
   rules:
     - if: $CI_COMMIT_TAG == null
   script:
-    - dotnet restore --no-cache --force
-    - dotnet build -c Debug --nologo --no-restore --no-incremental
     - shopt -s globstar
     - mkdir ./artifacts
+    - dotnet restore --no-cache --force
+    - dotnet build -c Debug --nologo --no-restore --no-incremental
     - mv ./**/*.nupkg    ./artifacts/
     - mv ./**/*.snupkg   ./artifacts/
   artifacts:
@@ -42,10 +42,20 @@ test-debug:
     - 64bit
   rules:
     - if: $CI_COMMIT_TAG == null
-  coverage: '/Total[^|]*\|[^|]*\|\s*([0-9.%]+)/'
+  coverage: /Branch coverage[\s\S].+%/
+  before_script:
+    - dotnet tool install dotnet-reportgenerator-globaltool --tool-path /dotnet-tools
   script:
-    - dotnet restore --no-cache --force
-    - dotnet test -c Debug --nologo --no-restore
+    - dotnet test -c Debug --nologo /p:CoverletOutputFormat=Cobertura
+    - /dotnet-tools/reportgenerator "-reports:${CI_PROJECT_DIR}/**/coverage.cobertura.xml" "-targetdir:/reports" -reportType:TextSummary
+  after_script:
+    - cat /reports/Summary.txt
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: ./**/coverage.cobertura.xml
 
 deploy-debug:
   stage: deploy
@@ -72,17 +82,17 @@ build-release:
   rules:
     - if: $CI_COMMIT_TAG != null
   script:
-    - dotnet restore --no-cache --force
-    - dotnet build -c Release --nologo --no-restore --no-incremental
     - shopt -s globstar
     - mkdir ./artifacts
+    - dotnet restore --no-cache --force
+    - dotnet build -c Release --nologo --no-restore --no-incremental
     - mv ./**/*.nupkg    ./artifacts/
     - mv ./**/*.snupkg   ./artifacts/
   artifacts:
     paths:
       - artifacts/*.nupkg
       - artifacts/*.snupkg
-    expire_in: 1 days
+    expire_in: 7 days
 
 test-release:
   stage: test
@@ -94,10 +104,20 @@ test-release:
     - amd64
   rules:
     - if: $CI_COMMIT_TAG != null
-  coverage: '/Total[^|]*\|[^|]*\|\s*([0-9.%]+)/'
+  coverage: /Branch coverage[\s\S].+%/
+  before_script:
+    - dotnet tool install dotnet-reportgenerator-globaltool --tool-path /dotnet-tools
   script:
-    - dotnet restore --no-cache --force
-    - dotnet test -c Release --nologo --no-restore
+    - dotnet test -c Release --nologo /p:CoverletOutputFormat=Cobertura
+    - /dotnet-tools/reportgenerator "-reports:${CI_PROJECT_DIR}/**/coverage.cobertura.xml" "-targetdir:/reports" -reportType:TextSummary
+  after_script:
+    - cat /reports/Summary.txt
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: ./**/coverage.cobertura.xml
 
 deploy-release:
   stage: deploy
