@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_nothing changed yet_
+
+
+## [v0.4.0] (2025-01-29)
+
 ### Added
 
 - Small CLI client for Modbus communication.
@@ -22,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- The `AMWD.Protocols.Modbus.Proxy` (introduced in [v0.3.0]) has been removed.
+- Discontinue the `AMWD.Protocols.Modbus.Proxy` package (introduced in [v0.3.0]).
 
 ### Fixed
 
@@ -72,7 +77,8 @@ So this tag is only here for documentation purposes of the NuGet Gallery.
 
 
 
-[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.2...v0.4.0
 [v0.3.2]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.1...v0.3.2
 [v0.3.1]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.0...v0.3.1
 [v0.3.0]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.2.0...v0.3.0

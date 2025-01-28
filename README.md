@@ -20,11 +20,6 @@ For example the default protocol versions: `TCP`, `RTU` and `ASCII`.
 With this package you'll have anything you need to create your own client implementations.
 
 
-### [Proxy]
-
-The package contains a TCP and a RTU server implementation as proxy which contains a client of your choice to connect to.
-
-
 ### [Serial]
 
 This package contains some wrappers and implementations for the serial protocol.
@@ -47,7 +42,6 @@ Published under [MIT License] (see [choose a license])
 
 [see here]:         https://github.com/andreasAMmueller/Modbus
 [Common]:           AMWD.Protocols.Modbus.Common/README.md
-[Proxy]:            AMWD.Protocols.Modbus.Proxy/README.md
 [Serial]:           AMWD.Protocols.Modbus.Serial/README.md
 [TCP]:              AMWD.Protocols.Modbus.Tcp/README.md
 [MIT License]:      LICENSE.txt
