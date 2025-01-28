@@ -738,8 +738,9 @@ namespace AMWD.Protocols.Modbus.Serial
 
 					byte[] objBytes = GetDeviceObject((byte)i, deviceInfo);
 
-					// We need to split the response if it would exceed the max ADU size
-					if (responseBytes.Count + bodyBytes.Count + objBytes.Length > RtuProtocol.MAX_ADU_LENGTH)
+					// We need to split the response if it would exceed the max ADU size.
+					// 2 bytes of CRC have to be added.
+					if (responseBytes.Count + bodyBytes.Count + objBytes.Length + 2 > RtuProtocol.MAX_ADU_LENGTH)
 					{
 						bodyBytes[3] = 0xFF;
 						bodyBytes[4] = (byte)i;
@@ -831,9 +832,8 @@ namespace AMWD.Protocols.Modbus.Serial
 
 				default:
 					{
-						if (deviceIdentification.ExtendedObjects.ContainsKey(objectId))
+						if (deviceIdentification.ExtendedObjects.TryGetValue(objectId, out byte[] bytes))
 						{
-							byte[] bytes = deviceIdentification.ExtendedObjects[objectId];
 							result.Add((byte)bytes.Length);
 							result.AddRange(bytes);
 						}
