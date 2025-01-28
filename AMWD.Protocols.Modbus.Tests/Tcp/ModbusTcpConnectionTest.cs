@@ -498,7 +498,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 		private ModbusTcpConnection GetTcpConnection()
 		{
-			_networkStreamMock = new Mock<NetworkStreamWrapper>();
+			_networkStreamMock = new Mock<NetworkStreamWrapper>(null);
 			_networkStreamMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
 				.Callback<ReadOnlyMemory<byte>, CancellationToken>((req, _) => _networkRequestCallbacks.Add(req.ToArray()))

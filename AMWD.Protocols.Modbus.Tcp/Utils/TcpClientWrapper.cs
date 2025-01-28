@@ -3,18 +3,29 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace AMWD.Protocols.Modbus.Tcp.Utils
 {
 	/// <inheritdoc cref="TcpClient" />
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-	internal class TcpClientWrapper(AddressFamily addressFamily) : IDisposable
+	internal class TcpClientWrapper : IDisposable
 	{
 		#region Fields
 
-		private readonly TcpClient _client = new(addressFamily);
+		private readonly TcpClient _client;
 
 		#endregion Fields
+
+		public TcpClientWrapper(AddressFamily addressFamily)
+		{
+			_client = new TcpClient(addressFamily);
+		}
+
+		public TcpClientWrapper(TcpClient client)
+		{
+			_client = client ?? throw new ArgumentNullException(nameof(client));
+		}
 
 		#region Properties
 
