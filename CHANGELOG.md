@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Wrong _following bytes_ calculation in `ModbusTcpProxy`.
+- Wrong processing of `WriteMultipleHoldingRegisters` for proxies.
 
 
 ## [v0.3.2] (2024-09-04)
