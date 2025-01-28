@@ -17,7 +17,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 	/// <summary>
 	/// Implements a Modbus TCP server proxying all requests to a Modbus client of choice.
 	/// </summary>
-	public class ModbusTcpProxy : IDisposable
+	public class ModbusTcpProxy : IModbusProxy
 	{
 		#region Fields
 
@@ -41,7 +41,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 		/// Initializes a new instance of the <see cref="ModbusTcpProxy"/> class.
 		/// </summary>
 		/// <param name="client">The <see cref="ModbusClientBase"/> used to request the remote device, that should be proxied.</param>
-		/// <param name="listenAddress">An <see cref="IPAddress"/> to listen on (Default: <see cref="IPAddress.Loopback"/>).</param>
+		/// <param name="listenAddress">An <see cref="IPAddress"/> to listen on.</param>
 		public ModbusTcpProxy(ModbusClientBase client, IPAddress listenAddress)
 		{
 			Client = client ?? throw new ArgumentNullException(nameof(client));

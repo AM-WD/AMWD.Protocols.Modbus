@@ -4,11 +4,11 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
 
-    <AssemblyName>modbus-client</AssemblyName>
-    <RootNamespace>AMWD.Protocols.Modbus.CliClient</RootNamespace>
+    <AssemblyName>modbus-proxy</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.CliProxy</RootNamespace>
 
-    <Product>Modbus CLI client</Product>
-    <Description>Small CLI client for Modbus communication.</Description>
+    <Product>Modbus CLI proxy</Product>
+    <Description>Small CLI proxy to forward messages.</Description>
 
     <IsPackable>false</IsPackable>
     <SignAssembly>false</SignAssembly>

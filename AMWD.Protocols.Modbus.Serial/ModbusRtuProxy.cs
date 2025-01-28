@@ -15,7 +15,7 @@ namespace AMWD.Protocols.Modbus.Serial
 	/// <summary>
 	/// Implements a Modbus serial line RTU server proxying all requests to a Modbus client of choice.
 	/// </summary>
-	public class ModbusRtuProxy : IDisposable
+	public class ModbusRtuProxy : IModbusProxy
 	{
 		#region Fields
 
@@ -165,7 +165,7 @@ namespace AMWD.Protocols.Modbus.Serial
 		#region Control Methods
 
 		/// <summary>
-		/// Starts the server.
+		/// Starts the proxy.
 		/// </summary>
 		/// <param name="cancellationToken">A cancellation token used to propagate notification that this operation should be canceled.</param>
 		public Task StartAsync(CancellationToken cancellationToken = default)
@@ -186,7 +186,7 @@ namespace AMWD.Protocols.Modbus.Serial
 		}
 
 		/// <summary>
-		/// Stops the server.
+		/// Stops the proxy.
 		/// </summary>
 		/// <param name="cancellationToken">A cancellation token used to propagate notification that this operation should be canceled.</param>
 		public Task StopAsync(CancellationToken cancellationToken = default)

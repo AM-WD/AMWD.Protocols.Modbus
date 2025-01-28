@@ -12,6 +12,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	public class ModbusTcpServer : ModbusTcpProxy
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ModbusTcpServer"/> class.
+		/// </summary>
+		/// <param name="listenAddress">The <see cref="IPAddress"/> to listen on.</param>
 		public ModbusTcpServer(IPAddress listenAddress)
 			: base(new VirtualModbusClient(), listenAddress)
 		{

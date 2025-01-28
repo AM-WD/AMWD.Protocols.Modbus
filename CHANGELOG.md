@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Small CLI tool to test Modbus client communication.
+- Small CLI client for Modbus communication.
+- Small CLI proxy to forward messages.
 - `VirtualModbusClient` added to `AMWD.Protocols.Modbus.Common`.
 
 ### Changed
