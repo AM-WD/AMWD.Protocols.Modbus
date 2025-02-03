@@ -18,12 +18,12 @@
 
     <PackageIcon>package-icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 
     <Title>Modbus Protocol for .NET</Title>
     <Company>AM.WD</Company>
     <Authors>Andreas Müller</Authors>
     <Copyright>© {copyright:2018-} AM.WD</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(SolutionDir)/AMWD.Protocols.Modbus.snk</AssemblyOriginatorKeyFile>
@@ -52,6 +52,7 @@
 
   <ItemGroup>
     <None Include="$(SolutionDir)/package-icon.png" Pack="true" PackagePath="/" />
+    <None Include="$(SolutionDir)/LICENSE.txt" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>
