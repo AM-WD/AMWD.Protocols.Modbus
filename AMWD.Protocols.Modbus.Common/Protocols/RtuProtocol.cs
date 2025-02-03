@@ -10,6 +10,22 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 	/// </summary>
 	public class RtuProtocol : IModbusProtocol
 	{
+		#region Fields
+
+		private static readonly byte[] _readFunctionCodes = [
+			(byte)ModbusFunctionCode.ReadCoils,
+			(byte)ModbusFunctionCode.ReadDiscreteInputs,
+			(byte)ModbusFunctionCode.ReadHoldingRegisters,
+			(byte)ModbusFunctionCode.ReadInputRegisters];
+
+		private static readonly byte[] _writeFunctionCodes = [
+			(byte)ModbusFunctionCode.WriteSingleCoil,
+			(byte)ModbusFunctionCode.WriteSingleRegister,
+			(byte)ModbusFunctionCode.WriteMultipleCoils,
+			(byte)ModbusFunctionCode.WriteMultipleRegisters];
+
+		#endregion Fields
+
 		#region Constants
 
 		/// <summary>
@@ -627,7 +643,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			// - 0x03 Read Holding Registers
 			// - 0x04 Read Input Registers
 			// do have a "following bytes" at position 3
-			if (new[] { 0x01, 0x02, 0x03, 0x04 }.Contains(responseBytes[1]))
+			if (_readFunctionCodes.Contains(responseBytes[1]))
 			{
 				// Unit ID, Function Code, ByteCount, 2x CRC and length of ByteCount
 				if (responseBytes.Count < 5 + responseBytes[2])
@@ -638,7 +654,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			// - 0x06 Write Single Register
 			// - 0x0F Write Multiple Coils
 			// - 0x10 Write Multiple Registers
-			if (new[] { 0x05, 0x06, 0x0F, 0x10 }.Contains(responseBytes[1]))
+			if (_writeFunctionCodes.Contains(responseBytes[1]))
 			{
 				// Write Single => Unit ID, Function code, 2x Address, 2x Value, 2x CRC
 				// Write Multi  => Unit ID, Function code, 2x Address, 2x QuantityWritten, 2x CRC
@@ -715,13 +731,13 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 			if (isError)
 				throw new ModbusException("Remote Error") { ErrorCode = (ModbusErrorCode)response[2] };
 
-			if (new[] { 0x01, 0x02, 0x03, 0x04 }.Contains(fnCode))
+			if (_readFunctionCodes.Contains(fnCode))
 			{
 				if (response.Count != 5 + response[2])
 					throw new ModbusException("Number of following bytes does not match.");
 			}
 
-			if (new[] { 0x05, 0x06, 0x0F, 0x10 }.Contains(fnCode))
+			if (_writeFunctionCodes.Contains(fnCode))
 			{
 				if (response.Count != 8)
 					throw new ModbusException("Number of bytes does not match.");

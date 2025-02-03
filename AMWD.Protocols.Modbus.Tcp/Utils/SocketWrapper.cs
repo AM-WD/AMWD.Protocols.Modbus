@@ -3,14 +3,11 @@ using System.Net.Sockets;
 
 namespace AMWD.Protocols.Modbus.Tcp.Utils
 {
-	internal class SocketWrapper : IDisposable
+	/// <inheritdoc cref="Socket" />
+	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+	internal class SocketWrapper(Socket socket) : IDisposable
 	{
-		private Socket _socket;
-
-		public SocketWrapper(Socket socket)
-		{
-			_socket = socket;
-		}
+		private readonly Socket _socket = socket;
 
 		/// <inheritdoc  cref="Socket.DualMode" />
 		public virtual bool DualMode

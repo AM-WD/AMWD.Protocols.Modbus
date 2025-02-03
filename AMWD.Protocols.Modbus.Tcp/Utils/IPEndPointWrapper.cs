@@ -1,15 +1,13 @@
 ﻿using System.Net;
+using System.Net.Sockets;
 
 namespace AMWD.Protocols.Modbus.Tcp.Utils
 {
-	internal class IPEndPointWrapper
+	/// <inheritdoc cref="IPEndPoint" />
+	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+	internal class IPEndPointWrapper(EndPoint endPoint)
 	{
-		private IPEndPoint _ipEndPoint;
-
-		public IPEndPointWrapper(EndPoint endPoint)
-		{
-			_ipEndPoint = (IPEndPoint)endPoint;
-		}
+		private readonly IPEndPoint _ipEndPoint = (IPEndPoint)endPoint;
 
 		#region Properties
 

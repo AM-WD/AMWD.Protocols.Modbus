@@ -8,14 +8,9 @@ namespace AMWD.Protocols.Modbus.Tcp.Utils
 {
 	/// <inheritdoc cref="NetworkStream" />
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-	internal class NetworkStreamWrapper : IDisposable
+	internal class NetworkStreamWrapper(NetworkStream stream) : IDisposable
 	{
-		private readonly NetworkStream _stream;
-
-		public NetworkStreamWrapper(NetworkStream stream)
-		{
-			_stream = stream;
-		}
+		private readonly NetworkStream _stream = stream;
 
 		/// <inheritdoc cref="NetworkStream.Dispose" />
 		public virtual void Dispose()

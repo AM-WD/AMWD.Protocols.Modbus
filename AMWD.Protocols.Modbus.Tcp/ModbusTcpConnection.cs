@@ -65,8 +65,12 @@ namespace AMWD.Protocols.Modbus.Tcp
 			get => _readTimeout;
 			set
 			{
+#if NET8_0_OR_GREATER
+				ArgumentOutOfRangeException.ThrowIfLessThan(value, TimeSpan.Zero);
+#else
 				if (value < TimeSpan.Zero)
 					throw new ArgumentOutOfRangeException(nameof(value));
+#endif
 
 				_readTimeout = value;
 
@@ -81,8 +85,12 @@ namespace AMWD.Protocols.Modbus.Tcp
 			get => _writeTimeout;
 			set
 			{
+#if NET8_0_OR_GREATER
+				ArgumentOutOfRangeException.ThrowIfLessThan(value, TimeSpan.Zero);
+#else
 				if (value < TimeSpan.Zero)
 					throw new ArgumentOutOfRangeException(nameof(value));
+#endif
 
 				_writeTimeout = value;
 
@@ -376,10 +384,9 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 			try
 			{
-				return Dns.GetHostAddresses(hostname)
+				return [.. Dns.GetHostAddresses(hostname)
 					.Where(a => a.AddressFamily == AddressFamily.InterNetwork || a.AddressFamily == AddressFamily.InterNetworkV6)
-					.OrderBy(a => a.AddressFamily) // prefer IPv4
-					.ToArray();
+					.OrderBy(a => a.AddressFamily)]; // prefer IPv4
 			}
 			catch
 			{

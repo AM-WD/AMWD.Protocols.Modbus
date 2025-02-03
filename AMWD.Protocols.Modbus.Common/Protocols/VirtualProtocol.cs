@@ -71,7 +71,7 @@ namespace AMWD.Protocols.Modbus.Common.Protocols
 
 		public DeviceIdentificationRaw DeserializeReadDeviceIdentification(IReadOnlyList<byte> response)
 		{
-			if (!_devices.TryGetValue(response[0], out var device))
+			if (!_devices.TryGetValue(response[0], out var _))
 				throw new TimeoutException("Device not found.");
 
 			var result = new DeviceIdentificationRaw

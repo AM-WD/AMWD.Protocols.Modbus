@@ -6,21 +6,17 @@ using System.Threading.Tasks;
 
 namespace AMWD.Protocols.Modbus.Tcp.Utils
 {
+	/// <inheritdoc cref="TcpListener" />
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-	internal class TcpListenerWrapper : IDisposable
+	internal class TcpListenerWrapper(IPAddress localaddr, int port) : IDisposable
 	{
 		#region Fields
 
-		private TcpListener _tcpListener;
+		private readonly TcpListener _tcpListener = new(localaddr, port);
 
 		#endregion Fields
 
 		#region Constructor
-
-		public TcpListenerWrapper(IPAddress localaddr, int port)
-		{
-			_tcpListener = new TcpListener(localaddr, port);
-		}
 
 		#endregion Constructor
 
