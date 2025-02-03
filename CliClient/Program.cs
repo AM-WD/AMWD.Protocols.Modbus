@@ -43,7 +43,7 @@ namespace AMWD.Protocols.Modbus.CliClient
 		{
 			if (!ParseArguments(args))
 			{
-				Console.WriteLine("Could not parse arguments.");
+				Console.Error.WriteLine("Could not parse arguments.");
 				return 1;
 			}
 
@@ -55,13 +55,13 @@ namespace AMWD.Protocols.Modbus.CliClient
 
 			if (string.IsNullOrWhiteSpace(_target))
 			{
-				Console.WriteLine("No serial port or tcp host specified.");
+				Console.Error.WriteLine("No serial port or tcp host specified.");
 				return 1;
 			}
 
 			if (!_typeOption.IsSet)
 			{
-				Console.WriteLine("No type specified.");
+				Console.Error.WriteLine("No type specified.");
 				return 1;
 			}
 
@@ -79,7 +79,7 @@ namespace AMWD.Protocols.Modbus.CliClient
 				{
 					try
 					{
-						Console.Write(".");
+						Console.Error.Write(".");
 						await Task.Delay(1000, cts.Token);
 					}
 					catch (OperationCanceledException)
@@ -87,7 +87,7 @@ namespace AMWD.Protocols.Modbus.CliClient
 						return 0;
 					}
 				}
-				Console.WriteLine();
+				Console.Error.WriteLine();
 			}
 
 			using var client = CreateClient();

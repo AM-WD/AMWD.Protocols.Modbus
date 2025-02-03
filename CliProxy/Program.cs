@@ -57,7 +57,7 @@ namespace AMWD.Protocols.Modbus.CliProxy
 		{
 			if (!ParseArguments(args))
 			{
-				Console.WriteLine("Could not parse arguments.");
+				Console.Error.WriteLine("Could not parse arguments.");
 				return 1;
 			}
 
@@ -81,7 +81,7 @@ namespace AMWD.Protocols.Modbus.CliProxy
 				{
 					try
 					{
-						Console.Write(".");
+						Console.Error.Write(".");
 						await Task.Delay(1000, cts.Token);
 					}
 					catch (OperationCanceledException)
@@ -89,12 +89,15 @@ namespace AMWD.Protocols.Modbus.CliProxy
 						return 0;
 					}
 				}
-				Console.WriteLine();
+				Console.Error.WriteLine();
 			}
 
 			try
 			{
 				using var client = CreateClient();
+				Console.WriteLine(client);
+				Console.WriteLine();
+
 				if (_clientProtocolOption.IsSet)
 				{
 					switch (_clientProtocolOption.Value.ToLower())
@@ -105,10 +108,13 @@ namespace AMWD.Protocols.Modbus.CliProxy
 					}
 				}
 				using var proxy = CreateProxy(client);
+				Console.WriteLine(proxy);
+				Console.WriteLine();
 
 				await proxy.StartAsync(cts.Token);
 				try
 				{
+					Console.WriteLine("Running proxy. Press Ctrl+C to stop.");
 					await Task.Delay(Timeout.Infinite, cts.Token);
 				}
 				finally
