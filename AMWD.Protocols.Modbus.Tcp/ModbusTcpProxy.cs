@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using AMWD.Protocols.Modbus.Common;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Common.Protocols;
+using AMWD.Protocols.Modbus.Tcp.Extensions;
 using AMWD.Protocols.Modbus.Tcp.Utils;
 
 namespace AMWD.Protocols.Modbus.Tcp
@@ -17,7 +18,12 @@ namespace AMWD.Protocols.Modbus.Tcp
 	/// <summary>
 	/// Implements a Modbus TCP server proxying all requests to a Modbus client of choice.
 	/// </summary>
-	public class ModbusTcpProxy : IModbusProxy
+	/// <remarks>
+	/// Initializes a new instance of the <see cref="ModbusTcpProxy"/> class.
+	/// </remarks>
+	/// <param name="client">The <see cref="ModbusClientBase"/> used to request the remote device, that should be proxied.</param>
+	/// <param name="listenAddress">An <see cref="IPAddress"/> to listen on.</param>
+	public class ModbusTcpProxy(ModbusClientBase client, IPAddress listenAddress) : IModbusProxy
 	{
 		#region Fields
 
@@ -25,29 +31,16 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 		private TimeSpan _readWriteTimeout = TimeSpan.FromSeconds(100);
 
-		private TcpListenerWrapper _tcpListener;
+		private readonly TcpListenerWrapper _tcpListener = new(listenAddress, 502);
 		private CancellationTokenSource _stopCts;
 		private Task _clientConnectTask = Task.CompletedTask;
 
 		private readonly SemaphoreSlim _clientListLock = new(1, 1);
 		private readonly List<TcpClientWrapper> _clients = [];
-		private readonly List<Task> _clientTasks = [];
 
 		#endregion Fields
 
 		#region Constructors
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ModbusTcpProxy"/> class.
-		/// </summary>
-		/// <param name="client">The <see cref="ModbusClientBase"/> used to request the remote device, that should be proxied.</param>
-		/// <param name="listenAddress">An <see cref="IPAddress"/> to listen on.</param>
-		public ModbusTcpProxy(ModbusClientBase client, IPAddress listenAddress)
-		{
-			Client = client ?? throw new ArgumentNullException(nameof(client));
-
-			_tcpListener = new TcpListenerWrapper(listenAddress, 502);
-		}
 
 		#endregion Constructors
 
@@ -56,7 +49,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 		/// <summary>
 		/// Gets the Modbus client used to request the remote device, that should be proxied.
 		/// </summary>
-		public ModbusClientBase Client { get; }
+		public ModbusClientBase Client { get; } = client ?? throw new ArgumentNullException(nameof(client));
 
 		/// <summary>
 		/// Gets the <see cref="IPAddress"/> to listen on.
@@ -140,16 +133,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 			try
 			{
-				await Task.WhenAny(_clientConnectTask, Task.Delay(Timeout.Infinite, cancellationToken));
-			}
-			catch (OperationCanceledException)
-			{
-				// Terminated
-			}
-
-			try
-			{
-				await Task.WhenAny(Task.WhenAll(_clientTasks), Task.Delay(Timeout.Infinite, cancellationToken));
+				await Task.WhenAny(_clientConnectTask, Task.Delay(Timeout.Infinite, cancellationToken)).ConfigureAwait(continueOnCapturedContext: false);
 			}
 			catch (OperationCanceledException)
 			{
@@ -174,6 +158,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			_tcpListener.Dispose();
 
 			_stopCts?.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		private void Assertions()
@@ -196,12 +181,13 @@ namespace AMWD.Protocols.Modbus.Tcp
 			{
 				try
 				{
-					var client = await _tcpListener.AcceptTcpClientAsync(cancellationToken);
-					await _clientListLock.WaitAsync(cancellationToken);
+					var client = await _tcpListener.AcceptTcpClientAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+					await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 					try
 					{
 						_clients.Add(client);
-						_clientTasks.Add(HandleClientAsync(client, cancellationToken));
+						// Can be ignored as it will terminate by itself on cancellation
+						HandleClientAsync(client, cancellationToken).Forget();
 					}
 					finally
 					{
@@ -227,20 +213,20 @@ namespace AMWD.Protocols.Modbus.Tcp
 					using (var cts = new CancellationTokenSource(ReadWriteTimeout))
 					using (cancellationToken.Register(cts.Cancel))
 					{
-						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token);
+						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token).ConfigureAwait(continueOnCapturedContext: false);
 						requestBytes.AddRange(headerBytes);
 
 						ushort length = headerBytes
 							.Skip(4).Take(2).ToArray()
 							.GetBigEndianUInt16();
 
-						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(length, cts.Token);
+						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(length, cts.Token).ConfigureAwait(continueOnCapturedContext: false);
 						requestBytes.AddRange(bodyBytes);
 					}
 
-					byte[] responseBytes = await HandleRequestAsync([.. requestBytes], cancellationToken);
+					byte[] responseBytes = await HandleRequestAsync([.. requestBytes], cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 					if (responseBytes != null)
-						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken);
+						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				}
 			}
 			catch
@@ -249,7 +235,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			}
 			finally
 			{
-				await _clientListLock.WaitAsync(cancellationToken);
+				await _clientListLock.WaitAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				try
 				{
 					_clients.Remove(client);
@@ -324,7 +310,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var coils = await Client.ReadCoilsAsync(unitId, firstAddress, count, cancellationToken);
+				var coils = await Client.ReadCoilsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[(int)Math.Ceiling(coils.Count / 8.0)];
 				for (int i = 0; i < coils.Count; i++)
@@ -363,7 +349,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var discreteInputs = await Client.ReadDiscreteInputsAsync(unitId, firstAddress, count, cancellationToken);
+				var discreteInputs = await Client.ReadDiscreteInputsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[(int)Math.Ceiling(discreteInputs.Count / 8.0)];
 				for (int i = 0; i < discreteInputs.Count; i++)
@@ -402,7 +388,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var holdingRegisters = await Client.ReadHoldingRegistersAsync(unitId, firstAddress, count, cancellationToken);
+				var holdingRegisters = await Client.ReadHoldingRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[holdingRegisters.Count * 2];
 				for (int i = 0; i < holdingRegisters.Count; i++)
@@ -436,7 +422,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			responseBytes.AddRange(requestBytes.Take(8));
 			try
 			{
-				var inputRegisters = await Client.ReadInputRegistersAsync(unitId, firstAddress, count, cancellationToken);
+				var inputRegisters = await Client.ReadInputRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[count * 2];
 				for (int i = 0; i < count; i++)
@@ -484,7 +470,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 					LowByte = requestBytes[11],
 				};
 
-				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[6], coil, cancellationToken);
+				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[6], coil, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -524,7 +510,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 					LowByte = requestBytes[11]
 				};
 
-				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[6], register, cancellationToken);
+				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[6], register, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -584,7 +570,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 					});
 				}
 
-				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[6], coils, cancellationToken);
+				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[6], coils, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -641,7 +627,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 					});
 				}
 
-				bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[6], list, cancellationToken);
+				bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[6], list, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -698,7 +684,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 			try
 			{
-				var deviceInfo = await Client.ReadDeviceIdentificationAsync(requestBytes[6], category, firstObject, cancellationToken);
+				var deviceInfo = await Client.ReadDeviceIdentificationAsync(requestBytes[6], category, firstObject, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				var bodyBytes = new List<byte>();
 
@@ -761,7 +747,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 			}
 		}
 
-		private byte[] GetDeviceObject(byte objectId, DeviceIdentification deviceIdentification)
+		private static byte[] GetDeviceObject(byte objectId, DeviceIdentification deviceIdentification)
 		{
 			var result = new List<byte> { objectId };
 			switch ((ModbusDeviceIdentificationObject)objectId)
@@ -851,5 +837,18 @@ namespace AMWD.Protocols.Modbus.Tcp
 		}
 
 		#endregion Request Handling
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"TCP Proxy");
+			sb.AppendLine($"  {nameof(ListenAddress)}:   {ListenAddress}");
+			sb.AppendLine($"  {nameof(ListenPort)}:      {ListenPort}");
+			sb.AppendLine($"  {nameof(Client)}:          {Client.GetType().Name}");
+
+			return sb.ToString();
+		}
 	}
 }

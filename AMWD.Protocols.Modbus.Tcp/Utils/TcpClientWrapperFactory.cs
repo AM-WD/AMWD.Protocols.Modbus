@@ -3,6 +3,9 @@ using System.Net.Sockets;
 
 namespace AMWD.Protocols.Modbus.Tcp.Utils
 {
+	/// <summary>
+	/// Factory for creating <see cref="TcpClientWrapper"/> instances.
+	/// </summary>
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	internal class TcpClientWrapperFactory
 	{

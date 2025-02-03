@@ -31,8 +31,7 @@ namespace AMWD.Protocols.Modbus.Serial
 		private readonly Task _processingTask;
 		private readonly AsyncQueue<RequestQueueItem> _requestQueue = new();
 
-		// Only required to cover all logic branches on unit tests.
-		private bool _isUnitTest = false;
+		private readonly bool _isLinux;
 
 		#endregion Fields
 
@@ -41,6 +40,8 @@ namespace AMWD.Protocols.Modbus.Serial
 		/// </summary>
 		public ModbusSerialConnection(string portName)
 		{
+			_isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
 			if (string.IsNullOrWhiteSpace(portName))
 				throw new ArgumentNullException(nameof(portName));
 
@@ -268,7 +269,7 @@ namespace AMWD.Protocols.Modbus.Serial
 				try
 				{
 					// Get next request to process
-					var item = await _requestQueue.DequeueAsync(cancellationToken);
+					var item = await _requestQueue.DequeueAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 					// Remove registration => already removed from queue
 					item.CancellationTokenRegistration.Dispose();
@@ -276,13 +277,13 @@ namespace AMWD.Protocols.Modbus.Serial
 					// Build combined cancellation token
 					using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, item.CancellationTokenSource.Token);
 					// Wait for exclusive access
-					await _portLock.WaitAsync(linkedCts.Token);
+					await _portLock.WaitAsync(linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 					try
 					{
 						// Ensure connection is up
 						await AssertConnection(linkedCts.Token);
 
-						await _serialPort.WriteAsync(item.Request, linkedCts.Token);
+						await _serialPort.WriteAsync(item.Request, linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 
 						linkedCts.Token.ThrowIfCancellationRequested();
 
@@ -291,7 +292,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 						do
 						{
-							int readCount = await _serialPort.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token);
+							int readCount = await _serialPort.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 							if (readCount < 1)
 								throw new EndOfStreamException();
 
@@ -322,7 +323,7 @@ namespace AMWD.Protocols.Modbus.Serial
 						_portLock.Release();
 						_idleTimer.Change(IdleTimeout, Timeout.InfiniteTimeSpan);
 
-						await Task.Delay(InterRequestDelay, cancellationToken);
+						await Task.Delay(InterRequestDelay, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 					}
 				}
 				catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -353,7 +354,7 @@ namespace AMWD.Protocols.Modbus.Serial
 					_serialPort.Close();
 					_serialPort.ResetRS485DriverStateFlags();
 
-					if (DriverEnabledRS485 && (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || _isUnitTest))
+					if (DriverEnabledRS485 && _isLinux)
 					{
 						var flags = _serialPort.GetRS485DriverStateFlags();
 						flags |= RS485Flags.Enabled;
@@ -361,7 +362,7 @@ namespace AMWD.Protocols.Modbus.Serial
 						_serialPort.ChangeRS485DriverStateFlags(flags);
 					}
 
-					using var connectTask = Task.Run(_serialPort.Open);
+					using var connectTask = Task.Run(_serialPort.Open, cancellationToken);
 					if (await Task.WhenAny(connectTask, Task.Delay(ReadTimeout, cancellationToken)) == connectTask)
 					{
 						await connectTask;
@@ -379,7 +380,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 					try
 					{
-						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken);
+						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 					}
 					catch
 					{ /* keep it quiet */ }

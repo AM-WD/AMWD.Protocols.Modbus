@@ -10,19 +10,27 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 	/// <summary>
 	/// Base implementation of a Modbus client.
 	/// </summary>
-	public abstract class ModbusClientBase : IDisposable
+	/// <remarks>
+	/// Initializes a new instance of the <see cref="ModbusClientBase"/> class with a specific <see cref="IModbusConnection"/>.
+	/// </remarks>
+	/// <param name="connection">The <see cref="IModbusConnection"/> responsible for invoking the requests.</param>
+	/// <param name="disposeConnection">
+	/// <see langword="true"/> if the connection should be disposed of by Dispose(),
+	/// <see langword="false"/> otherwise if you inted to reuse the connection.
+	/// </param>
+	public abstract class ModbusClientBase(IModbusConnection connection, bool disposeConnection) : IDisposable
 	{
 		private bool _isDisposed;
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the connection should be disposed of by <see cref="Dispose()"/>.
 		/// </summary>
-		protected readonly bool disposeConnection;
+		protected readonly bool disposeConnection = disposeConnection;
 
 		/// <summary>
 		/// Gets or sets the <see cref="IModbusConnection"/> responsible for invoking the requests.
 		/// </summary>
-		protected readonly IModbusConnection connection;
+		protected readonly IModbusConnection connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ModbusClientBase"/> class with a specific <see cref="IModbusConnection"/>.
@@ -31,20 +39,6 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 		public ModbusClientBase(IModbusConnection connection)
 			: this(connection, true)
 		{ }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ModbusClientBase"/> class with a specific <see cref="IModbusConnection"/>.
-		/// </summary>
-		/// <param name="connection">The <see cref="IModbusConnection"/> responsible for invoking the requests.</param>
-		/// <param name="disposeConnection">
-		/// <see langword="true"/> if the connection should be disposed of by Dispose(),
-		/// <see langword="false"/> otherwise if you inted to reuse the connection.
-		/// </param>
-		public ModbusClientBase(IModbusConnection connection, bool disposeConnection)
-		{
-			this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
-			this.disposeConnection = disposeConnection;
-		}
 
 		/// <summary>
 		/// Gets or sets the protocol type to use.
@@ -67,7 +61,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeReadCoils(unitId, startAddress, count);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			// The protocol processes complete bytes from the response.
@@ -92,7 +86,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeReadDiscreteInputs(unitId, startAddress, count);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			// The protocol processes complete bytes from the response.
@@ -117,7 +111,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeReadHoldingRegisters(unitId, startAddress, count);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			var holdingRegisters = Protocol.DeserializeReadHoldingRegisters(response).ToList();
@@ -140,7 +134,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeReadInputRegisters(unitId, startAddress, count);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			var inputRegisters = Protocol.DeserializeReadInputRegisters(response).ToList();
@@ -184,7 +178,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			do
 			{
 				var request = Protocol.SerializeReadDeviceIdentification(unitId, category, requestObjectId);
-				var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+				var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				Protocol.ValidateResponse(request, response);
 
 				result = Protocol.DeserializeReadDeviceIdentification(response);
@@ -247,7 +241,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeWriteSingleCoil(unitId, coil);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			var result = Protocol.DeserializeWriteSingleCoil(response);
@@ -268,7 +262,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeWriteSingleHoldingRegister(unitId, register);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			var result = Protocol.DeserializeWriteSingleHoldingRegister(response);
@@ -289,7 +283,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeWriteMultipleCoils(unitId, coils);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			var (firstAddress, count) = Protocol.DeserializeWriteMultipleCoils(response);
@@ -309,7 +303,7 @@ namespace AMWD.Protocols.Modbus.Common.Contracts
 			Assertions();
 
 			var request = Protocol.SerializeWriteMultipleHoldingRegisters(unitId, registers);
-			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken);
+			var response = await connection.InvokeAsync(request, Protocol.CheckResponseComplete, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 			Protocol.ValidateResponse(request, response);
 
 			var (firstAddress, count) = Protocol.DeserializeWriteMultipleHoldingRegisters(response);

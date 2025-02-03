@@ -12,7 +12,7 @@ namespace System.IO
 			int offset = 0;
 			do
 			{
-				int count = await stream.ReadAsync(buffer, offset, expectedBytes - offset, cancellationToken);
+				int count = await stream.ReadAsync(buffer, offset, expectedBytes - offset, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (count < 1)
 					throw new EndOfStreamException();
 
@@ -30,7 +30,7 @@ namespace System.IO
 			int offset = 0;
 			do
 			{
-				int count = await stream.ReadAsync(buffer, offset, expectedBytes - offset, cancellationToken);
+				int count = await stream.ReadAsync(buffer, offset, expectedBytes - offset, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (count < 1)
 					throw new EndOfStreamException();
 

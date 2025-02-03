@@ -208,7 +208,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 				try
 				{
 					// Get next request to process
-					var item = await _requestQueue.DequeueAsync(cancellationToken);
+					var item = await _requestQueue.DequeueAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 					// Remove registration => already removed from queue
 					item.CancellationTokenRegistration.Dispose();
@@ -216,19 +216,19 @@ namespace AMWD.Protocols.Modbus.Tcp
 					// Build combined cancellation token
 					using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, item.CancellationTokenSource.Token);
 					// Wait for exclusive access
-					await _clientLock.WaitAsync(linkedCts.Token);
+					await _clientLock.WaitAsync(linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 					try
 					{
 						// Ensure connection is up
-						await AssertConnection(linkedCts.Token);
+						await AssertConnection(linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 
 						var stream = _tcpClient.GetStream();
 						await stream.FlushAsync(linkedCts.Token);
 
 #if NET6_0_OR_GREATER
-						await stream.WriteAsync(item.Request, linkedCts.Token);
+						await stream.WriteAsync(item.Request, linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 #else
-						await stream.WriteAsync(item.Request, 0, item.Request.Length, linkedCts.Token);
+						await stream.WriteAsync(item.Request, 0, item.Request.Length, linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 #endif
 
 						linkedCts.Token.ThrowIfCancellationRequested();
@@ -239,9 +239,9 @@ namespace AMWD.Protocols.Modbus.Tcp
 						do
 						{
 #if NET6_0_OR_GREATER
-							int readCount = await stream.ReadAsync(buffer, linkedCts.Token);
+							int readCount = await stream.ReadAsync(buffer, linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 #else
-							int readCount = await stream.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token);
+							int readCount = await stream.ReadAsync(buffer, 0, buffer.Length, linkedCts.Token).ConfigureAwait(continueOnCapturedContext: false);
 #endif
 							if (readCount < 1)
 								throw new EndOfStreamException();
@@ -332,7 +332,7 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 					try
 					{
-						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken);
+						await Task.Delay(TimeSpan.FromSeconds(delay), cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 					}
 					catch
 					{ /* keep it quiet */ }

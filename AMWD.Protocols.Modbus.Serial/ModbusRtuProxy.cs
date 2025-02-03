@@ -192,17 +192,16 @@ namespace AMWD.Protocols.Modbus.Serial
 		public Task StopAsync(CancellationToken cancellationToken = default)
 		{
 			Assertions();
-			return StopAsyncInternal(cancellationToken);
+			StopAsyncInternal();
+			return Task.CompletedTask;
 		}
 
-		private Task StopAsyncInternal(CancellationToken cancellationToken)
+		private void StopAsyncInternal()
 		{
 			_stopCts?.Cancel();
 
 			_serialPort.Close();
 			_serialPort.DataReceived -= OnDataReceived;
-
-			return Task.CompletedTask;
 		}
 
 		/// <summary>
@@ -215,7 +214,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 			_isDisposed = true;
 
-			StopAsyncInternal(CancellationToken.None).Wait();
+			StopAsyncInternal();
 
 			_serialPort.Dispose();
 			_stopCts?.Dispose();
@@ -332,7 +331,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
-				var coils = await Client.ReadCoilsAsync(unitId, firstAddress, count, cancellationToken);
+				var coils = await Client.ReadCoilsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[(int)Math.Ceiling(coils.Count / 8.0)];
 				for (int i = 0; i < coils.Count; i++)
@@ -371,7 +370,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
-				var discreteInputs = await Client.ReadDiscreteInputsAsync(unitId, firstAddress, count, cancellationToken);
+				var discreteInputs = await Client.ReadDiscreteInputsAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[(int)Math.Ceiling(discreteInputs.Count / 8.0)];
 				for (int i = 0; i < discreteInputs.Count; i++)
@@ -410,7 +409,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
-				var holdingRegisters = await Client.ReadHoldingRegistersAsync(unitId, firstAddress, count, cancellationToken);
+				var holdingRegisters = await Client.ReadHoldingRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[holdingRegisters.Count * 2];
 				for (int i = 0; i < holdingRegisters.Count; i++)
@@ -444,7 +443,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			responseBytes.AddRange(requestBytes.Take(2));
 			try
 			{
-				var inputRegisters = await Client.ReadInputRegistersAsync(unitId, firstAddress, count, cancellationToken);
+				var inputRegisters = await Client.ReadInputRegistersAsync(unitId, firstAddress, count, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				byte[] values = new byte[count * 2];
 				for (int i = 0; i < count; i++)
@@ -492,7 +491,7 @@ namespace AMWD.Protocols.Modbus.Serial
 					LowByte = requestBytes[5],
 				};
 
-				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[0], coil, cancellationToken);
+				bool isSuccess = await Client.WriteSingleCoilAsync(requestBytes[0], coil, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -531,7 +530,7 @@ namespace AMWD.Protocols.Modbus.Serial
 					LowByte = requestBytes[5]
 				};
 
-				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[0], register, cancellationToken);
+				bool isSuccess = await Client.WriteSingleHoldingRegisterAsync(requestBytes[0], register, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -591,7 +590,7 @@ namespace AMWD.Protocols.Modbus.Serial
 					});
 				}
 
-				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[0], coils, cancellationToken);
+				bool isSuccess = await Client.WriteMultipleCoilsAsync(requestBytes[0], coils, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -648,7 +647,7 @@ namespace AMWD.Protocols.Modbus.Serial
 					});
 				}
 
-				bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[0], list, cancellationToken);
+				bool isSuccess = await Client.WriteMultipleHoldingRegistersAsync(requestBytes[0], list, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 				if (isSuccess)
 				{
 					// Response is an echo of the request
@@ -705,7 +704,7 @@ namespace AMWD.Protocols.Modbus.Serial
 
 			try
 			{
-				var deviceInfo = await Client.ReadDeviceIdentificationAsync(requestBytes[0], category, firstObject, cancellationToken);
+				var deviceInfo = await Client.ReadDeviceIdentificationAsync(requestBytes[0], category, firstObject, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
 				var bodyBytes = new List<byte>();
 
@@ -855,5 +854,21 @@ namespace AMWD.Protocols.Modbus.Serial
 		}
 
 		#endregion Request Handling
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"RTU Proxy");
+			sb.AppendLine($"  {nameof(PortName)}:   {PortName}");
+			sb.AppendLine($"  {nameof(BaudRate)}:   {(int)BaudRate}");
+			sb.AppendLine($"  {nameof(DataBits)}:   {DataBits}");
+			sb.AppendLine($"  {nameof(StopBits)}:   {StopBits}");
+			sb.AppendLine($"  {nameof(Parity)}:     {Parity}");
+			sb.AppendLine($"  {nameof(Client)}:     {Client.GetType().Name}");
+
+			return sb.ToString();
+		}
 	}
 }
