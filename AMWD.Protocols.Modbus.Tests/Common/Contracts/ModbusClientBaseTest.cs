@@ -105,16 +105,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowExceptionOnNullConnection()
 		{
 			// Arrange
 			IModbusConnection connection = null;
 
-			// Act
-			new ModbusClientBaseWrapper(connection);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => new ModbusClientBaseWrapper(connection));
 		}
 
 		[DataTestMethod]
@@ -155,31 +152,25 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ObjectDisposedException))]
 		public async Task ShouldAssertDisposed()
 		{
 			// Arrange
 			var client = GetClient();
 			client.Dispose();
 
-			// Act
-			await client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT);
-
-			// Assert - ObjectDisposedException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public async Task ShouldAssertProtocolSet()
 		{
 			// Arrange
 			var client = GetClient();
 			client.Protocol = null;
 
-			// Act
-			await client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT));
 		}
 
 		#endregion Common/Connection/Assertions

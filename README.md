@@ -2,9 +2,12 @@
 
 Here you can find a basic implementation of the Modbus protocol.
 
+![NuGet Version](https://shields.io/nuget/v/AMWD.Protocols.Modbus.Common?style=flat&logo=nuget)
+![Test Coverage](https://git.am-wd.de/am-wd/amwd.protocols.modbus/badges/main/coverage.svg?style=flat)
+
 ## Overview
 
-The project is divided into four parts.
+The project is divided into multiple parts.
 
 To be mentioned at the beginning:    
 Only the clients are build very modular to fit any requirement reached on the first implementation back in 2018 ([see here]).    
@@ -35,7 +38,7 @@ It uses a specific TCP connection implementation and plugs all things from the C
 ---
 
 Published under [MIT License] (see [choose a license])    
-[![Buy me a Coffee](https://shields.am-wd.de/badge/PayPal-Buy_me_a_Coffee-yellow?style=flat&logo=paypal)](https://link.am-wd.de/donate)
+[![Buy me a Coffee](https://shields.io/badge/PayPal-Buy_me_a_Coffee-yellow?style=flat&logo=paypal)](https://link.am-wd.de/donate)
 [![built with Codeium](https://codeium.com/badges/main)](https://link.am-wd.de/codeium)
 
 

@@ -157,15 +157,12 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullExceptionOnCreateInstanceForClient()
 		{
 			// Arrange
 
-			// Act
-			new ModbusTcpProxy(null, IPAddress.Loopback);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => new ModbusTcpProxy(null, IPAddress.Loopback));
 		}
 
 		[TestMethod]
@@ -212,17 +209,14 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeExceptionForInvalidTimeout()
 		{
 			// Arrange
 			_connectClient = false;
 			using var proxy = GetProxy();
 
-			// Act
-			proxy.ReadWriteTimeout = TimeSpan.FromSeconds(-3);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => proxy.ReadWriteTimeout = TimeSpan.FromSeconds(-3));
 		}
 
 		[TestMethod]
@@ -886,6 +880,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			Assert.AreEqual(ModbusDeviceIdentificationObject.VendorName, objectId);
 
 			CollectionAssert.AreEqual(expectedResponse, _responseBytesCallbacks.First());
+			SnapshotAssert.AreEqual(_clientDeviceIdentificationResponse.ToString());
 		}
 
 		[TestMethod]

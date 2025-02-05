@@ -32,31 +32,23 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullForGetSByte()
 		{
 			// Arrange
 			HoldingRegister register = null;
 
-			// Act
-			register.GetSByte();
-
-			// Assert - ArgumentNullException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => register.GetSByte());
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentForGetSByte()
 		{
 			// Arrange
 			var obj = new Coil();
 
-			// Act
-			obj.GetSByte();
-
-			// Assert - ArgumentException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => obj.GetSByte());
 		}
 
 		[TestMethod]
@@ -86,31 +78,23 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullForGetInt16()
 		{
 			// Arrange
 			HoldingRegister register = null;
 
-			// Act
-			register.GetInt16();
-
-			// Assert - ArgumentNullException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => register.GetInt16());
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentForGetInt16()
 		{
 			// Arrange
 			var obj = new Coil();
 
-			// Act
-			obj.GetInt16();
-
-			// Assert - ArgumentException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => obj.GetInt16());
 		}
 
 		[TestMethod]
@@ -149,21 +133,16 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullOnGetInt32()
 		{
 			// Arrange
 			HoldingRegister[] registers = null;
 
-			// Act
-			registers.GetInt32(0);
-
-			// Assert - ArgumentNullException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => registers.GetInt32(0));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetInt32ForLength()
 		{
 			// Arrange
@@ -172,17 +151,13 @@
 				new HoldingRegister { Address = 101, HighByte = 0x01, LowByte = 0x02 }
 			};
 
-			// Act
-			registers.GetInt32(0);
-
-			// Assert - ArgumentException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetInt32(0));
 		}
 
 		[DataTestMethod]
 		[DataRow(1)]
 		[DataRow(-1)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeOnGetInt32(int startIndex)
 		{
 			// Arrange
@@ -192,15 +167,11 @@
 				new HoldingRegister { Address = 100, HighByte = 0x03, LowByte = 0x04 }
 			};
 
-			// Act
-			registers.GetInt32(startIndex);
-
-			// Assert - ArgumentOutOfRangeException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => registers.GetInt32(startIndex));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetInt32ForType()
 		{
 			// Arrange
@@ -210,11 +181,8 @@
 				new InputRegister { Address = 101, HighByte = 0x03, LowByte = 0x04 }
 			};
 
-			// Act
-			registers.GetInt32(0);
-
-			// Assert - ArgumentException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetInt32(0));
 		}
 
 		[TestMethod]
@@ -257,21 +225,16 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullOnGetInt64()
 		{
 			// Arrange
 			HoldingRegister[] registers = null;
 
-			// Act
-			registers.GetInt64(0);
-
-			// Assert - ArgumentNullException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => registers.GetInt64(0));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetInt64ForLength()
 		{
 			// Arrange
@@ -282,17 +245,13 @@
 				new HoldingRegister { Address = 103, HighByte = 0x03, LowByte = 0x04 }
 			};
 
-			// Act
-			registers.GetInt64(0);
-
-			// Assert - ArgumentException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetInt64(0));
 		}
 
 		[DataTestMethod]
 		[DataRow(1)]
 		[DataRow(-1)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeOnGetInt64(int startIndex)
 		{
 			// Arrange
@@ -304,15 +263,11 @@
 				new HoldingRegister { Address = 103, HighByte = 0x03, LowByte = 0x04 }
 			};
 
-			// Act
-			registers.GetInt64(startIndex);
-
-			// Assert - ArgumentOutOfRangeException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => registers.GetInt64(startIndex));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetInt64ForType()
 		{
 			// Arrange
@@ -324,11 +279,8 @@
 				new InputRegister { Address = 103, HighByte = 0x03, LowByte = 0x04 }
 			};
 
-			// Act
-			registers.GetInt64(0);
-
-			// Assert - ArgumentException
-			Assert.Fail();
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetInt64(0));
 		}
 
 		#endregion Modbus to value

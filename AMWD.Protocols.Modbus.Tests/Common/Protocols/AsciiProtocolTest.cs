@@ -32,29 +32,23 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(2001)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadCoils(int count)
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadCoils(UNIT_ID, 19, (ushort)count);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadCoils(UNIT_ID, 19, (ushort)count));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadCoils()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadCoils(UNIT_ID, ushort.MaxValue, 2);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadCoils(UNIT_ID, ushort.MaxValue, 2));
 		}
 
 		[TestMethod]
@@ -88,7 +82,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowExceptionOnDeserializeReadCoils()
 		{
 			// Arrange
@@ -98,10 +91,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			_ = protocol.DeserializeReadCoils(responseBytes);
-
-			// Assert - ModbusException
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.DeserializeReadCoils(responseBytes));
 		}
 
 		#endregion Read Coils
@@ -129,29 +120,23 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(2001)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadDiscreteInputs(int count)
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadDiscreteInputs(UNIT_ID, 19, (ushort)count);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadDiscreteInputs(UNIT_ID, 19, (ushort)count));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadDiscreteInputs()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadDiscreteInputs(UNIT_ID, ushort.MaxValue, 2);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadDiscreteInputs(UNIT_ID, ushort.MaxValue, 2));
 		}
 
 		[TestMethod]
@@ -185,7 +170,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowExceptionOnDeserializeReadDiscreteInputs()
 		{
 			// Arrange
@@ -195,10 +179,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.DeserializeReadDiscreteInputs(responseBytes);
-
-			// Assert - ModbusException
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.DeserializeReadDiscreteInputs(responseBytes));
 		}
 
 		#endregion Read Discrete Inputs
@@ -226,29 +208,23 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(2001)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadHoldingRegisters(int count)
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadHoldingRegisters(UNIT_ID, 19, (ushort)count);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadHoldingRegisters(UNIT_ID, 19, (ushort)count));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadHoldingRegisters()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadHoldingRegisters(UNIT_ID, ushort.MaxValue, 2);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadHoldingRegisters(UNIT_ID, ushort.MaxValue, 2));
 		}
 
 		[TestMethod]
@@ -276,7 +252,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowExceptionOnDeserializeReadHoldingRegisters()
 		{
 			// Arrange
@@ -286,10 +261,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.DeserializeReadHoldingRegisters(responseBytes);
-
-			// Assert - ModbusException
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.DeserializeReadHoldingRegisters(responseBytes));
 		}
 
 		#endregion Read Holding Registers
@@ -317,29 +290,23 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(2001)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeReadInputRegisters(int count)
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadInputRegisters(UNIT_ID, 19, (ushort)count);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadInputRegisters(UNIT_ID, 19, (ushort)count));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForStartingAddressOnSerializeReadInputRegisters()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadInputRegisters(UNIT_ID, ushort.MaxValue, 2);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadInputRegisters(UNIT_ID, ushort.MaxValue, 2));
 		}
 
 		[TestMethod]
@@ -367,7 +334,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowExceptionOnDeserializeReadInputRegisters()
 		{
 			// Arrange
@@ -377,10 +343,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.DeserializeReadInputRegisters(responseBytes);
-
-			// Assert - ModbusException
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.DeserializeReadInputRegisters(responseBytes));
 		}
 
 		#endregion Read Input Registers
@@ -410,16 +374,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeExceptionForCategoryOnSerializeReadDeviceIdentification()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeReadDeviceIdentification(UNIT_ID, (ModbusDeviceIdentificationCategory)10, ModbusDeviceIdentificationObject.ProductCode);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeReadDeviceIdentification(UNIT_ID, (ModbusDeviceIdentificationCategory)10, ModbusDeviceIdentificationObject.ProductCode));
 		}
 
 		[DataTestMethod]
@@ -449,7 +410,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowExceptionOnDeserializeReadDeviceIdentificationForMeiType()
 		{
 			// Arrange
@@ -459,12 +419,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.DeserializeReadDeviceIdentification(responseBytes);
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.DeserializeReadDeviceIdentification(responseBytes));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowExceptionOnDeserializeReadDeviceIdentificationForCategory()
 		{
 			// Arrange
@@ -474,8 +433,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.DeserializeReadDeviceIdentification(responseBytes);
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.DeserializeReadDeviceIdentification(responseBytes));
 		}
 
 		#endregion Read Device Identification
@@ -502,16 +461,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullOnSerializeWriteSingleCoil()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteSingleCoil(UNIT_ID, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => protocol.SerializeWriteSingleCoil(UNIT_ID, null));
 		}
 
 		[TestMethod]
@@ -557,16 +513,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullOnSerializeWriteSingleHoldingRegister()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteSingleHoldingRegister(UNIT_ID, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => protocol.SerializeWriteSingleHoldingRegister(UNIT_ID, null));
 		}
 
 		[TestMethod]
@@ -619,22 +572,18 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullOnSerializeWriteMultipleCoils()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleCoils(UNIT_ID, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => protocol.SerializeWriteMultipleCoils(UNIT_ID, null));
 		}
 
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(1969)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeWriteMultipleCoils(int count)
 		{
 			// Arrange
@@ -644,14 +593,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleCoils(UNIT_ID, coils);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeWriteMultipleCoils(UNIT_ID, coils));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentExceptionForDuplicateEntryOnSerializeMultipleCoils()
 		{
 			// Arrange
@@ -662,14 +608,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			};
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleCoils(UNIT_ID, coils);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => protocol.SerializeWriteMultipleCoils(UNIT_ID, coils));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentExceptionForGapInAddressOnSerializeMultipleCoils()
 		{
 			// Arrange
@@ -680,10 +623,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			};
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleCoils(UNIT_ID, coils);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => protocol.SerializeWriteMultipleCoils(UNIT_ID, coils));
 		}
 
 		[TestMethod]
@@ -732,22 +673,18 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullOnSerializeWriteMultipleHoldingRegisters()
 		{
 			// Arrange
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, null));
 		}
 
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(124)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowOutOfRangeForCountOnSerializeWriteMultipleHoldingRegisters(int count)
 		{
 			// Arrange
@@ -757,14 +694,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentExceptionForDuplicateEntryOnSerializeMultipleHoldingRegisters()
 		{
 			// Arrange
@@ -775,14 +709,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			};
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentExceptionForGapInAddressOnSerializeMultipleHoldingRegisters()
 		{
 			// Arrange
@@ -793,10 +724,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			};
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => protocol.SerializeWriteMultipleHoldingRegisters(UNIT_ID, registers));
 		}
 
 		[TestMethod]
@@ -898,7 +827,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForMissingHeaderOnValidateResponse()
 		{
 			// Arrange
@@ -907,12 +835,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			AddTrailer(ref response);
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForMissingTrailerOnValidateResponse()
 		{
 			// Arrange
@@ -920,12 +847,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			string response = $":{UNIT_ID:X2}010100";
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForUnitIdOnValidateResponse()
 		{
 			// Arrange
@@ -934,12 +860,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			AddTrailer(ref response);
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForLrcOnValidateResponse()
 		{
 			// Arrange
@@ -947,12 +872,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			string response = $":{UNIT_ID:X2}010001FF00XX\r\n";
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForFunctionCodeOnValidateResponse()
 		{
 			// Arrange
@@ -961,12 +885,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			AddTrailer(ref response);
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForErrorOnValidateResponse()
 		{
 			// Arrange
@@ -975,8 +898,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			AddTrailer(ref response);
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[DataTestMethod]
@@ -984,7 +907,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		[DataRow(0x02)]
 		[DataRow(0x03)]
 		[DataRow(0x04)]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForReadLengthOnValidateResponse(int fn)
 		{
 			// Arrange
@@ -993,8 +915,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			AddTrailer(ref response);
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[DataTestMethod]
@@ -1002,7 +924,6 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		[DataRow(0x06)]
 		[DataRow(0x0F)]
 		[DataRow(0x10)]
-		[ExpectedException(typeof(ModbusException))]
 		public void ShouldThrowForWriteLengthOnValidateResponse(int fn)
 		{
 			// Arrange
@@ -1011,8 +932,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			AddTrailer(ref response);
 			var protocol = new AsciiProtocol();
 
-			// Act
-			protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response));
+			// Act + Assert
+			Assert.ThrowsException<ModbusException>(() => protocol.ValidateResponse(Encoding.ASCII.GetBytes(request), Encoding.ASCII.GetBytes(response)));
 		}
 
 		[TestMethod]
@@ -1033,58 +954,46 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 		[DataRow("")]
 		[DataRow("     ")]
 		[DataRow("\t")]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullExceptionForMessageOnLrc(string msg)
 		{
 			// Arrange
 
-			// Act
-			AsciiProtocol.LRC(msg);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => AsciiProtocol.LRC(msg));
 		}
 
 		[DataTestMethod]
 		[DataRow(-1)]
 		[DataRow(4)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeExceptionForStartOnLrc(int start)
 		{
 			// Arrange
 			string msg = "0207";
 
-			// Act
-			AsciiProtocol.LRC(msg, start);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => AsciiProtocol.LRC(msg, start));
 		}
 
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(5)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeExceptionForLengthOnLrc(int length)
 		{
 			// Arrange
 			string msg = "0207";
 
-			// Act
-			AsciiProtocol.LRC(msg, 0, length);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => AsciiProtocol.LRC(msg, 0, length));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentExceptionForMessageLengthOnLrc()
 		{
 			// Arrange
 			string msg = "0207";
 
-			// Act
-			AsciiProtocol.LRC(msg);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => AsciiProtocol.LRC(msg));
 		}
 
 		#endregion Validation

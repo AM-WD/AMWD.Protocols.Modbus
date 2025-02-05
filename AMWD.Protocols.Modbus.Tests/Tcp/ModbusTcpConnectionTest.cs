@@ -80,31 +80,25 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		[DataRow(null)]
 		[DataRow("")]
 		[DataRow("   ")]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullExceptionForInvalidHostname(string hostname)
 		{
 			// Arrange
 			var connection = GetTcpConnection();
 
-			// Act
-			connection.Hostname = hostname;
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => connection.Hostname = hostname);
 		}
 
 		[DataTestMethod]
 		[DataRow(0)]
 		[DataRow(65536)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeExceptionForInvalidPort(int port)
 		{
 			// Arrange
 			var connection = GetTcpConnection();
 
-			// Act
-			connection.Port = port;
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => connection.Port = port);
 		}
 
 		[TestMethod]
@@ -119,46 +113,37 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ObjectDisposedException))]
 		public async Task ShouldThrowDisposedExceptionOnInvokeAsync()
 		{
 			// Arrange
 			var connection = GetConnection();
 			connection.Dispose();
 
-			// Act
-			await connection.InvokeAsync(null, null);
-
-			// Assert - OjbectDisposedException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => connection.InvokeAsync(null, null));
 		}
 
 		[DataTestMethod]
 		[DataRow(null)]
 		[DataRow(new byte[0])]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public async Task ShouldThrowArgumentNullExceptionForMissingRequestOnInvokeAsync(byte[] request)
 		{
 			// Arrange
 			var connection = GetConnection();
 
-			// Act
-			await connection.InvokeAsync(request, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public async Task ShouldThrowArgumentNullExceptionForMissingValidationOnInvokeAsync()
 		{
 			// Arrange
 			byte[] request = new byte[1];
 			var connection = GetConnection();
 
-			// Act
-			await connection.InvokeAsync(request, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
 		}
 
 		[TestMethod]
@@ -235,7 +220,6 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(EndOfStreamException))]
 		public async Task ShouldThrowEndOfStreamExceptionOnInvokeAsync()
 		{
 			// Arrange
@@ -244,14 +228,11 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			var connection = GetConnection();
 
-			// Act
-			var response = await connection.InvokeAsync(request, validation);
-
-			// Assert - EndOfStreamException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<EndOfStreamException>(() => connection.InvokeAsync(request, validation));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ApplicationException))]
 		public async Task ShouldThrowApplicationExceptionWhenHostNotResolvableOnInvokeAsync()
 		{
 			// Arrange
@@ -264,10 +245,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 			connection.GetType().GetField("_hostname", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(connection, "");
 
-			// Act
-			var response = await connection.InvokeAsync(request, validation);
-
-			// Assert - ApplicationException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ApplicationException>(() => connection.InvokeAsync(request, validation));
 		}
 
 		[TestMethod]
@@ -351,8 +330,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(TaskCanceledException))]
-		public async Task ShouldThrowTaskCancelledExceptionForDisposeOnInvokeAsync()
+		public async Task ShouldThrowTaskCanceledExceptionForDisposeOnInvokeAsync()
 		{
 			// Arrange
 			byte[] request = [1, 2, 3];
@@ -363,17 +341,17 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.Setup(ns => ns.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
 				.Returns(new ValueTask(Task.Delay(100)));
 
-			// Act
-			var task = connection.InvokeAsync(request, validation);
-			connection.Dispose();
-			await task;
-
-			// Assert - TaskCancelledException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
+			{
+				var task = connection.InvokeAsync(request, validation);
+				connection.Dispose();
+				await task;
+			});
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(TaskCanceledException))]
-		public async Task ShouldThrowTaskCancelledExceptionForCancelOnInvokeAsync()
+		public async Task ShouldThrowTaskCanceledExceptionForCancelOnInvokeAsync()
 		{
 			// Arrange
 			byte[] request = [1, 2, 3];
@@ -385,12 +363,13 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.Setup(ns => ns.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
 				.Returns(new ValueTask(Task.Delay(100)));
 
-			// Act
-			var task = connection.InvokeAsync(request, validation, cts.Token);
-			cts.Cancel();
-			await task;
-
-			// Assert - TaskCancelledException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
+			{
+				var task = connection.InvokeAsync(request, validation, cts.Token);
+				cts.Cancel();
+				await task;
+			});
 		}
 
 		[TestMethod]

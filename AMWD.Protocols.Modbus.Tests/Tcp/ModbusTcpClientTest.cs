@@ -162,5 +162,18 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			_tcpConnectionMock.VerifyNoOtherCalls();
 		}
+
+		[TestMethod]
+		public void ShouldPrintCleanString()
+		{
+			// Arrange
+			using var client = new ModbusTcpClient(_tcpConnectionMock.Object);
+
+			// Act
+			string str = client.ToString();
+
+			// Assert
+			SnapshotAssert.AreEqual(str);
+		}
 	}
 }

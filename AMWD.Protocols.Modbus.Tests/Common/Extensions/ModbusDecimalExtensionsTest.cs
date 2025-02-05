@@ -41,20 +41,16 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullOnGetSingle()
 		{
 			// Arrange
 			HoldingRegister[] registers = null;
 
-			// Act
-			registers.GetSingle(0);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => registers.GetSingle(0));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetSingleForLength()
 		{
 			// Arrange
@@ -63,16 +59,13 @@
 				new() { Address = 101, HighByte = 0x01, LowByte = 0x02 }
 			};
 
-			// Act
-			registers.GetSingle(0);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetSingle(0));
 		}
 
 		[DataTestMethod]
 		[DataRow(1)]
 		[DataRow(-1)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeOnGetSingle(int startIndex)
 		{
 			// Arrange
@@ -82,14 +75,11 @@
 				new() { Address = 100, HighByte = 0x03, LowByte = 0x04 }
 			};
 
-			// Act
-			registers.GetSingle(startIndex);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => registers.GetSingle(startIndex));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetSingleForType()
 		{
 			// Arrange
@@ -99,10 +89,8 @@
 				new InputRegister { Address = 101, HighByte = 0x03, LowByte = 0x04 }
 			};
 
-			// Act
-			registers.GetSingle(0);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetSingle(0));
 		}
 
 		[TestMethod]
@@ -145,20 +133,16 @@
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullOnGetDouble()
 		{
 			// Arrange
 			HoldingRegister[] registers = null;
 
-			// Act
-			registers.GetDouble(0);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => registers.GetDouble(0));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetDoubleForLength()
 		{
 			// Arrange
@@ -169,16 +153,13 @@
 				new() { Address = 102, HighByte = 0x7A, LowByte = 0xE1 }
 			};
 
-			// Act
-			registers.GetDouble(0);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetDouble(0));
 		}
 
 		[DataTestMethod]
 		[DataRow(1)]
 		[DataRow(-1)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeOnGetDouble(int startIndex)
 		{
 			// Arrange
@@ -190,14 +171,11 @@
 				new() { Address = 103, HighByte = 0x47, LowByte = 0xAE }
 			};
 
-			// Act
-			registers.GetDouble(startIndex);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => registers.GetDouble(startIndex));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnGetDoubleForType()
 		{
 			// Arrange
@@ -209,10 +187,8 @@
 				new InputRegister { Address = 103, HighByte = 0x47, LowByte = 0xAE }
 			};
 
-			// Act
-			registers.GetDouble(0);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetDouble(0));
 		}
 
 		#endregion Modbus to value

@@ -94,58 +94,46 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 		[DataRow(null)]
 		[DataRow("")]
 		[DataRow("  ")]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullExceptionOnCreate(string portName)
 		{
 			// Arrange
 
-			// Act
-			using var test = new ModbusSerialClient(portName);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => new ModbusSerialClient(portName));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ObjectDisposedException))]
 		public async Task ShouldThrowDisposedExceptionOnInvokeAsync()
 		{
 			// Arrange
 			var connection = GetConnection();
 			connection.Dispose();
 
-			// Act
-			await connection.InvokeAsync(null, null);
-
-			// Assert - OjbectDisposedException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => connection.InvokeAsync(null, null));
 		}
 
 		[DataTestMethod]
 		[DataRow(null)]
 		[DataRow(new byte[0])]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public async Task ShouldThrowArgumentNullExceptionForMissingRequestOnInvokeAsync(byte[] request)
 		{
 			// Arrange
 			var connection = GetConnection();
 
-			// Act
-			await connection.InvokeAsync(request, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public async Task ShouldThrowArgumentNullExceptionForMissingValidationOnInvokeAsync()
 		{
 			// Arrange
 			byte[] request = new byte[1];
 			var connection = GetConnection();
 
-			// Act
-			await connection.InvokeAsync(request, null);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
 		}
 
 		[TestMethod]
@@ -176,10 +164,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_serialPortMock.VerifyNoOtherCalls();
 		}
 
-		[DataTestMethod]
-		[DataRow(false)]
-		[DataRow(true)]
-		public async Task ShouldOpenAndCloseOnInvokeAsync(bool modifyDriver)
+		[TestMethod]
+		public async Task ShouldOpenAndCloseOnInvokeAsyncOnLinuxNotModifyingDriver()
 		{
 			// Arrange
 			_alwaysOpen = false;
@@ -193,8 +179,9 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_serialLineResponseQueue.Enqueue(expectedResponse);
 
 			var connection = GetSerialConnection();
+			connection.GetType().GetField("_isLinux", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(connection, true);
 			connection.IdleTimeout = TimeSpan.FromMilliseconds(200);
-			connection.DriverEnabledRS485 = modifyDriver;
+			connection.DriverEnabledRS485 = false;
 
 			// Act
 			var response = await connection.InvokeAsync(request, validation);
@@ -213,11 +200,50 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_serialPortMock.Verify(c => c.ResetRS485DriverStateFlags(), Times.Exactly(2));
 			_serialPortMock.Verify(c => c.Open(), Times.Once);
 
-			if (modifyDriver)
-			{
-				_serialPortMock.Verify(c => c.GetRS485DriverStateFlags(), Times.Once);
-				_serialPortMock.Verify(c => c.ChangeRS485DriverStateFlags(It.IsAny<RS485Flags>()), Times.Once);
-			}
+			_serialPortMock.Verify(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
+			_serialPortMock.Verify(ns => ns.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+
+			_serialPortMock.VerifyNoOtherCalls();
+		}
+
+		[TestMethod]
+		public async Task ShouldOpenAndCloseOnInvokeAsyncOnLinuxModifyingDriver()
+		{
+			// Arrange
+			_alwaysOpen = false;
+			_isOpenQueue.Enqueue(false);
+			_isOpenQueue.Enqueue(true);
+			_isOpenQueue.Enqueue(true);
+
+			byte[] request = [1, 2, 3];
+			byte[] expectedResponse = [9, 8, 7];
+			var validation = new Func<IReadOnlyList<byte>, bool>(_ => true);
+			_serialLineResponseQueue.Enqueue(expectedResponse);
+
+			var connection = GetSerialConnection();
+			connection.GetType().GetField("_isLinux", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(connection, true);
+			connection.IdleTimeout = TimeSpan.FromMilliseconds(200);
+			connection.DriverEnabledRS485 = true;
+
+			// Act
+			var response = await connection.InvokeAsync(request, validation);
+			await Task.Delay(500);
+
+			// Assert
+			Assert.IsNotNull(response);
+
+			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
+			CollectionAssert.AreEqual(request, _serialLineRequestCallbacks.First());
+
+			_serialPortMock.VerifyGet(c => c.ReadTimeout, Times.Once);
+
+			_serialPortMock.Verify(c => c.IsOpen, Times.Exactly(3));
+			_serialPortMock.Verify(c => c.Close(), Times.Exactly(2));
+			_serialPortMock.Verify(c => c.ResetRS485DriverStateFlags(), Times.Exactly(2));
+			_serialPortMock.Verify(c => c.Open(), Times.Once);
+
+			_serialPortMock.Verify(c => c.GetRS485DriverStateFlags(), Times.Once);
+			_serialPortMock.Verify(c => c.ChangeRS485DriverStateFlags(It.IsAny<RS485Flags>()), Times.Once);
 
 			_serialPortMock.Verify(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
 			_serialPortMock.Verify(ns => ns.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -226,7 +252,90 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(EndOfStreamException))]
+		public async Task ShouldOpenAndCloseOnInvokeAsyncOnOtherOsNotModifyingDriver()
+		{
+			// Arrange
+			_alwaysOpen = false;
+			_isOpenQueue.Enqueue(false);
+			_isOpenQueue.Enqueue(true);
+			_isOpenQueue.Enqueue(true);
+
+			byte[] request = [1, 2, 3];
+			byte[] expectedResponse = [9, 8, 7];
+			var validation = new Func<IReadOnlyList<byte>, bool>(_ => true);
+			_serialLineResponseQueue.Enqueue(expectedResponse);
+
+			var connection = GetSerialConnection();
+			connection.GetType().GetField("_isLinux", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(connection, false);
+			connection.IdleTimeout = TimeSpan.FromMilliseconds(200);
+			connection.DriverEnabledRS485 = false;
+
+			// Act
+			var response = await connection.InvokeAsync(request, validation);
+			await Task.Delay(500);
+
+			// Assert
+			Assert.IsNotNull(response);
+
+			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
+			CollectionAssert.AreEqual(request, _serialLineRequestCallbacks.First());
+
+			_serialPortMock.VerifyGet(c => c.ReadTimeout, Times.Once);
+
+			_serialPortMock.Verify(c => c.IsOpen, Times.Exactly(3));
+			_serialPortMock.Verify(c => c.Close(), Times.Exactly(2));
+			_serialPortMock.Verify(c => c.ResetRS485DriverStateFlags(), Times.Exactly(2));
+			_serialPortMock.Verify(c => c.Open(), Times.Once);
+
+			_serialPortMock.Verify(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
+			_serialPortMock.Verify(ns => ns.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+
+			_serialPortMock.VerifyNoOtherCalls();
+		}
+
+		[TestMethod]
+		public async Task ShouldOpenAndCloseOnInvokeAsyncOnOtherOsModifyingDriver()
+		{
+			// Arrange
+			_alwaysOpen = false;
+			_isOpenQueue.Enqueue(false);
+			_isOpenQueue.Enqueue(true);
+			_isOpenQueue.Enqueue(true);
+
+			byte[] request = [1, 2, 3];
+			byte[] expectedResponse = [9, 8, 7];
+			var validation = new Func<IReadOnlyList<byte>, bool>(_ => true);
+			_serialLineResponseQueue.Enqueue(expectedResponse);
+
+			var connection = GetSerialConnection();
+			connection.GetType().GetField("_isLinux", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(connection, false);
+			connection.IdleTimeout = TimeSpan.FromMilliseconds(200);
+			connection.DriverEnabledRS485 = true;
+
+			// Act
+			var response = await connection.InvokeAsync(request, validation);
+			await Task.Delay(500);
+
+			// Assert
+			Assert.IsNotNull(response);
+
+			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
+			CollectionAssert.AreEqual(request, _serialLineRequestCallbacks.First());
+
+			_serialPortMock.VerifyGet(c => c.ReadTimeout, Times.Once);
+
+			_serialPortMock.Verify(c => c.IsOpen, Times.Exactly(3));
+			_serialPortMock.Verify(c => c.Close(), Times.Exactly(2));
+			_serialPortMock.Verify(c => c.ResetRS485DriverStateFlags(), Times.Exactly(2));
+			_serialPortMock.Verify(c => c.Open(), Times.Once);
+
+			_serialPortMock.Verify(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
+			_serialPortMock.Verify(ns => ns.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+
+			_serialPortMock.VerifyNoOtherCalls();
+		}
+
+		[TestMethod]
 		public async Task ShouldThrowEndOfStreamExceptionOnInvokeAsync()
 		{
 			// Arrange
@@ -235,10 +344,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			var connection = GetConnection();
 
-			// Act
-			var response = await connection.InvokeAsync(request, validation);
-
-			// Assert - EndOfStreamException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<EndOfStreamException>(() => connection.InvokeAsync(request, validation));
 		}
 
 		[TestMethod]
@@ -320,7 +427,6 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(TaskCanceledException))]
 		public async Task ShouldThrowTaskCancelledExceptionForDisposeOnInvokeAsync()
 		{
 			// Arrange
@@ -332,16 +438,16 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
 				.Returns(Task.Delay(100));
 
-			// Act
-			var task = connection.InvokeAsync(request, validation);
-			connection.Dispose();
-			await task;
-
-			// Assert - TaskCancelledException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
+			{
+				var task = connection.InvokeAsync(request, validation);
+				connection.Dispose();
+				await task;
+			});
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(TaskCanceledException))]
 		public async Task ShouldThrowTaskCancelledExceptionForCancelOnInvokeAsync()
 		{
 			// Arrange
@@ -354,12 +460,13 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
 				.Returns(Task.Delay(100));
 
-			// Act
-			var task = connection.InvokeAsync(request, validation, cts.Token);
-			cts.Cancel();
-			await task;
-
-			// Assert - TaskCancelledException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<TaskCanceledException>(async () =>
+			{
+				var task = connection.InvokeAsync(request, validation, cts.Token);
+				cts.Cancel();
+				await task;
+			});
 		}
 
 		[TestMethod]
@@ -375,7 +482,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 			_serialPortMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
-				.Callback<byte[], CancellationToken>((req, _) => _serialLineRequestCallbacks.Add(req.ToArray()))
+				.Callback<byte[], CancellationToken>((req, _) => _serialLineRequestCallbacks.Add([.. req]))
 				.Returns(Task.Delay(100));
 
 			// Act
@@ -418,7 +525,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 			_serialPortMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
-				.Callback<byte[], CancellationToken>((req, _) => _serialLineRequestCallbacks.Add(req.ToArray()))
+				.Callback<byte[], CancellationToken>((req, _) => _serialLineRequestCallbacks.Add([.. req]))
 				.Returns(Task.Delay(100));
 
 			// Act
@@ -488,9 +595,6 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connectionField = connection.GetType().GetField("_serialPort", BindingFlags.NonPublic | BindingFlags.Instance);
 			(connectionField.GetValue(connection) as SerialPortWrapper)?.Dispose();
 			connectionField.SetValue(connection, _serialPortMock.Object);
-
-			// Set unit test mode
-			connection.GetType().GetField("_isUnitTest", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(connection, true);
 
 			return connection;
 		}

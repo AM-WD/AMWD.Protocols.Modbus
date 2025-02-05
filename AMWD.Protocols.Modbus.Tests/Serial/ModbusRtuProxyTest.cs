@@ -144,49 +144,40 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullExceptionOnCreateInstanceForClient()
 		{
 			// Arrange
 
-			// Act
-			new ModbusRtuProxy(null, "some-port");
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => new ModbusRtuProxy(null, "some-port"));
 		}
 
 		[DataTestMethod]
 		[DataRow(null)]
 		[DataRow("")]
 		[DataRow("  ")]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowArgumentNullExceptionOnCreateInstanceForPortName(string portName)
 		{
 			// Arrange
 			var connection = new Mock<IModbusConnection>();
 			var clientMock = new Mock<ModbusClientBase>(connection.Object);
 
-			// Act
-			new ModbusRtuProxy(clientMock.Object, portName);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => new ModbusRtuProxy(clientMock.Object, portName));
 		}
 
 		[DataTestMethod]
 		[DataRow(null)]
 		[DataRow("")]
 		[DataRow("  ")]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public async Task ShouldThrowArgumentNullExceptionOnMissingPortName(string portName)
 		{
 			// Arrange
 			using var proxy = GetProxy();
 			_serialPortMock.Setup(m => m.PortName).Returns(portName);
 
-			// Act
-			await proxy.StartAsync();
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => proxy.StartAsync());
 		}
 
 		[TestMethod]

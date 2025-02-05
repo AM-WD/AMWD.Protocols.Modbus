@@ -30,16 +30,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullOnGetBoolean()
 		{
 			// Arrange
 			Coil coil = null;
 
-			// Act
-			coil.GetBoolean();
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => coil.GetBoolean());
 		}
 
 		[TestMethod]
@@ -95,35 +92,28 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullOnString()
 		{
 			// Arrange
 			HoldingRegister[] list = null;
 
-			// Act
-			list.GetString(2);
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => list.GetString(2));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnStringForEmptyList()
 		{
 			// Arrange
 			var registers = Array.Empty<HoldingRegister>();
 
-			// Act
-			registers.GetString(2);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetString(2));
 		}
 
 		[DataTestMethod]
 		[DataRow(1)]
 		[DataRow(-1)]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShouldThrowArgumentOutOfRangeOnString(int startIndex)
 		{
 			// Arrange
@@ -133,14 +123,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 				new() { Address = 2, HighByte = 67, LowByte = 0 }
 			};
 
-			// Act
-			registers.GetString(2, startIndex);
-
-			// Assert - ArgumentOutOfRangeException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => registers.GetString(2, startIndex));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowArgumentOnStringForMixedTypes()
 		{
 			// Arrange
@@ -150,10 +137,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 				new InputRegister { Address = 2, HighByte = 67, LowByte = 0 }
 			};
 
-			// Act
-			registers.GetString(2);
-
-			// Assert - ArgumentException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentException>(() => registers.GetString(2));
 		}
 
 		#endregion Modbus to value
@@ -272,16 +257,13 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowNullOnGetString()
 		{
 			// Arrange
 			string str = null;
 
-			// Act
-			_ = str.ToRegisters(100).ToArray();
-
-			// Assert - ArgumentNullException
+			// Act + Assert
+			Assert.ThrowsException<ArgumentNullException>(() => str.ToRegisters(100).ToArray());
 		}
 
 		#endregion Value to Modbus
