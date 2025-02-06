@@ -108,7 +108,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 			_stopCts?.Dispose();
 			_stopCts = new CancellationTokenSource();
 
-			_tcpListener.Socket.DualMode = ListenAddress.AddressFamily == AddressFamily.InterNetworkV6;
+			// Only allowed to set, if the socket is in the InterNetworkV6 address family.
+			// See: https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.dualmode?view=netstandard-2.0#exceptions
+			if (ListenAddress.AddressFamily == AddressFamily.InterNetworkV6)
+				_tcpListener.Socket.DualMode = true;
 
 			_tcpListener.Start();
 			_clientConnectTask = WaitForClientAsync(_stopCts.Token);

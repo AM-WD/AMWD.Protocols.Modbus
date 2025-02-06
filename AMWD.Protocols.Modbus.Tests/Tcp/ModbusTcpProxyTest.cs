@@ -143,7 +143,6 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await proxy.StopAsync();
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
 
@@ -151,7 +150,29 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Exactly(2));
 			_tcpListenerMock.Verify(m => m.AcceptTcpClientAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
+			VerifyNoOtherCalls();
+		}
+
+		[TestMethod]
+		public async Task ShouldSetSocketToDualModeOnIpV6()
+		{
+			// Arrange
+			_connectClient = false;
+			using var proxy = GetProxy(IPAddress.IPv6Loopback);
+
+			// Act
+			await proxy.StartAsync();
+			await proxy.StopAsync();
+
+			// Assert
+			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
+			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
+			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
+			_socketMock.VerifySet(m => m.DualMode = true, Times.Once);
+
+			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
+			_tcpListenerMock.Verify(m => m.Stop(), Times.Exactly(2));
+			_tcpListenerMock.Verify(m => m.AcceptTcpClientAsync(It.IsAny<CancellationToken>()), Times.Once);
 
 			VerifyNoOtherCalls();
 		}
@@ -238,7 +259,6 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
@@ -246,7 +266,6 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_tcpListenerMock.Verify(m => m.AcceptTcpClientAsync(It.IsAny<CancellationToken>()), Times.AtLeast(1));
 
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			VerifyNoOtherCalls();
 		}
@@ -263,10 +282,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -294,10 +311,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -341,10 +356,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -382,10 +395,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -419,10 +430,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -471,10 +480,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -512,10 +519,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -549,10 +554,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -599,10 +602,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -640,10 +641,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -677,10 +676,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -727,10 +724,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -768,10 +763,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -805,10 +798,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -856,10 +847,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -898,10 +887,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -930,10 +917,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -965,10 +950,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1000,10 +983,9 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
+
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1041,10 +1023,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1089,10 +1069,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1146,10 +1124,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1192,10 +1168,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1238,10 +1212,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1288,10 +1260,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1329,10 +1299,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1361,10 +1329,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1397,10 +1363,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1444,10 +1408,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1490,10 +1452,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1531,10 +1491,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1564,10 +1522,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1611,10 +1567,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1657,10 +1611,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1702,10 +1654,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1734,10 +1684,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1770,10 +1718,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1821,10 +1767,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1871,10 +1815,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1916,10 +1858,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1948,10 +1888,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -1984,10 +1922,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -2035,10 +1971,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			await Task.Delay(100);
 
 			// Assert
-			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
 			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
-			_socketMock.VerifySet(m => m.DualMode = false, Times.Once);
 
 			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
 			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
@@ -2094,9 +2028,9 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			return [.. CreateHeader(request), .. request];
 		}
 
-		private ModbusTcpProxy GetProxy()
+		private ModbusTcpProxy GetProxy(IPAddress localAddress = null)
 		{
-			var localAddress = IPAddress.Loopback;
+			localAddress ??= IPAddress.Loopback;
 			int localPort = 502;
 
 			var connection = new Mock<IModbusConnection>();

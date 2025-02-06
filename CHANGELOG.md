@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Async methods do not return on captured context anymore (`Task.ConfigureAwait(false)`).
 
+### Fixed
+
+- Set `Socket.DualMode` on IPv4 network address is not allowed (`ModbusTcpProxy`).
+
 
 ## [v0.4.0] (2025-01-29)
 
