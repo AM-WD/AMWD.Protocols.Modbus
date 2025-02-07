@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _nothing changed yet_
 
+
+## [v0.4.2] (2025-02-07)
+
+### Fixed
+
+- Fixing issue with R/W timeouts while processing client requests on the `ModbusTcpProxy`.
+
+
 ## [v0.4.1] (2025-02-06)
 
 ### Changed
@@ -87,7 +95,8 @@ So this tag is only here for documentation purposes of the NuGet Gallery.
 
 
 
-[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.2...HEAD
+[v0.4.2]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.1...v0.4.2
 [v0.4.1]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.2...v0.4.0
 [v0.3.2]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.1...v0.3.2

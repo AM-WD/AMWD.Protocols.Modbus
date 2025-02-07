@@ -213,23 +213,32 @@ namespace AMWD.Protocols.Modbus.Tcp
 				{
 					var requestBytes = new List<byte>();
 
+					// Waiting for next request
+					byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+					requestBytes.AddRange(headerBytes);
+
+					ushort length = headerBytes
+						.Skip(4).Take(2).ToArray()
+						.GetBigEndianUInt16();
+
+					// Waiting for the remaining required data
 					using (var cts = new CancellationTokenSource(ReadWriteTimeout))
 					using (cancellationToken.Register(cts.Cancel))
 					{
-						byte[] headerBytes = await stream.ReadExpectedBytesAsync(6, cts.Token).ConfigureAwait(continueOnCapturedContext: false);
-						requestBytes.AddRange(headerBytes);
-
-						ushort length = headerBytes
-							.Skip(4).Take(2).ToArray()
-							.GetBigEndianUInt16();
-
 						byte[] bodyBytes = await stream.ReadExpectedBytesAsync(length, cts.Token).ConfigureAwait(continueOnCapturedContext: false);
 						requestBytes.AddRange(bodyBytes);
 					}
 
 					byte[] responseBytes = await HandleRequestAsync([.. requestBytes], cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 					if (responseBytes != null)
-						await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+					{
+						// Write response when available
+						using (var cts = new CancellationTokenSource(ReadWriteTimeout))
+						using (cancellationToken.Register(cts.Cancel))
+						{
+							await stream.WriteAsync(responseBytes, 0, responseBytes.Length, cts.Token).ConfigureAwait(continueOnCapturedContext: false);
+						}
+					}
 				}
 			}
 			catch
