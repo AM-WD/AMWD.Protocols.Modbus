@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>AMWD.Protocols.Modbus.Tcp</PackageId>
+    <AssemblyName>amwd-modbus-tcp</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.Tcp</RootNamespace>
+
+    <Product>Modbus TCP Protocol</Product>
+    <Description>Implementation of the Modbus protocol communicating via TCP.</Description>
+    <PackageTags>Modbus Protocol Network TCP LAN</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ArrayExtensions.cs" Link="Extensions/ArrayExtensions.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Extensions/ReaderWriterLockSlimExtensions.cs" Link="Extensions/ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Utils/AsyncQueue.cs" Link="Utils/AsyncQueue.cs" />
+    <Compile Include="../AMWD.Protocols.Modbus.Common/Utils/RequestQueueItem.cs" Link="Utils/RequestQueueItem.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AMWD.Protocols.Modbus.Common\AMWD.Protocols.Modbus.Common.csproj" />
+  </ItemGroup>
+
+</Project>

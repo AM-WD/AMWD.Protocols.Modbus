@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>modbus-client</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.CliClient</RootNamespace>
+
+    <Product>Modbus CLI client</Product>
+    <Description>Small CLI client for Modbus communication.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj" />
+    <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Tcp\AMWD.Protocols.Modbus.Tcp.csproj" />
+  </ItemGroup>
+
+</Project>

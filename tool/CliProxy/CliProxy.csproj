@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>modbus-proxy</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.CliProxy</RootNamespace>
+
+    <Product>Modbus CLI proxy</Product>
+    <Description>Small CLI proxy to forward messages.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj" />
+    <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Tcp\AMWD.Protocols.Modbus.Tcp.csproj" />
+  </ItemGroup>
+
+</Project>

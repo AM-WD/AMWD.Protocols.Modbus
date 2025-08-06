@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <TargetFramework>net8.0</TargetFramework>
+
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <AssemblyOriginatorKeyFile>../../AMWD.Protocols.Modbus.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)\..'))" />
+</Project>

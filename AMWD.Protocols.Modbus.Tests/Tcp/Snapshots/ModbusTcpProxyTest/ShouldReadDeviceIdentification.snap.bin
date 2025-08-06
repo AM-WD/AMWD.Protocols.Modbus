@@ -1,9 +1,0 @@
-DeviceIdentification
-  VendorName:                VendorName
-  ProductCode:               ProductCode
-  MajorMinorRevision:        MajorMinorRevision
-  VendorUrl:                 
-  ProductName:               
-  ModelName:                 
-  UserApplicationName:       
-  IsIndividualAccessAllowed: False

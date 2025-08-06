@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>AMWD.Protocols.Modbus.Common</PackageId>
+    <AssemblyName>amwd-modbus-common</AssemblyName>
+    <RootNamespace>AMWD.Protocols.Modbus.Common</RootNamespace>
+
+    <Product>Modbus Protocol Common</Product>
+    <Description>Common data for Modbus protocol.</Description>
+    <PackageTags>Modbus Protocol</PackageTags>
+  </PropertyGroup>
+
+</Project>
