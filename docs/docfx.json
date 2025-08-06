@@ -1,0 +1,63 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../",
+          "files": [
+            "src/AMWD.Protocols.Modbus.Common/bin/Release/netstandard2.0/amwd-modbus-common.dll",
+            "src/AMWD.Protocols.Modbus.Serial/bin/Release/netstandard2.0/amwd-modbus-serial.dll",
+            "src/AMWD.Protocols.Modbus.Tcp/bin/Release/netstandard2.0/amwd-modbus-tcp.dll"
+          ]
+        }
+      ],
+      "dest": "api",
+      "outputFormat": "apiPage"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [ "**/*.{md,yml}" ],
+        "exclude": [ "_site/**", "obj/**" ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [ "images/**" ],
+        "exclude": [ "_site/**", "obj/**" ]
+      }
+    ],
+    "output": "_site",
+    "template": [ "default", "modern", "templates/amwd" ],
+    "postProcessors": ["ExtractSearchIndex"],
+    "globalMetadata": {
+      "_appName": "Protocol for .NET",
+      "_appTitle": "Modbus Protocol for .NET",
+      "_appFooter": "<span>&copy; AM.WD &mdash; Docs generated using <a href=\"https://dotnet.github.io/docfx\" target=\"_blank\">docfx</a>.</span>",
+      "_appLogoPath": "images/logo.svg",
+      "_appFaviconPath": "images/favicon.ico",
+      "_disableBreadcrumb": true,
+      "_disableContribution": true,
+      "_enableSearch": true,
+      "_enableNewTab": true,
+      "pdf": false
+    },
+    "markdownEngineName": "markdig",
+    "markdownEngineProperties": {
+      "alerts": {
+        "TODO": "alert alert-secondary"
+      }
+    },
+    "sitemap": {
+      "baseUrl": "https://docs.am-wd.de/modbus",
+      "priority": 0.5,
+      "changefreq": "weekly"
+    },
+    "noLangKeyword": false,
+    "keepFileLink": false,
+    "cleanupCacheHistory": false,
+    "disableGitFeatures": true
+  }
+}

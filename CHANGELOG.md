@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_nothing changed yet_
+### Added
+
+- New automatic documentation generation using docfx.
+
+### Changed
+
+- Reorganized folder structure to allow documentation generation.
 
 
 ## [v0.4.2] (2025-02-07)

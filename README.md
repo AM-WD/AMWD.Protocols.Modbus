@@ -39,13 +39,12 @@ It uses a specific TCP connection implementation and plugs all things from the C
 
 Published under [MIT License] (see [choose a license])    
 [![Buy me a Coffee](https://shields.io/badge/PayPal-Buy_me_a_Coffee-yellow?style=flat&logo=paypal)](https://link.am-wd.de/donate)
-[![built with Codeium](https://codeium.com/badges/main)](https://link.am-wd.de/codeium)
 
 
 
 [see here]:         https://github.com/andreasAMmueller/Modbus
-[Common]:           AMWD.Protocols.Modbus.Common/README.md
-[Serial]:           AMWD.Protocols.Modbus.Serial/README.md
-[TCP]:              AMWD.Protocols.Modbus.Tcp/README.md
+[Common]:           src/AMWD.Protocols.Modbus.Common/README.md
+[Serial]:           src/AMWD.Protocols.Modbus.Serial/README.md
+[TCP]:              src/AMWD.Protocols.Modbus.Tcp/README.md
 [MIT License]:      LICENSE.txt
 [choose a license]: https://choosealicense.com/licenses/mit/

@@ -129,3 +129,29 @@ deploy-release:
     - if: $CI_COMMIT_TAG != null
   script:
     - dotnet nuget push -k $NUGET_APIKEY -s https://api.nuget.org/v3/index.json --skip-duplicate artifacts/*.nupkg
+
+
+
+publish-docs:
+  variables:
+    DOCFX_SOURCE_REPOSITORY_URL: "https://github.com/AM-WD/AMWD.Protocols.Modbus"
+  stage: deploy
+  tags:
+    - docker
+    - lnx
+    - server
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  before_script:
+    - apt-get update
+    - apt-get -y install zip unzip
+    - dotnet tool install docfx --tool-path /dotnet-tools
+  script:
+    # Build the docs
+    - dotnet build -c Release --nologo
+    - /dotnet-tools/docfx metadata docs/docfx.json
+    - /dotnet-tools/docfx build docs/docfx.json
+    # Deploy the docs
+    - cd docs/_site
+    - zip -r ../docs.zip *
+    - curl --user "$DOCS_DEPLOY_USER:$DOCS_DEPLOY_PASS" -F docs=modbus -F dump=@../docs.zip "$DOCS_DEPLOY_URL"
