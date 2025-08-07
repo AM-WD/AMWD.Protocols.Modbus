@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup />
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj" />
     <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Tcp\AMWD.Protocols.Modbus.Tcp.csproj" />

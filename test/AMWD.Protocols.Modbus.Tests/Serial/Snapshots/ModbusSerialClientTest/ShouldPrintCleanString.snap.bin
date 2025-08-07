@@ -1,0 +1,8 @@
+Serial Client COM-42
+  BaudRate:           2400
+  DataBits:           7
+  StopBits:           1.5
+  Parity:             space
+  Handshake:          xonxoff
+  RtsEnable:          true
+  DriverEnabledRS485: true
