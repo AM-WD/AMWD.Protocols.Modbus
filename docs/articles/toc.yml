@@ -2,3 +2,7 @@
   href: introduction.md
 - name: Getting Started
   href: getting-started.md
+- name: GitHub
+  href: https://github.com/AM-WD/AMWD.Protocols.Modbus
+- name: NuGet
+  href: https://www.nuget.org/packages?q=AMWD.Protocols.Modbus

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New automatic documentation generation using docfx.
+- Additional articles for the documentation.
 
 ### Changed
 
