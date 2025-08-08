@@ -91,6 +91,7 @@ dotnet_naming_style.prefix_underscore.required_prefix = _
 
 [*.cs]
 csharp_preferred_modifier_order = public, private, protected, internal, static, extern, new, virtual, abstract, sealed, override, readonly, unsafe, volatile, async:suggestion
+csharp_style_prefer_primary_constructors = false
 
 # Only use "var" when it's obvious what the variable type is
 csharp_style_var_for_built_in_types = false:warning
@@ -157,3 +158,6 @@ csharp_space_between_square_brackets = false
 [*.{xml,csproj,targets,props,json,yml}]
 indent_size = 2
 indent_style = space
+
+[*.{json,yml}]
+end_of_line = lf
