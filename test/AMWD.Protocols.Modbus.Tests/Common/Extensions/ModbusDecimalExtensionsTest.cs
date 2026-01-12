@@ -206,7 +206,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(5, registers[0].Address);
 			Assert.AreEqual(0x41, registers[0].HighByte);
@@ -228,7 +228,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(6, registers[0].Address);
 			Assert.AreEqual(0x41, registers[0].HighByte);
@@ -250,7 +250,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(4, registers.Count);
+			Assert.HasCount(4, registers);
 
 			Assert.AreEqual(5, registers[0].Address);
 			Assert.AreEqual(0x40, registers[0].HighByte);
@@ -280,7 +280,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(4, registers.Count);
+			Assert.HasCount(4, registers);
 
 			Assert.AreEqual(8, registers[0].Address);
 			Assert.AreEqual(0x40, registers[0].HighByte);

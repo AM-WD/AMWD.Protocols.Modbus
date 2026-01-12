@@ -21,7 +21,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(12, bytes.Count);
+			Assert.HasCount(12, bytes);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, bytes[0]);
@@ -83,7 +83,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(coils);
-			Assert.AreEqual(24, coils.Count);
+			Assert.HasCount(24, coils);
 
 			for (int i = 0; i < 24; i++)
 			{
@@ -121,7 +121,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(12, bytes.Count);
+			Assert.HasCount(12, bytes);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, bytes[0]);
@@ -183,7 +183,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(inputs);
-			Assert.AreEqual(24, inputs.Count);
+			Assert.HasCount(24, inputs);
 
 			for (int i = 0; i < 24; i++)
 			{
@@ -221,7 +221,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(12, bytes.Count);
+			Assert.HasCount(12, bytes);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, bytes[0]);
@@ -282,7 +282,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(0, registers[0].Address);
 			Assert.AreEqual(555, registers[0].Value);
@@ -316,7 +316,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(12, bytes.Count);
+			Assert.HasCount(12, bytes);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, bytes[0]);
@@ -377,7 +377,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(0, registers[0].Address);
 			Assert.AreEqual(554, registers[0].Value);
@@ -415,7 +415,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(bytes);
-			Assert.AreEqual(11, bytes.Count);
+			Assert.HasCount(11, bytes);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, bytes[0]);
@@ -516,7 +516,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(12, result.Count);
+			Assert.HasCount(12, result);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, result[0]);
@@ -587,7 +587,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(12, result.Count);
+			Assert.HasCount(12, result);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, result[0]);
@@ -665,7 +665,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(14, result.Count);
+			Assert.HasCount(14, result);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, result[0]);
@@ -791,7 +791,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(17, result.Count);
+			Assert.HasCount(17, result);
 
 			//    Transaction id
 			Assert.AreEqual(0x00, result[0]);

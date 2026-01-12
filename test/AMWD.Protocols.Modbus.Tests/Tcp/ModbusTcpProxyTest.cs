@@ -12,6 +12,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 	[TestClass]
 	public class ModbusTcpProxyTest
 	{
+		public TestContext TestContext { get; set; }
+
 		private bool _connectClient;
 
 		private Mock<ModbusClientBase> _clientMock;
@@ -138,8 +140,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await proxy.StopAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await proxy.StopAsync(TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -160,8 +162,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy(IPAddress.IPv6Loopback);
 
 			// Act
-			await proxy.StartAsync();
-			await proxy.StopAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await proxy.StopAsync(TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.Socket, Times.Once);
@@ -248,14 +250,14 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.Setup(m => m.AcceptTcpClientAsync(It.IsAny<CancellationToken>()))
 				.Returns<CancellationToken>(async (ct) =>
 				{
-					await Task.Run(() => SpinWait.SpinUntil(() => _connectClient || ct.IsCancellationRequested));
+					await Task.Run(() => SpinWait.SpinUntil(() => _connectClient || ct.IsCancellationRequested), ct);
 					_connectClient = false;
 					throw new Exception();
 				});
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -277,8 +279,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_tcpClientMock.Setup(m => m.GetStream()).Throws(new Exception());
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -306,8 +308,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -351,8 +353,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -390,8 +392,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -425,8 +427,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new Exception("Error ;-)"));
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -475,8 +477,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -514,8 +516,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -549,8 +551,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new Exception("Error ;-)"));
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -597,8 +599,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -636,8 +638,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -671,8 +673,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new Exception("Error ;-)"));
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -719,8 +721,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -758,8 +760,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -793,8 +795,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new Exception("Error ;-)"));
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -842,8 +844,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -882,8 +884,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -912,8 +914,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -945,8 +947,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -978,8 +980,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 
@@ -1018,8 +1020,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1064,8 +1066,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1119,8 +1121,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1163,8 +1165,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1207,8 +1209,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new ModbusException());
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1255,8 +1257,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1294,8 +1296,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1324,8 +1326,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1358,8 +1360,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1403,8 +1405,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new ModbusException());
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1447,8 +1449,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1486,8 +1488,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1517,8 +1519,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1562,8 +1564,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new ModbusException());
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1606,8 +1608,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1630,7 +1632,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			var (unitId, coils) = _writeMultipleCoilsCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(10, coils.Count);
+			Assert.HasCount(10, coils);
 
 			for (byte i = 13; i < 23; i++)
 				Assert.IsNotNull(coils.Where(c => c.Address == i).FirstOrDefault());
@@ -1649,8 +1651,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1679,8 +1681,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1713,8 +1715,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1737,7 +1739,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			var (unitId, coils) = _writeMultipleCoilsCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(10, coils.Count);
+			Assert.HasCount(10, coils);
 
 			for (byte i = 13; i < 23; i++)
 				Assert.IsNotNull(coils.Where(c => c.Address == i).FirstOrDefault());
@@ -1762,8 +1764,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new ModbusException());
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1786,7 +1788,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			var (unitId, coils) = _writeMultipleCoilsCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(10, coils.Count);
+			Assert.HasCount(10, coils);
 
 			for (byte i = 13; i < 23; i++)
 				Assert.IsNotNull(coils.Where(c => c.Address == i).FirstOrDefault());
@@ -1810,8 +1812,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1834,7 +1836,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			var (unitId, registers) = _writeMultipleRegistersCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			for (byte i = 1; i < 3; i++)
 				Assert.IsNotNull(registers.Where(c => c.Address == i).FirstOrDefault());
@@ -1853,8 +1855,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1883,8 +1885,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1917,8 +1919,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1941,7 +1943,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			var (unitId, registers) = _writeMultipleRegistersCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			for (byte i = 1; i < 3; i++)
 				Assert.IsNotNull(registers.Where(c => c.Address == i).FirstOrDefault());
@@ -1966,8 +1968,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.ThrowsAsync(new ModbusException());
 
 			// Act
-			await proxy.StartAsync();
-			await Task.Delay(100);
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
 
 			// Assert
 			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
@@ -1990,7 +1992,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 
 			var (unitId, registers) = _writeMultipleRegistersCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			for (byte i = 1; i < 3; i++)
 				Assert.IsNotNull(registers.Where(c => c.Address == i).FirstOrDefault());
@@ -2053,7 +2055,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.Setup(m => m.AcceptTcpClientAsync(It.IsAny<CancellationToken>()))
 				.Returns<CancellationToken>(async (ct) =>
 				{
-					await Task.Run(() => SpinWait.SpinUntil(() => _connectClient || ct.IsCancellationRequested));
+					await Task.Run(() => SpinWait.SpinUntil(() => _connectClient || ct.IsCancellationRequested), ct);
 					ct.ThrowIfCancellationRequested();
 					_connectClient = false;
 
@@ -2074,7 +2076,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 				.Setup(m => m.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
 				.Returns<byte[], int, int, CancellationToken>(async (buffer, offset, count, ct) =>
 				{
-					await Task.Run(() => SpinWait.SpinUntil(() => _requestBytesQueue.Count > 0 || ct.IsCancellationRequested));
+					await Task.Run(() => SpinWait.SpinUntil(() => _requestBytesQueue.Count > 0 || ct.IsCancellationRequested), ct);
 					ct.ThrowIfCancellationRequested();
 
 					byte[] bytes = _requestBytesQueue.Dequeue();

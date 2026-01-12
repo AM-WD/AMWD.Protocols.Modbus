@@ -13,6 +13,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 	[TestClass]
 	public class ModbusTcpConnectionTest
 	{
+		public TestContext TestContext { get; set; }
+
 		private readonly string _hostname = "127.0.0.1";
 
 		private Mock<TcpClientWrapper> _tcpClientMock;
@@ -50,7 +52,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_networkResponseQueue.Enqueue(expectedResponse);
 
 			var connection = GetTcpConnection();
-			await connection.InvokeAsync(request, validation);
+			await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 
 			_tcpClientMock.Invocations.Clear();
 			_networkStreamMock.Invocations.Clear();
@@ -119,7 +121,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			connection.Dispose();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => connection.InvokeAsync(null, null));
+			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => connection.InvokeAsync(null, null, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -131,7 +133,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
+			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -142,7 +144,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
+			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -157,7 +159,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -195,8 +197,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			connection.IdleTimeout = TimeSpan.FromMilliseconds(200);
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
-			await Task.Delay(500);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			await Task.Delay(500, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -228,7 +230,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<EndOfStreamException>(() => connection.InvokeAsync(request, validation));
+			await Assert.ThrowsExactlyAsync<EndOfStreamException>(() => connection.InvokeAsync(request, validation, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -245,7 +247,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			connection.GetType().GetField("_hostname", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(connection, "");
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ApplicationException>(() => connection.InvokeAsync(request, validation));
+			await Assert.ThrowsExactlyAsync<ApplicationException>(() => connection.InvokeAsync(request, validation, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -266,8 +268,8 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			connection.IdleTimeout = TimeSpan.FromMilliseconds(200);
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
-			await Task.Delay(500);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			await Task.Delay(500, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -306,7 +308,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -338,12 +340,12 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 			_networkStreamMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
-				.Returns(new ValueTask(Task.Delay(100)));
+				.Returns<ReadOnlyMemory<byte>, CancellationToken>((_, ct) => new ValueTask(Task.Delay(100, ct)));
 
 			// Act + Assert
 			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
 			{
-				var task = connection.InvokeAsync(request, validation);
+				var task = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 				connection.Dispose();
 				await task;
 			});
@@ -360,7 +362,7 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var connection = GetConnection();
 			_networkStreamMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
-				.Returns(new ValueTask(Task.Delay(100)));
+				.Returns<ReadOnlyMemory<byte>, CancellationToken>((_, ct) => new ValueTask(Task.Delay(100, ct)));
 
 			// Act + Assert
 			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
@@ -385,10 +387,10 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_networkStreamMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
 				.Callback<ReadOnlyMemory<byte>, CancellationToken>((req, _) => _networkRequestCallbacks.Add(req.ToArray()))
-				.Returns(new ValueTask(Task.Delay(100)));
+				.Returns<ReadOnlyMemory<byte>, CancellationToken>((_, ct) => new ValueTask(Task.Delay(100, ct)));
 
 			// Act
-			var taskToComplete = connection.InvokeAsync(request, validation);
+			var taskToComplete = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 
 			var taskToCancel = connection.InvokeAsync(request, validation, cts.Token);
 			cts.Cancel();
@@ -396,16 +398,10 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			var response = await taskToComplete;
 
 			// Assert - Part 1
-			try
-			{
-				await taskToCancel;
-				Assert.Fail();
-			}
-			catch (TaskCanceledException)
-			{ /* expected exception */ }
+			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () => await taskToCancel);
 
 			// Assert - Part 2
-			Assert.AreEqual(1, _networkRequestCallbacks.Count);
+			Assert.HasCount(1, _networkRequestCallbacks);
 			CollectionAssert.AreEqual(request, _networkRequestCallbacks.First());
 			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
 
@@ -432,31 +428,18 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			_networkStreamMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
 				.Callback<ReadOnlyMemory<byte>, CancellationToken>((req, _) => _networkRequestCallbacks.Add(req.ToArray()))
-				.Returns(new ValueTask(Task.Delay(100)));
+				.Returns<ReadOnlyMemory<byte>, CancellationToken>((_, ct) => new ValueTask(Task.Delay(100, ct)));
 
 			// Act
-			var taskToCancel = connection.InvokeAsync(request, validation);
-			var taskToDequeue = connection.InvokeAsync(request, validation);
+			var taskToCancel = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			var taskToDequeue = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 			connection.Dispose();
 
 			// Assert
-			try
-			{
-				await taskToCancel;
-				Assert.Fail();
-			}
-			catch (TaskCanceledException)
-			{ /* expected exception */ }
+			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () => await taskToCancel);
+			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(async () => await taskToDequeue);
 
-			try
-			{
-				await taskToDequeue;
-				Assert.Fail();
-			}
-			catch (ObjectDisposedException)
-			{ /* expected exception */ }
-
-			Assert.AreEqual(1, _networkRequestCallbacks.Count);
+			Assert.HasCount(1, _networkRequestCallbacks);
 			CollectionAssert.AreEqual(request, _networkRequestCallbacks.First());
 
 			_tcpClientMock.Verify(c => c.Connected, Times.Once);

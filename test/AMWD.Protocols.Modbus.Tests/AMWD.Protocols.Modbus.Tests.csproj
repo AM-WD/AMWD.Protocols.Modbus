@@ -3,6 +3,10 @@
   <PropertyGroup />
 
   <ItemGroup>
+    <Compile Include="../MSTestSettings.cs" Link="MSTestSettings.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Serial\AMWD.Protocols.Modbus.Serial.csproj" />
     <ProjectReference Include="..\..\src\AMWD.Protocols.Modbus.Tcp\AMWD.Protocols.Modbus.Tcp.csproj" />
   </ItemGroup>

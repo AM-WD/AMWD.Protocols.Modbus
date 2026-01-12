@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reorganized folder structure to allow documentation generation.
 - Migrated main repository from GitLab to Gitea.
 - Migrated to VS 2026.
+- Updated UnitTests and Tools to .NET 10.
 
 
 ## [v0.4.2] (2025-02-07)

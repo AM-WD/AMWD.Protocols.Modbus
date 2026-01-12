@@ -1,4 +1,4 @@
-﻿<Solution>
+<Solution>
   <Folder Name="/Solution Items/" />
   <Folder Name="/Solution Items/build/">
     <File Path="Directory.Build.props" />
@@ -26,6 +26,7 @@
     <File Path="src/Directory.Build.props" />
   </Folder>
   <Folder Name="/test/">
+    <File Path="test/MSTestSettings.cs" />
     <Project Path="test/AMWD.Protocols.Modbus.Tests/AMWD.Protocols.Modbus.Tests.csproj" />
     <File Path="test/Directory.Build.props" />
   </Folder>

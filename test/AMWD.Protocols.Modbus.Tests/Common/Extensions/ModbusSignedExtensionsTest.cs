@@ -103,9 +103,9 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister(),
-				new HoldingRegister { Address = 100, HighByte = 0x01, LowByte = 0x02 },
-				new HoldingRegister { Address = 101, HighByte = 0x03, LowByte = 0x04 }
+				new(),
+				new() { Address = 100, HighByte = 0x01, LowByte = 0x02 },
+				new() { Address = 101, HighByte = 0x03, LowByte = 0x04 }
 			};
 
 			// Act
@@ -121,8 +121,8 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister { Address = 101, HighByte = 0x01, LowByte = 0x02 },
-				new HoldingRegister { Address = 100, HighByte = 0x03, LowByte = 0x04 }
+				new() { Address = 101, HighByte = 0x01, LowByte = 0x02 },
+				new() { Address = 100, HighByte = 0x03, LowByte = 0x04 }
 			};
 
 			// Act
@@ -148,7 +148,7 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister { Address = 101, HighByte = 0x01, LowByte = 0x02 }
+				new() { Address = 101, HighByte = 0x01, LowByte = 0x02 }
 			};
 
 			// Act + Assert
@@ -163,8 +163,8 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister { Address = 101, HighByte = 0x01, LowByte = 0x02 },
-				new HoldingRegister { Address = 100, HighByte = 0x03, LowByte = 0x04 }
+				new() { Address = 101, HighByte = 0x01, LowByte = 0x02 },
+				new() { Address = 100, HighByte = 0x03, LowByte = 0x04 }
 			};
 
 			// Act + Assert
@@ -191,11 +191,11 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister(),
-				new HoldingRegister { Address = 100, HighByte = 0x00, LowByte = 0x00 },
-				new HoldingRegister { Address = 101, HighByte = 0x00, LowByte = 0x00 },
-				new HoldingRegister { Address = 102, HighByte = 0x01, LowByte = 0x02 },
-				new HoldingRegister { Address = 103, HighByte = 0x03, LowByte = 0x04 }
+				new(),
+				new() { Address = 100, HighByte = 0x00, LowByte = 0x00 },
+				new() { Address = 101, HighByte = 0x00, LowByte = 0x00 },
+				new() { Address = 102, HighByte = 0x01, LowByte = 0x02 },
+				new() { Address = 103, HighByte = 0x03, LowByte = 0x04 }
 			};
 
 			// Act
@@ -211,10 +211,10 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister { Address = 103, HighByte = 0x00, LowByte = 0x00 },
-				new HoldingRegister { Address = 102, HighByte = 0x00, LowByte = 0x00 },
-				new HoldingRegister { Address = 101, HighByte = 0x01, LowByte = 0x02 },
-				new HoldingRegister { Address = 100, HighByte = 0x03, LowByte = 0x04 }
+				new() { Address = 103, HighByte = 0x00, LowByte = 0x00 },
+				new() { Address = 102, HighByte = 0x00, LowByte = 0x00 },
+				new() { Address = 101, HighByte = 0x01, LowByte = 0x02 },
+				new() { Address = 100, HighByte = 0x03, LowByte = 0x04 }
 			};
 
 			// Act
@@ -240,9 +240,9 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister { Address = 101, HighByte = 0x00, LowByte = 0x00 },
-				new HoldingRegister { Address = 102, HighByte = 0x01, LowByte = 0x02 },
-				new HoldingRegister { Address = 103, HighByte = 0x03, LowByte = 0x04 }
+				new() { Address = 101, HighByte = 0x00, LowByte = 0x00 },
+				new() { Address = 102, HighByte = 0x01, LowByte = 0x02 },
+				new() { Address = 103, HighByte = 0x03, LowByte = 0x04 }
 			};
 
 			// Act + Assert
@@ -257,10 +257,10 @@
 			// Arrange
 			var registers = new HoldingRegister[]
 			{
-				new HoldingRegister { Address = 100, HighByte = 0x00, LowByte = 0x00 },
-				new HoldingRegister { Address = 101, HighByte = 0x00, LowByte = 0x00 },
-				new HoldingRegister { Address = 102, HighByte = 0x01, LowByte = 0x02 },
-				new HoldingRegister { Address = 103, HighByte = 0x03, LowByte = 0x04 }
+				new() { Address = 100, HighByte = 0x00, LowByte = 0x00 },
+				new() { Address = 101, HighByte = 0x00, LowByte = 0x00 },
+				new() { Address = 102, HighByte = 0x01, LowByte = 0x02 },
+				new() { Address = 103, HighByte = 0x03, LowByte = 0x04 }
 			};
 
 			// Act + Assert
@@ -330,7 +330,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(5, registers[0].Address);
 			Assert.AreEqual(0x00, registers[0].HighByte);
@@ -352,7 +352,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(6, registers[0].Address);
 			Assert.AreEqual(0x00, registers[0].HighByte);
@@ -374,7 +374,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(4, registers.Count);
+			Assert.HasCount(4, registers);
 
 			Assert.AreEqual(10, registers[0].Address);
 			Assert.AreEqual(0x00, registers[0].HighByte);
@@ -404,7 +404,7 @@
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(4, registers.Count);
+			Assert.HasCount(4, registers);
 
 			Assert.AreEqual(13, registers[0].Address);
 			Assert.AreEqual(0x00, registers[0].HighByte);

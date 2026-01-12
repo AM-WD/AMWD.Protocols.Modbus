@@ -12,6 +12,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 	[TestClass]
 	public class ModbusRtuProxyTest
 	{
+		public TestContext TestContext { get; set; }
+
 		private Mock<ModbusClientBase> _clientMock;
 		private Mock<SerialPortWrapper> _serialPortMock;
 
@@ -127,8 +129,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			using var proxy = GetProxy();
 
 			// Act
-			await proxy.StartAsync();
-			await proxy.StopAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await proxy.StopAsync(TestContext.CancellationToken);
 
 			// Assert
 			_serialPortMock.VerifyGet(m => m.PortName, Times.Exactly(2));
@@ -176,7 +178,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_serialPortMock.Setup(m => m.PortName).Returns(portName);
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => proxy.StartAsync());
+			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => proxy.StartAsync(TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -249,7 +251,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			// Arrange
 			// Not adding request data to the queue will cause an exception while reading
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -275,7 +277,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue(request);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -304,7 +306,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 142, 1];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -347,7 +349,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [2, 1, 1, 9];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -384,7 +386,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -412,7 +414,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [2, 129, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.ReadCoilsAsync(It.IsAny<byte>(), It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()))
@@ -460,7 +462,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [22, 2, 1, 10];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -497,7 +499,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -525,7 +527,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [2, 130, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.ReadDiscreteInputsAsync(It.IsAny<byte>(), It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()))
@@ -571,7 +573,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [42, 3, 4, 34, 12, 78, 56];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -608,7 +610,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -636,7 +638,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [2, 131, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.ReadHoldingRegistersAsync(It.IsAny<byte>(), It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()))
@@ -682,7 +684,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [42, 4, 4, 12, 34, 56, 78];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -719,7 +721,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -747,7 +749,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [2, 132, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.ReadInputRegistersAsync(It.IsAny<byte>(), It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()))
@@ -794,7 +796,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 				2, 18, 77, 97, 106, 111, 114, 77, 105, 110, 111, 114, 82, 101, 118, 105, 115, 105, 111, 110];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -832,7 +834,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -860,7 +862,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 171, 1];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -891,7 +893,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 171, 2];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -922,7 +924,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 171, 3];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -959,7 +961,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 				2, 18, 77, 97, 106, 111, 114, 77, 105, 110, 111, 114, 82, 101, 118, 105, 115, 105, 111, 110];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1003,7 +1005,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 				3, 0, 4, 0, 5, 0, 6, 0,];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1057,7 +1059,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 				216, 0, 217, 0, 218, 0, 219, 0, 220, 0, 221, 0, 222, 0];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1099,7 +1101,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 				0, 10, 86, 101, 110, 100, 111, 114, 78, 97, 109, 101];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1140,7 +1142,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_clientMock.Setup(m => m.ReadDeviceIdentificationAsync(It.IsAny<byte>(), It.IsAny<ModbusDeviceIdentificationCategory>(), It.IsAny<ModbusDeviceIdentificationObject>(), It.IsAny<CancellationToken>()))
 				.Callback<byte, ModbusDeviceIdentificationCategory, ModbusDeviceIdentificationObject, CancellationToken>((unitId, category, objectId, _) => _clientReadDeviceCallbacks.Add((unitId, category, objectId)))
 				.ThrowsAsync(new ModbusException());
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1186,7 +1188,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [3, 5, 0, 7, 255, 0];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1223,7 +1225,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1251,7 +1253,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [3, 133, 3];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1283,7 +1285,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [3, 133, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1321,7 +1323,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [3, 133, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.WriteSingleCoilAsync(It.IsAny<byte>(), It.IsAny<Coil>(), It.IsAny<CancellationToken>()))
@@ -1368,7 +1370,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [4, 6, 0, 1, 0, 3];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1405,7 +1407,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1434,7 +1436,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [4, 134, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1472,7 +1474,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [4, 134, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.WriteSingleHoldingRegisterAsync(It.IsAny<byte>(), It.IsAny<HoldingRegister>(), It.IsAny<CancellationToken>()))
@@ -1519,7 +1521,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 15, 0, 13, 0, 10];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1544,12 +1546,12 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			var (unitId, coils) = _writeMultipleCoilsCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(10, coils.Count);
+			Assert.HasCount(10, coils);
 
 			for (byte i = 13; i < 23; i++)
 				Assert.IsNotNull(coils.Where(c => c.Address == i).FirstOrDefault());
 
-			CollectionAssert.AreEqual(new bool[] { true, false, true, true, false, false, true, true, true, false }, coils.Select(c => c.Value).ToArray());
+			CollectionAssert.AreEqual(new[] { true, false, true, true, false, false, true, true, true, false }, coils.Select(c => c.Value).ToArray());
 		}
 
 		[TestMethod]
@@ -1560,7 +1562,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1588,7 +1590,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 143, 3];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1620,7 +1622,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 143, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1645,12 +1647,12 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			var (unitId, coils) = _writeMultipleCoilsCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(10, coils.Count);
+			Assert.HasCount(10, coils);
 
 			for (byte i = 13; i < 23; i++)
 				Assert.IsNotNull(coils.Where(c => c.Address == i).FirstOrDefault());
 
-			CollectionAssert.AreEqual(new bool[] { true, false, true, true, false, false, true, true, true, false }, coils.Select(c => c.Value).ToArray());
+			CollectionAssert.AreEqual(new[] { true, false, true, true, false, false, true, true, true, false }, coils.Select(c => c.Value).ToArray());
 		}
 
 		[TestMethod]
@@ -1662,7 +1664,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 143, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.WriteMultipleCoilsAsync(It.IsAny<byte>(), It.IsAny<IReadOnlyList<Coil>>(), It.IsAny<CancellationToken>()))
@@ -1692,12 +1694,12 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			var (unitId, coils) = _writeMultipleCoilsCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(10, coils.Count);
+			Assert.HasCount(10, coils);
 
 			for (byte i = 13; i < 23; i++)
 				Assert.IsNotNull(coils.Where(c => c.Address == i).FirstOrDefault());
 
-			CollectionAssert.AreEqual(new bool[] { true, false, true, true, false, false, true, true, true, false }, coils.Select(c => c.Value).ToArray());
+			CollectionAssert.AreEqual(new[] { true, false, true, true, false, false, true, true, true, false }, coils.Select(c => c.Value).ToArray());
 		}
 
 		#endregion Write Multiple Coils (Fn 15)
@@ -1713,7 +1715,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 16, 0, 1, 0, 2];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1738,7 +1740,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			var (unitId, registers) = _writeMultipleRegistersCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			for (byte i = 1; i < 3; i++)
 				Assert.IsNotNull(registers.Where(c => c.Address == i).FirstOrDefault());
@@ -1754,7 +1756,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_requestBytesQueue.Enqueue([.. request, .. RtuProtocol.CRC16(request)]);
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1782,7 +1784,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 144, 3];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1814,7 +1816,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 144, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			// Act
 			_serialPortMock.Raise(m => m.DataReceived += null, _dataReceivedEventArgs);
@@ -1839,7 +1841,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			var (unitId, registers) = _writeMultipleRegistersCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			for (byte i = 1; i < 3; i++)
 				Assert.IsNotNull(registers.Where(c => c.Address == i).FirstOrDefault());
@@ -1856,7 +1858,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			byte[] expectedResponse = [1, 144, 4];
 
 			using var proxy = GetProxy();
-			await proxy.StartAsync();
+			await proxy.StartAsync(TestContext.CancellationToken);
 
 			_clientMock
 				.Setup(m => m.WriteMultipleHoldingRegistersAsync(It.IsAny<byte>(), It.IsAny<IReadOnlyList<HoldingRegister>>(), It.IsAny<CancellationToken>()))
@@ -1886,7 +1888,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 
 			var (unitId, registers) = _writeMultipleRegistersCallbacks.First();
 			Assert.AreEqual(1, unitId);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			for (byte i = 1; i < 3; i++)
 				Assert.IsNotNull(registers.Where(c => c.Address == i).FirstOrDefault());

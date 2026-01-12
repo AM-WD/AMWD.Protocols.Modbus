@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <NrtRevisionFormat>{semvertag:main}{!:-dev}</NrtRevisionFormat>
 
     <Title>Modbus Protocol for .NET</Title>

@@ -133,7 +133,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Models
 					.GetField("_coils", BindingFlags.NonPublic | BindingFlags.Instance)
 					.GetValue(device)).ToArray();
 
-			Assert.AreEqual(1, coils.Length);
+			Assert.HasCount(1, coils);
 			Assert.AreEqual(111, coils.First());
 		}
 
@@ -178,7 +178,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Models
 					.GetField("_discreteInputs", BindingFlags.NonPublic | BindingFlags.Instance)
 					.GetValue(device)).ToArray();
 
-			Assert.AreEqual(1, discreteInputs.Length);
+			Assert.HasCount(1, discreteInputs);
 			Assert.AreEqual(111, discreteInputs.First());
 		}
 
@@ -228,7 +228,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Models
 					.GetValue(device))
 					.ToDictionary(x => x.Key, x => x.Value);
 
-			Assert.AreEqual(1, registers.Count);
+			Assert.HasCount(1, registers);
 			Assert.AreEqual(111, registers.First().Key);
 			Assert.AreEqual(42, registers.First().Value);
 		}
@@ -279,7 +279,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Models
 					.GetValue(device))
 					.ToDictionary(x => x.Key, x => x.Value);
 
-			Assert.AreEqual(1, registers.Count);
+			Assert.HasCount(1, registers);
 			Assert.AreEqual(111, registers.First().Key);
 			Assert.AreEqual(42, registers.First().Value);
 		}

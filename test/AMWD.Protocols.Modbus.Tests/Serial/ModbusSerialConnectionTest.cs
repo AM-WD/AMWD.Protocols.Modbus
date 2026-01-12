@@ -13,6 +13,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 	[TestClass]
 	public class ModbusSerialConnectionTest
 	{
+		public TestContext TestContext { get; set; }
+
 		private Mock<SerialPortWrapper> _serialPortMock;
 
 		private bool _alwaysOpen;
@@ -109,7 +111,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			connection.Dispose();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => connection.InvokeAsync(null, null));
+			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => connection.InvokeAsync(null, null, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -121,7 +123,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
+			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -132,7 +134,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null));
+			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => connection.InvokeAsync(request, null, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -147,7 +149,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -183,8 +185,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			connection.DriverEnabledRS485 = false;
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
-			await Task.Delay(500);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			await Task.Delay(500, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -225,8 +227,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			connection.DriverEnabledRS485 = true;
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
-			await Task.Delay(500);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			await Task.Delay(500, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -270,8 +272,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			connection.DriverEnabledRS485 = false;
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
-			await Task.Delay(500);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			await Task.Delay(500, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -312,8 +314,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			connection.DriverEnabledRS485 = true;
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
-			await Task.Delay(500);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			await Task.Delay(500, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -344,7 +346,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<EndOfStreamException>(() => connection.InvokeAsync(request, validation));
+			await Assert.ThrowsExactlyAsync<EndOfStreamException>(() => connection.InvokeAsync(request, validation, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -365,8 +367,8 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			connection.IdleTimeout = TimeSpan.FromMilliseconds(200);
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
-			await Task.Delay(500);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			await Task.Delay(500, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -404,7 +406,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 
 			// Act
-			var response = await connection.InvokeAsync(request, validation);
+			var response = await connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(response);
@@ -435,12 +437,12 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 			_serialPortMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
-				.Returns(Task.Delay(100));
+				.Returns<byte[], CancellationToken>((_, ct) => Task.Delay(100, ct));
 
 			// Act + Assert
 			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
 			{
-				var task = connection.InvokeAsync(request, validation);
+				var task = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 				connection.Dispose();
 				await task;
 			});
@@ -457,7 +459,7 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var connection = GetConnection();
 			_serialPortMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
-				.Returns(Task.Delay(100));
+				.Returns<byte[], CancellationToken>((_, ct) => Task.Delay(100, ct));
 
 			// Act + Assert
 			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () =>
@@ -482,10 +484,10 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_serialPortMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
 				.Callback<byte[], CancellationToken>((req, _) => _serialLineRequestCallbacks.Add([.. req]))
-				.Returns(Task.Delay(100));
+				.Returns<byte[], CancellationToken>((_, ct) => Task.Delay(100, ct));
 
 			// Act
-			var taskToComplete = connection.InvokeAsync(request, validation);
+			var taskToComplete = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 
 			var taskToCancel = connection.InvokeAsync(request, validation, cts.Token);
 			cts.Cancel();
@@ -493,16 +495,10 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			var response = await taskToComplete;
 
 			// Assert - Part 1
-			try
-			{
-				await taskToCancel;
-				Assert.Fail();
-			}
-			catch (TaskCanceledException)
-			{ /* expected exception */ }
+			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () => await taskToCancel);
 
 			// Assert - Part 2
-			Assert.AreEqual(1, _serialLineRequestCallbacks.Count);
+			Assert.HasCount(1, _serialLineRequestCallbacks);
 			CollectionAssert.AreEqual(request, _serialLineRequestCallbacks.First());
 			CollectionAssert.AreEqual(expectedResponse, response.ToArray());
 
@@ -525,31 +521,18 @@ namespace AMWD.Protocols.Modbus.Tests.Serial
 			_serialPortMock
 				.Setup(ns => ns.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
 				.Callback<byte[], CancellationToken>((req, _) => _serialLineRequestCallbacks.Add([.. req]))
-				.Returns(Task.Delay(100));
+				.Returns<byte[], CancellationToken>((_, ct) => Task.Delay(100, ct));
 
 			// Act
-			var taskToCancel = connection.InvokeAsync(request, validation);
-			var taskToDequeue = connection.InvokeAsync(request, validation);
+			var taskToCancel = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
+			var taskToDequeue = connection.InvokeAsync(request, validation, TestContext.CancellationToken);
 			connection.Dispose();
 
 			// Assert
-			try
-			{
-				await taskToCancel;
-				Assert.Fail();
-			}
-			catch (TaskCanceledException)
-			{ /* expected exception */ }
+			await Assert.ThrowsExactlyAsync<TaskCanceledException>(async () => await taskToCancel);
+			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(async () => await taskToDequeue);
 
-			try
-			{
-				await taskToDequeue;
-				Assert.Fail();
-			}
-			catch (ObjectDisposedException)
-			{ /* expected exception */ }
-
-			Assert.AreEqual(1, _serialLineRequestCallbacks.Count);
+			Assert.HasCount(1, _serialLineRequestCallbacks);
 			CollectionAssert.AreEqual(request, _serialLineRequestCallbacks.First());
 
 			_serialPortMock.Verify(c => c.IsOpen, Times.Once);

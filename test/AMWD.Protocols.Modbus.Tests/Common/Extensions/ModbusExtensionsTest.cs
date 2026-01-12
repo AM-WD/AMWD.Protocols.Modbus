@@ -172,7 +172,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 			// Assert
 			Assert.IsNotNull(register);
 			Assert.AreEqual(321, register.Address);
-			Assert.IsTrue(register.Value > 0);
+			Assert.IsGreaterThan(0, register.Value);
 		}
 
 		[TestMethod]
@@ -187,7 +187,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 			// Assert
 			Assert.IsNotNull(register);
 			Assert.AreEqual(321, register.Address);
-			Assert.IsTrue(register.Value == 0);
+			Assert.AreEqual(0, register.Value);
 		}
 
 		[TestMethod]
@@ -201,7 +201,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(100, registers[0].Address);
 			Assert.AreEqual(97, registers[0].HighByte);
@@ -223,7 +223,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(101, registers[0].Address);
 			Assert.AreEqual(97, registers[0].HighByte);
@@ -245,7 +245,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Extensions
 
 			// Assert
 			Assert.IsNotNull(registers);
-			Assert.AreEqual(2, registers.Count);
+			Assert.HasCount(2, registers);
 
 			Assert.AreEqual(100, registers[0].Address);
 			Assert.AreEqual(97, registers[0].LowByte);

@@ -9,7 +9,7 @@ env:
   TZ: 'Europe/Berlin'
   LANG: 'de'
   CONFIGURATION: 'Debug'
-  CI_SERVER_HOST: ${{ gitea.server_url }}
+  GITEA_SERVER_URL: ${{ gitea.server_url }}
 
 jobs:
   build-test-deploy:
@@ -23,14 +23,14 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 8.x
+          dotnet-version: 10.x
           cache: false
 
       - name: Restore dependencies
         run: |
           set -ex
           dotnet restore -v q
-          dotnet tool restore -v q
+          echo "CI_SERVER_HOST=${GITEA_SERVER_URL#https://}" >> "$GITEA_ENV"
 
       - name: Setup tools
         run: |

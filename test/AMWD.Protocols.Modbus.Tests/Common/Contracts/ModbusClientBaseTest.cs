@@ -8,6 +8,8 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 	[TestClass]
 	public class ModbusClientBaseTest
 	{
+		public TestContext TestContext { get; set; }
+
 		// Consts
 		private const byte UNIT_ID = 42;
 		private const ushort START_ADDRESS = 123;
@@ -158,7 +160,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			client.Dispose();
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT));
+			await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT, TestContext.CancellationToken));
 		}
 
 		[TestMethod]
@@ -169,7 +171,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			client.Protocol = null;
 
 			// Act + Assert
-			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT));
+			await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT, TestContext.CancellationToken));
 		}
 
 		#endregion Common/Connection/Assertions
@@ -184,11 +186,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			var result = await client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT);
+			var result = await client.ReadCoilsAsync(UNIT_ID, START_ADDRESS, READ_COUNT, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(READ_COUNT, result.Count);
+			Assert.HasCount(READ_COUNT, result);
 
 			for (int i = 0; i < READ_COUNT; i++)
 			{
@@ -213,11 +215,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			var result = await client.ReadDiscreteInputsAsync(UNIT_ID, START_ADDRESS, READ_COUNT);
+			var result = await client.ReadDiscreteInputsAsync(UNIT_ID, START_ADDRESS, READ_COUNT, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(READ_COUNT, result.Count);
+			Assert.HasCount(READ_COUNT, result);
 
 			for (int i = 0; i < READ_COUNT; i++)
 			{
@@ -241,11 +243,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			var result = await client.ReadHoldingRegistersAsync(UNIT_ID, START_ADDRESS, READ_COUNT);
+			var result = await client.ReadHoldingRegistersAsync(UNIT_ID, START_ADDRESS, READ_COUNT, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(READ_COUNT, result.Count);
+			Assert.HasCount(READ_COUNT, result);
 
 			for (int i = 0; i < READ_COUNT; i++)
 			{
@@ -269,11 +271,11 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			var result = await client.ReadInputRegistersAsync(UNIT_ID, START_ADDRESS, READ_COUNT);
+			var result = await client.ReadInputRegistersAsync(UNIT_ID, START_ADDRESS, READ_COUNT, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(result);
-			Assert.AreEqual(READ_COUNT, result.Count);
+			Assert.HasCount(READ_COUNT, result);
 
 			for (int i = 0; i < READ_COUNT; i++)
 			{
@@ -297,7 +299,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			var result = await client.ReadDeviceIdentificationAsync(UNIT_ID, ModbusDeviceIdentificationCategory.Basic, ModbusDeviceIdentificationObject.VendorName);
+			var result = await client.ReadDeviceIdentificationAsync(UNIT_ID, ModbusDeviceIdentificationCategory.Basic, ModbusDeviceIdentificationObject.VendorName, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(result);
@@ -310,7 +312,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			Assert.AreEqual("UnitTests", result.ModelName);
 			Assert.AreEqual("Modbus Client Base Unit Test", result.UserApplicationName);
 
-			Assert.AreEqual(0, result.ExtendedObjects.Count);
+			Assert.IsEmpty(result.ExtendedObjects);
 
 			_connection.Verify(c => c.InvokeAsync(It.IsAny<IReadOnlyList<byte>>(), It.IsAny<Func<IReadOnlyList<byte>, bool>>(), It.IsAny<CancellationToken>()), Times.Once);
 			_connection.VerifyNoOtherCalls();
@@ -340,7 +342,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			var result = await client.ReadDeviceIdentificationAsync(UNIT_ID, ModbusDeviceIdentificationCategory.Extended, ModbusDeviceIdentificationObject.VendorName);
+			var result = await client.ReadDeviceIdentificationAsync(UNIT_ID, ModbusDeviceIdentificationCategory.Extended, ModbusDeviceIdentificationObject.VendorName, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsNotNull(result);
@@ -353,7 +355,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			Assert.AreEqual("UnitTests", result.ModelName);
 			Assert.AreEqual("Modbus Client Base Unit Test", result.UserApplicationName);
 
-			Assert.AreEqual(1, result.ExtendedObjects.Count);
+			Assert.HasCount(1, result.ExtendedObjects);
 			Assert.AreEqual(0x07, result.ExtendedObjects.First().Key);
 			CollectionAssert.AreEqual(new byte[] { 0x01, 0x02, 0x03 }, result.ExtendedObjects.First().Value);
 
@@ -383,7 +385,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteSingleCoilAsync(UNIT_ID, coil);
+			bool result = await client.WriteSingleCoilAsync(UNIT_ID, coil, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsTrue(result);
@@ -409,7 +411,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteSingleCoilAsync(UNIT_ID, coil);
+			bool result = await client.WriteSingleCoilAsync(UNIT_ID, coil, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
@@ -435,7 +437,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteSingleCoilAsync(UNIT_ID, coil);
+			bool result = await client.WriteSingleCoilAsync(UNIT_ID, coil, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
@@ -461,7 +463,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteSingleHoldingRegisterAsync(UNIT_ID, register);
+			bool result = await client.WriteSingleHoldingRegisterAsync(UNIT_ID, register, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsTrue(result);
@@ -487,7 +489,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteSingleHoldingRegisterAsync(UNIT_ID, register);
+			bool result = await client.WriteSingleHoldingRegisterAsync(UNIT_ID, register, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
@@ -513,7 +515,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteSingleHoldingRegisterAsync(UNIT_ID, register);
+			bool result = await client.WriteSingleHoldingRegisterAsync(UNIT_ID, register, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
@@ -543,7 +545,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteMultipleCoilsAsync(UNIT_ID, coils);
+			bool result = await client.WriteMultipleCoilsAsync(UNIT_ID, coils, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsTrue(result);
@@ -574,7 +576,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteMultipleCoilsAsync(UNIT_ID, coils);
+			bool result = await client.WriteMultipleCoilsAsync(UNIT_ID, coils, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
@@ -605,7 +607,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteMultipleCoilsAsync(UNIT_ID, coils);
+			bool result = await client.WriteMultipleCoilsAsync(UNIT_ID, coils, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
@@ -635,7 +637,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteMultipleHoldingRegistersAsync(UNIT_ID, registers);
+			bool result = await client.WriteMultipleHoldingRegistersAsync(UNIT_ID, registers, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsTrue(result);
@@ -666,7 +668,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteMultipleHoldingRegistersAsync(UNIT_ID, registers);
+			bool result = await client.WriteMultipleHoldingRegistersAsync(UNIT_ID, registers, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
@@ -697,7 +699,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Contracts
 			var client = GetClient();
 
 			// Act
-			bool result = await client.WriteMultipleHoldingRegistersAsync(UNIT_ID, registers);
+			bool result = await client.WriteMultipleHoldingRegistersAsync(UNIT_ID, registers, TestContext.CancellationToken);
 
 			// Assert
 			Assert.IsFalse(result);
