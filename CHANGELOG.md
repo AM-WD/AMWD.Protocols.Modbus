@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_no changes yet_
+
+
+## [v0.5.0] (2026-01-12)
+
 ### Added
 
 - New automatic documentation generation using docfx.
@@ -105,7 +110,9 @@ So this tag is only here for documentation purposes of the NuGet Gallery.
 
 
 
-[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.5.0...HEAD
+
+[v0.5.0]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.2...v0.5.0
 [v0.4.2]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.1...v0.4.2
 [v0.4.1]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/AM-WD/AMWD.Protocols.Modbus/compare/v0.3.2...v0.4.0
