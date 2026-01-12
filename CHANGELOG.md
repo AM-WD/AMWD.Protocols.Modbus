@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Reorganized folder structure to allow documentation generation.
+- Migrated main repository from GitLab to Gitea.
 
 
 ## [v0.4.2] (2025-02-07)

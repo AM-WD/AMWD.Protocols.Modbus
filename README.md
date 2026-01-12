@@ -3,7 +3,6 @@
 Here you can find a basic implementation of the Modbus protocol.
 
 ![NuGet Version](https://shields.io/nuget/v/AMWD.Protocols.Modbus.Common?style=flat&logo=nuget)
-![Test Coverage](https://git.am-wd.de/am-wd/amwd.protocols.modbus/badges/main/coverage.svg?style=flat)
 
 ## Overview
 
@@ -37,8 +36,7 @@ It uses a specific TCP connection implementation and plugs all things from the C
 
 ---
 
-Published under [MIT License] (see [choose a license])    
-[![Buy me a Coffee](https://shields.io/badge/PayPal-Buy_me_a_Coffee-yellow?style=flat&logo=paypal)](https://link.am-wd.de/donate)
+Published under [MIT License] (see [choose a license])
 
 
 

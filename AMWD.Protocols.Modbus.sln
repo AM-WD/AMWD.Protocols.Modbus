@@ -25,7 +25,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{2ED08B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{C8065AE3-BA87-49AC-8100-C85D6DF7E436}"
 	ProjectSection(SolutionItems) = preProject
-		.gitlab-ci.yml = .gitlab-ci.yml
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
@@ -52,6 +51,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tool", "tool", "{3429CE19-211E-4AFA-9629-D7E1A360B7AC}"
 	ProjectSection(SolutionItems) = preProject
 		tool\Directory.Build.props = tool\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{42806262-7371-4239-AC04-33DC8E2596F1}"
+	ProjectSection(SolutionItems) = preProject
+		.gitea\workflows\branch-build.yml = .gitea\workflows\branch-build.yml
+		.gitea\workflows\release-build.yml = .gitea\workflows\release-build.yml
 	EndProjectSection
 EndProject
 Global
@@ -98,6 +103,7 @@ Global
 		{D966826F-EE6C-4BC0-9185-C2A9A50FD586} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B0E53462-B0ED-4685-8AA5-948DC160EE27} = {3429CE19-211E-4AFA-9629-D7E1A360B7AC}
 		{AC922E80-E9B6-493D-B1D1-752527E883ED} = {3429CE19-211E-4AFA-9629-D7E1A360B7AC}
+		{42806262-7371-4239-AC04-33DC8E2596F1} = {C8065AE3-BA87-49AC-8100-C85D6DF7E436}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E4FD8EF0-3594-4994-BE80-5FADA5EE17B4}

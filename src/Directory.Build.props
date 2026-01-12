@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
+    <NrtContinuousIntegrationBuild>$(ContinuousIntegrationBuild)</NrtContinuousIntegrationBuild>
 
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
     <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
@@ -13,7 +14,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <EmbedUntrackedSources>false</EmbedUntrackedSources>
 
     <PackageIcon>package-icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -23,13 +23,14 @@
     <AssemblyOriginatorKeyFile>../../AMWD.Protocols.Modbus.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GITLAB_CI)' == 'true'">
+  <PropertyGroup Condition="'$(CI)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(GITLAB_CI)' == 'true'">
-    <SourceLinkGitLabHost Include="$(CI_SERVER_HOST)" Version="$(CI_SERVER_VERSION)" />
-    <PackageReference Include="Microsoft.SourceLink.GitLab" Version="8.0.0">
+  <ItemGroup Condition="'$(CI)' == 'true'">
+    <SourceLinkGiteaHost Include="$(CI_SERVER_HOST)" />
+    <PackageReference Include="Microsoft.SourceLink.Gitea" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
