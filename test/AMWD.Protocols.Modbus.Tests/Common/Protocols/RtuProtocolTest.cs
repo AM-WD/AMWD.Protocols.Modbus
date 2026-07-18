@@ -423,7 +423,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			Assert.AreEqual(moreAndIndividual, result.MoreRequestsNeeded);
 			Assert.AreEqual(moreAndIndividual ? 0x05 : 0x00, result.NextObjectIdToRequest);
 
-			Assert.AreEqual(1, result.Objects.Count);
+			Assert.HasCount(1, result.Objects);
 			Assert.AreEqual(4, result.Objects.First().Key);
 			CollectionAssert.AreEqual("AM"u8.ToArray(), result.Objects.First().Value);
 		}
@@ -1131,7 +1131,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			byte[] crc = RtuProtocol.CRC16(bytes);
 
 			// Assert
-			Assert.AreEqual(2, crc.Length);
+			Assert.HasCount(2, crc);
 			Assert.AreEqual(0x41, crc[0]);
 			Assert.AreEqual(0x12, crc[1]);
 		}

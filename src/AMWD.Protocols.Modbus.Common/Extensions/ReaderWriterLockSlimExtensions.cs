@@ -1,8 +1,5 @@
 ﻿namespace System.Threading
 {
-	// ================================================================================================================================================== //
-	// Source: https://git.am-wd.de/am-wd/common/-/blob/d4b390ad911ce302cc371bb2121fa9c31db1674a/AMWD.Common/Extensions/ReaderWriterLockSlimExtensions.cs //
-	// ================================================================================================================================================== //
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 	internal static class ReaderWriterLockSlimExtensions
 	{

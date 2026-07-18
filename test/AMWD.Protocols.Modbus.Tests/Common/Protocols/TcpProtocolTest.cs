@@ -473,7 +473,7 @@ namespace AMWD.Protocols.Modbus.Tests.Common.Protocols
 			Assert.AreEqual(moreAndIndividual, result.MoreRequestsNeeded);
 			Assert.AreEqual(moreAndIndividual ? 0x05 : 0x00, result.NextObjectIdToRequest);
 
-			Assert.AreEqual(1, result.Objects.Count);
+			Assert.HasCount(1, result.Objects);
 			Assert.AreEqual(4, result.Objects.First().Key);
 			CollectionAssert.AreEqual("AM"u8.ToArray(), result.Objects.First().Value);
 		}

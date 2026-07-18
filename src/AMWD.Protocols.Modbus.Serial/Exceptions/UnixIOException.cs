@@ -60,7 +60,7 @@ namespace AMWD.Protocols.Modbus.Serial
 			: base(message, errorCode)
 		{ }
 
-#if ! NET8_0_OR_GREATER
+#if !NET8_0_OR_GREATER
 		/// <inheritdoc/>
 		protected UnixIOException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
