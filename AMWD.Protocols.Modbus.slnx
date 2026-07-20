@@ -4,8 +4,8 @@
     <File Path="Directory.Build.props" />
   </Folder>
   <Folder Name="/Solution Items/build/workflows/">
-    <File Path=".gitea/workflows/branch-build.yml" />
-    <File Path=".gitea/workflows/release-build.yml" />
+    <File Path=".github/workflows/branch-build.yml" />
+    <File Path=".github/workflows/release-build.yml" />
   </Folder>
   <Folder Name="/Solution Items/config/">
     <File Path=".editorconfig" />
@@ -20,19 +20,19 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
     <Project Path="src/AMWD.Protocols.Modbus.Common/AMWD.Protocols.Modbus.Common.csproj" />
     <Project Path="src/AMWD.Protocols.Modbus.Serial/AMWD.Protocols.Modbus.Serial.csproj" />
     <Project Path="src/AMWD.Protocols.Modbus.Tcp/AMWD.Protocols.Modbus.Tcp.csproj" />
-    <File Path="src/Directory.Build.props" />
   </Folder>
   <Folder Name="/test/">
     <File Path="test/MSTestSettings.cs" />
-    <Project Path="test/AMWD.Protocols.Modbus.Tests/AMWD.Protocols.Modbus.Tests.csproj" />
     <File Path="test/Directory.Build.props" />
+    <Project Path="test/AMWD.Protocols.Modbus.Tests/AMWD.Protocols.Modbus.Tests.csproj" />
   </Folder>
   <Folder Name="/tool/">
+    <File Path="tool/Directory.Build.props" />
     <Project Path="tool/CliClient/CliClient.csproj" />
     <Project Path="tool/CliProxy/CliProxy.csproj" />
-    <File Path="tool/Directory.Build.props" />
   </Folder>
 </Solution>

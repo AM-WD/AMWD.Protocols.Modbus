@@ -1,0 +1,82 @@
+name: Branch Build
+
+on:
+  push:
+    branches:
+      - '**'
+
+env:
+  TZ: 'Europe/Berlin'
+  LANG: 'de'
+  CONFIGURATION: 'Debug'
+  CI_COMMIT_TAG: ${{ gitea.ref_name }}
+
+concurrency:
+  group: ${{ github.repository }}/${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu
+
+    defaults:
+      run:
+        shell: bash
+
+    outputs:
+      hostname: ${{ steps.parse.outputs.hostname }}
+
+    steps:
+      - name: Parse push event
+        uses: actions/am-wd/parse-event@main
+        id: parse
+
+
+  build-test-deploy:
+    needs: [ prepare ]
+    runs-on: ubuntu
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      CI_SERVER_HOST: ${{ needs.prepare.outputs.hostname }}
+
+    steps:
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+          cache: false
+
+      - name: Checkout repository code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Restore tools
+        run: |
+          set -ex
+          dotnet restore -v q
+          dotnet tool install dotnet-reportgenerator-globaltool --tool-path /dotnet-tools
+
+      - name: Build solution
+        run: |
+          set -ex
+          dotnet build -c ${CONFIGURATION} --nologo --restore --force --no-cache
+
+      - name: Test solution
+        run: |
+          set -ex
+          dotnet test -c ${CONFIGURATION} --no-build --nologo /p:CoverletOutputFormat=Cobertura
+          /dotnet-tools/reportgenerator "-reports:${{ gitea.workspace }}/**/coverage.cobertura.xml" "-targetdir:/reports" "-reportType:TextSummary"
+          cat /reports/Summary.txt
+
+      - name: Publish packages
+        uses: actions/am-wd/publish-nuget@main
+        with:
+          api-key: ${{ secrets.BAGET_APIKEY }}
+          source: https://nuget.am-wd.de/v3/index.json
+          package-name: 'AMWD.Protocols.Modbus'
+          overwrite: true
