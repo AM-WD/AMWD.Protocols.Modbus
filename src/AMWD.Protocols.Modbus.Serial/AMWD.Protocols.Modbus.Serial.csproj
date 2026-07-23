@@ -5,7 +5,7 @@
     <AssemblyName>amwd-modbus-serial</AssemblyName>
     <RootNamespace>AMWD.Protocols.Modbus.Serial</RootNamespace>
 
-    <Product>Modbus RTU/ASCII Protocol</Product>
+    <Title>Modbus RTU/ASCII Protocol</Title>
     <Description>Implementation of the Modbus protocol communicating via serial line using RTU or ASCII encoding.</Description>
     <PackageTags>Modbus Protocol Serial Line RTU ASCII COM TTY USB</PackageTags>
   </PropertyGroup>

@@ -4,7 +4,7 @@
     <AssemblyName>modbus-proxy</AssemblyName>
     <RootNamespace>AMWD.Protocols.Modbus.CliProxy</RootNamespace>
 
-    <Product>Modbus CLI proxy</Product>
+    <Title>Modbus CLI proxy</Title>
     <Description>Small CLI proxy to forward messages.</Description>
   </PropertyGroup>
 

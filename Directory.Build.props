@@ -3,7 +3,7 @@
     <LangVersion>14.0</LangVersion>
     <NrtRevisionFormat>{semvertag:main}{!:-dev}</NrtRevisionFormat>
 
-    <Title>Modbus Protocol for .NET</Title>
+    <Product>Modbus Protocol for .NET</Product>
     <Company>AM.WD</Company>
     <Authors>Andreas Müller</Authors>
     <Copyright>© {copyright:2018-} AM.WD</Copyright>

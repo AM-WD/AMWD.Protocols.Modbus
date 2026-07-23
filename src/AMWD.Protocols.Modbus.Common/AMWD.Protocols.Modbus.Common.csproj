@@ -5,7 +5,7 @@
     <AssemblyName>amwd-modbus-common</AssemblyName>
     <RootNamespace>AMWD.Protocols.Modbus.Common</RootNamespace>
 
-    <Product>Modbus Protocol Common</Product>
+    <Title>Modbus Protocol Common</Title>
     <Description>Common data for Modbus protocol.</Description>
     <PackageTags>Modbus Protocol</PackageTags>
   </PropertyGroup>

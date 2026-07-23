@@ -5,7 +5,7 @@
     <AssemblyName>amwd-modbus-tcp</AssemblyName>
     <RootNamespace>AMWD.Protocols.Modbus.Tcp</RootNamespace>
 
-    <Product>Modbus TCP Protocol</Product>
+    <Title>Modbus TCP Protocol</Title>
     <Description>Implementation of the Modbus protocol communicating via TCP.</Description>
     <PackageTags>Modbus Protocol Network TCP LAN</PackageTags>
   </PropertyGroup>

@@ -4,7 +4,7 @@
     <AssemblyName>modbus-client</AssemblyName>
     <RootNamespace>AMWD.Protocols.Modbus.CliClient</RootNamespace>
 
-    <Product>Modbus CLI client</Product>
+    <Title>Modbus CLI client</Title>
     <Description>Small CLI client for Modbus communication.</Description>
   </PropertyGroup>
 
