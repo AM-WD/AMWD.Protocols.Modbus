@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using AMWD.Protocols.Modbus.Common;
 using AMWD.Protocols.Modbus.Common.Contracts;
 using AMWD.Protocols.Modbus.Tcp;
 using AMWD.Protocols.Modbus.Tcp.Utils;
@@ -455,6 +456,71 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			CollectionAssert.AreEqual(expectedResponse, _responseBytesCallbacks.First());
 		}
 
+		[TestMethod]
+		public async Task ShouldReturnClientErrorCodeOnReadCoils()
+		{
+			// Arrange
+			byte[] request = [2, 1, 0, 5, 0, 4];
+			_requestBytesQueue.Enqueue(CreateHeader(request));
+			_requestBytesQueue.Enqueue(request);
+			byte[] expectedResponse = CreateMessage([2, 129, 2]);
+
+			using var proxy = GetProxy();
+
+			_clientMock
+				.Setup(m => m.ReadCoilsAsync(It.IsAny<byte>(), It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()))
+				.Callback<byte, ushort, ushort, CancellationToken>((unitId, address, count, _) => _clientReadCallbacks.Add((unitId, address, count)))
+				.ThrowsAsync(new ModbusException("Address not served") { ErrorCode = ModbusErrorCode.IllegalDataAddress });
+
+			// Act
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
+
+			// Assert
+			_tcpListenerMock.VerifyGet(m => m.LocalIPEndPoint, Times.Once);
+			_ipEndPointMock.VerifyGet(m => m.Address, Times.Once);
+
+			_tcpListenerMock.Verify(m => m.Start(), Times.Once);
+			_tcpListenerMock.Verify(m => m.Stop(), Times.Once);
+			_tcpListenerMock.Verify(m => m.AcceptTcpClientAsync(It.IsAny<CancellationToken>()), Times.AtLeast(1));
+
+			_tcpClientMock.Verify(m => m.GetStream(), Times.Once);
+
+			_clientMock.Verify(m => m.ReadCoilsAsync(2, 5, 4, It.IsAny<CancellationToken>()), Times.Once);
+
+			_networkStreamMock.Verify(m => m.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
+			_networkStreamMock.Verify(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+
+			VerifyNoOtherCalls();
+
+			CollectionAssert.AreEqual(expectedResponse, _responseBytesCallbacks.First());
+		}
+
+		[TestMethod]
+		public async Task ShouldReturnSlaveDeviceFailureOnReadCoilsForModbusExceptionWithoutErrorCode()
+		{
+			// Arrange
+			byte[] request = [2, 1, 0, 5, 0, 4];
+			_requestBytesQueue.Enqueue(CreateHeader(request));
+			_requestBytesQueue.Enqueue(request);
+			byte[] expectedResponse = CreateMessage([2, 129, 4]);
+
+			using var proxy = GetProxy();
+
+			_clientMock
+				.Setup(m => m.ReadCoilsAsync(It.IsAny<byte>(), It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()))
+				.Callback<byte, ushort, ushort, CancellationToken>((unitId, address, count, _) => _clientReadCallbacks.Add((unitId, address, count)))
+				.ThrowsAsync(new ModbusException("No code"));
+
+			// Act
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
+
+			// Assert
+			_clientMock.Verify(m => m.ReadCoilsAsync(2, 5, 4, It.IsAny<CancellationToken>()), Times.Once);
+			CollectionAssert.AreEqual(expectedResponse, _responseBytesCallbacks.First());
+		}
+
 		#endregion Read Coils (Fn 1)
 
 		#region Read Discrete Inputs (Fn 2)
@@ -698,6 +764,31 @@ namespace AMWD.Protocols.Modbus.Tests.Tcp
 			Assert.AreEqual(15, startAddress);
 			Assert.AreEqual(2, count);
 
+			CollectionAssert.AreEqual(expectedResponse, _responseBytesCallbacks.First());
+		}
+
+		[TestMethod]
+		public async Task ShouldReturnClientErrorCodeOnReadHoldingRegisters()
+		{
+			// Arrange
+			byte[] request = [42, 3, 0, 15, 0, 2];
+			_requestBytesQueue.Enqueue(CreateHeader(request));
+			_requestBytesQueue.Enqueue(request);
+			byte[] expectedResponse = CreateMessage([42, 131, 11]);
+
+			using var proxy = GetProxy();
+
+			_clientMock
+				.Setup(m => m.ReadHoldingRegistersAsync(It.IsAny<byte>(), It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<CancellationToken>()))
+				.Callback<byte, ushort, ushort, CancellationToken>((unitId, address, count, _) => _clientReadCallbacks.Add((unitId, address, count)))
+				.ThrowsAsync(new ModbusException("Unit not served") { ErrorCode = ModbusErrorCode.GatewayTargetDevice });
+
+			// Act
+			await proxy.StartAsync(TestContext.CancellationToken);
+			await Task.Delay(100, TestContext.CancellationToken);
+
+			// Assert
+			_clientMock.Verify(m => m.ReadHoldingRegistersAsync(42, 15, 2, It.IsAny<CancellationToken>()), Times.Once);
 			CollectionAssert.AreEqual(expectedResponse, _responseBytesCallbacks.First());
 		}
 
