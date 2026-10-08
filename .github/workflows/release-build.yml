@@ -30,7 +30,7 @@ jobs:
 
   build-test-deploy:
     needs: [ prepare ]
-    runs-on: ubuntu-amd64
+    runs-on: server-runner
 
     defaults:
       run:
