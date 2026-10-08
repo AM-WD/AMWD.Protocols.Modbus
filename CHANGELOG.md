@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_no changes yet_
+### Changed
+
+- `ModbusTcpProxy` answers the error code of a `ModbusException` thrown by the underlying client (e.g. illegal data address, illegal function, gateway target device) instead of always "slave device failure"; other exceptions still map to slave device failure.
 
 
 ## [v0.6.0] (2026-08-21)
