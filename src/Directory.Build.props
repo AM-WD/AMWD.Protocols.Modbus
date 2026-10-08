@@ -29,8 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(CI)' == 'true'">
-    <SourceLinkGiteaHost Include="$(CI_SERVER_HOST)" />
-    <PackageReference Include="Microsoft.SourceLink.Gitea" Version="8.0.0">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.401">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
