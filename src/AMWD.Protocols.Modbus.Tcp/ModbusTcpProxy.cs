@@ -309,14 +309,6 @@ namespace AMWD.Protocols.Modbus.Tcp
 			}
 		}
 
-		private static ModbusErrorCode GetErrorCode(Exception exception)
-		{
-			if (exception is ModbusException modbusException && modbusException.ErrorCode != ModbusErrorCode.NoError)
-				return modbusException.ErrorCode;
-
-			return ModbusErrorCode.SlaveDeviceFailure;
-		}
-
 		private async Task<byte[]> HandleReadCoilsAsync(byte[] requestBytes, CancellationToken cancellationToken)
 		{
 			if (requestBytes.Length < 12)
@@ -854,6 +846,14 @@ namespace AMWD.Protocols.Modbus.Tcp
 			response[5] = bytes[1];
 
 			return [.. response];
+		}
+
+		private static ModbusErrorCode GetErrorCode(Exception exception)
+		{
+			if (exception is ModbusException modbusException && modbusException.ErrorCode != ModbusErrorCode.NoError)
+				return modbusException.ErrorCode;
+
+			return ModbusErrorCode.SlaveDeviceFailure;
 		}
 
 		#endregion Request Handling
