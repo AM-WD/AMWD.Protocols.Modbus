@@ -339,10 +339,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 				responseBytes.Add((byte)values.Length);
 				responseBytes.AddRange(values);
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -378,10 +378,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 				responseBytes.Add((byte)values.Length);
 				responseBytes.AddRange(values);
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -412,10 +412,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 				responseBytes.Add((byte)values.Length);
 				responseBytes.AddRange(values);
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -446,10 +446,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 				responseBytes.Add((byte)values.Length);
 				responseBytes.AddRange(values);
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -494,10 +494,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -534,10 +534,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -594,10 +594,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -651,10 +651,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 					responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 			}
 
 			return ReturnResponse(responseBytes);
@@ -750,10 +750,10 @@ namespace AMWD.Protocols.Modbus.Tcp
 
 				return ReturnResponse(responseBytes);
 			}
-			catch
+			catch (Exception ex)
 			{
 				responseBytes[7] |= 0x80;
-				responseBytes.Add((byte)ModbusErrorCode.SlaveDeviceFailure);
+				responseBytes.Add((byte)GetErrorCode(ex));
 
 				return ReturnResponse(responseBytes);
 			}
@@ -846,6 +846,14 @@ namespace AMWD.Protocols.Modbus.Tcp
 			response[5] = bytes[1];
 
 			return [.. response];
+		}
+
+		private static ModbusErrorCode GetErrorCode(Exception exception)
+		{
+			if (exception is ModbusException modbusException && modbusException.ErrorCode != ModbusErrorCode.NoError)
+				return modbusException.ErrorCode;
+
+			return ModbusErrorCode.SlaveDeviceFailure;
 		}
 
 		#endregion Request Handling

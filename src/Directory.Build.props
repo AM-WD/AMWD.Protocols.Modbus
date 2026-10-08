@@ -28,7 +28,14 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(CI)' == 'true'">
+  <ItemGroup Condition="'$(CI)' == 'true' and '$(Configuration)' == 'Debug'">
+    <SourceLinkGiteaHost Include="$(CI_SERVER_HOST)" />
+    <PackageReference Include="Microsoft.SourceLink.Gitea" Version="10.0.401">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(CI)' == 'true' and '$(Configuration)' == 'Release'">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.401">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

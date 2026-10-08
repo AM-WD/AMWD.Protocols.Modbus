@@ -30,7 +30,7 @@ jobs:
 
   build-test-deploy:
     needs: [ prepare ]
-    runs-on: ubuntu
+    runs-on: ubuntu-amd64
 
     defaults:
       run:
@@ -54,6 +54,7 @@ jobs:
       - name: Restore tools
         run: |
           set -ex
+          git remote add github https://github.com/AM-WD/AMWD.Protocols.Modbus.git
           dotnet restore -v q
           dotnet tool install dotnet-reportgenerator-globaltool --tool-path /dotnet-tools
           dotnet tool install docfx --tool-path /dotnet-tools
@@ -61,12 +62,12 @@ jobs:
       - name: Build solution
         run: |
           set -ex
-          dotnet build -c ${CONFIGURATION} --nologo --restore --force --no-cache
+          dotnet build -c ${CONFIGURATION} --nologo --restore --force --no-cache  -p:GitRepositoryRemoteName=github
 
       - name: Test solution
         run: |
           set -ex
-          dotnet test -c ${CONFIGURATION} --no-build --nologo /p:CoverletOutputFormat=Cobertura
+          dotnet test -c ${CONFIGURATION} --no-build --nologo -p:CoverletOutputFormat=Cobertura
           /dotnet-tools/reportgenerator "-reports:${{ github.workspace }}/**/coverage.cobertura.xml" "-targetdir:/reports" "-reportType:TextSummary"
           cat /reports/Summary.txt
 
